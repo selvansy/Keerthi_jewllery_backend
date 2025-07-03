@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification & Promotion Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-5">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-md p-6 rounded-lg">
+        <h1 class="text-2xl font-bold mb-4 text-center">Notification & Promotion Management</h1>
+
+        <!-- Tabs -->
+        <div class="flex space-x-4 mb-4">
+            <button onclick="showTab('push')" class="px-4 py-2 bg-blue-500 text-white rounded">Push Notifications</button>
+            <button onclick="showTab('promotion')" class="px-4 py-2 bg-green-500 text-white rounded">Promotions</button>
+            <button onclick="showTab('history')" class="px-4 py-2 bg-gray-500 text-white rounded">History</button>
+        </div>
+
+        <!-- Push Notification Form -->
+        <div id="pushTab" class="hidden">
+            <h2 class="text-xl font-semibold mb-2">Create Push Notification</h2>
+            <form id="pushForm" class="space-y-4">
+                <input type="text" id="pushTitle" placeholder="Title" class="w-full p-2 border rounded" required>
+                <textarea id="pushContent" placeholder="Message" class="w-full p-2 border rounded"></textarea>
+                <label><input type="checkbox" id="pushIsHtml"> Use HTML</label>
+                <input type="text" id="pushImageUrl" placeholder="Image URL" class="w-full p-2 border rounded">
+                
+                <select id="pushCampaignType" class="w-full p-2 border rounded">
+                    <option value="">Select Campaign Type</option>
+                    <option value="Festival">Festival</option>
+                    <option value="New arrivals">New Arrivals</option>
+                    <option value="Product">Product</option>
+                    <option value="Branch">Branch</option>
+                </select>
+
+                <select id="pushTargetBranch" class="w-full p-2 border rounded">
+                    <option value="">Select Branch</option>
+                    <option value="Branch1">Branch 1</option>
+                    <option value="Branch2">Branch 2</option>
+                </select>
+
+                <button type="button" onclick="sendPushNotification()" class="px-4 py-2 bg-blue-500 text-white rounded">Send Notification</button>
+            </form>
+        </div>
+
+        <!-- Promotion Form -->
+        <div id="promotionTab" class="hidden">
+            <h2 class="text-xl font-semibold mb-2">Create Promotion</h2>
+            <form id="promotionForm" class="space-y-4">
+                <input type="text" id="promotionTitle" placeholder="Title" class="w-full p-2 border rounded" required>
+                <textarea id="promotionContent" placeholder="Message" class="w-full p-2 border rounded"></textarea>
+                <label><input type="checkbox" id="promotionIsHtml"> Use HTML</label>
+                <input type="text" id="promotionImageUrl" placeholder="Image URL" class="w-full p-2 border rounded">
+                
+                <label><input type="checkbox" id="promotionSms"> SMS</label>
+                <label><input type="checkbox" id="promotionEmail"> Email</label>
+                <label><input type="checkbox" id="promotionWhatsapp"> WhatsApp</label>
+                <label><input type="checkbox" id="promotionPush"> Push Notification</label>
+
+                <button type="button" onclick="sendPromotion()" class="px-4 py-2 bg-green-500 text-white rounded">Send Promotion</button>
+            </form>
+        </div>
+
+        <!-- Notification & Promotion History -->
+        <div id="historyTab" class="hidden">
+            <h2 class="text-xl font-semibold mb-2">Notification & Promotion History</h2>
+            <table class="w-full border-collapse border border-gray-300 mt-4">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border border-gray-300 p-2">Type</th>
+                        <th class="border border-gray-300 p-2">Title</th>
+                        <th class="border border-gray-300 p-2">Channel</th>
+                        <th class="border border-gray-300 p-2">Status</th>
+                        <th class="border border-gray-300 p-2">Sent At</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            document.getElementById('pushTab').style.display = (tab === 'push') ? 'block' : 'none';
+            document.getElementById('promotionTab').style.display = (tab === 'promotion') ? 'block' : 'none';
+            document.getElementById('historyTab').style.display = (tab === 'history') ? 'block' : 'none';
+            if (tab === 'history') fetchHistory();
+        }
+
+        function sendPushNotification() {
+            const data = {
+                type: "pushNotification",
+                title: document.getElementById('pushTitle').value,
+                content: document.getElementById('pushContent').value,
+                isHtml: document.getElementById('pushIsHtml').checked,
+                imageUrl: document.getElementById('pushImageUrl').value,
+                campaignTypeId: document.getElementById('pushCampaignType').value,
+                branchId: document.getElementById('pushTargetBranch').value,
+                status: "pending"
+            };
+            fetch('/api/push-notifications', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            }).then(res => res.json()).then(() => alert("Push Notification Sent!"))
+              .catch(error => console.error("Error:", error));
+        }
+
+        function sendPromotion() {
+            const data = {
+                type: "promotion",
+                title: document.getElementById('promotionTitle').value,
+                content: document.getElementById('promotionContent').value,
+                isHtml: document.getElementById('promotionIsHtml').checked,
+                imageUrl: document.getElementById('promotionImageUrl').value,
+                sms: document.getElementById('promotionSms').checked,
+                email: document.getElementById('promotionEmail').checked,
+                whatsapp: document.getElementById('promotionWhatsapp').checked,
+                pushNotification: document.getElementById('promotionPush').checked,
+                status: "pending"
+            };
+            fetch('/api/promotions', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            }).then(res => res.json()).then(() => alert("Promotion Sent!"))
+              .catch(error => console.error("Error:", error));
+        }
+
+        function fetchHistory() {
+            fetch('/api/history')
+                .then(res => res.json())
+                .then(data => {
+                    let rows = "";
+                    data.forEach(item => {
+                        rows += `<tr>
+                            <td class="border p-2">${item.type}</td>
+                            <td class="border p-2">${item.title}</td>
+                            <td class="border p-2">${item.channel}</td>
+                            <td class="border p-2 ${item.status === 'sent' ? 'text-green-500' : 'text-red-500'}">${item.status}</td>
+                            <td class="border p-2">${new Date(item.sentAt).toLocaleString()}</td>
+                        </tr>`;
+                    });
+                    document.getElementById('historyTable').innerHTML = rows;
+                }).catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</body>
+</html>

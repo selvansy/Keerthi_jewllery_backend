@@ -1,0 +1,7 @@
+node_modules
+.env
+.DS_Store
+info.txt
+# src/public
+.vscode
+backup.js
