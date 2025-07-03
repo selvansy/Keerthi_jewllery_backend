@@ -75,14 +75,15 @@ class PurityUseCase {
         };
       }
 
-      
       const savedData = await this.purityRepository.updatePurity(id,updates);
 
       if (!savedData) {
         return { success: false, message: "Failed to update purity" };
       }
 
-      // await this.metalRateRepo.updateMetalId(id,data.id_metal)
+      const metaRate = await this.metalRateRepo.getByPurityId(id)
+
+      await this.metalRateRepo.updateMetalId(metaRate._id,data.id_metal)
       return { success: true, message: "Purity updated successfully" };
     } catch (error) {
       console.error(error);

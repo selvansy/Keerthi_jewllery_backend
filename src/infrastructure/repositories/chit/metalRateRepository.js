@@ -28,6 +28,39 @@ class MetalRateRepository {
     }
   }
 
+  async getByPurityId(id) {
+    try {
+      const savedData = await metalRateModel
+        .findOne({ purity_id: id })
+        .sort({ createdAt: -1 })
+        .lean();
+  
+      return savedData || null;
+    } catch (error) {
+      console.error(error);
+      throw new Error("Database error: metal rate findOne by id");
+    }
+  }
+
+  async updateMetalId(id,metalId) {
+    try {
+      const updatedData = await metalRateModel.findByIdAndUpdate(
+        { _id: id },
+        { $set: {material_type_id:metalId}},
+        { new: true }
+      );
+
+      if (updatedData) {
+        return updatedData;
+      }
+
+      return null;
+    } catch (error) {
+      console.error(error);
+      throw new Error("Database error: editMetalRate");
+    }
+  }
+
   async addMetalRate(data) {
     try {
       let savedData;
