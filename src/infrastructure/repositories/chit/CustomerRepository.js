@@ -212,6 +212,7 @@ class CustomerRepository {
 
   async addCustomer(data) {
     try {
+      return console.log(data)
       const savedUser = await customerModel.create(data);
 
       if (!savedUser) {
@@ -551,7 +552,7 @@ class CustomerRepository {
             as: "branch",
           },
         },
-        { $unwind: "$branch" },
+        { $unwind: { path: "$branch", preserveNullAndEmptyArrays: true } },
         {
           $lookup: {
             from: "schemeaccounts",
@@ -570,7 +571,7 @@ class CustomerRepository {
                   as: "scheme",
                 },
               },
-              { $unwind: "$scheme" },
+              { $unwind: { path: "$scheme", preserveNullAndEmptyArrays: true } },
               {
                 $lookup: {
                   from: "payments",
@@ -604,7 +605,7 @@ class CustomerRepository {
           },
         },
         {
-          $unwind: "$schemeAccounts",
+          $unwind: { path: "$schemeAccounts", preserveNullAndEmptyArrays: true },
         },
         {
           $group: {
@@ -651,7 +652,6 @@ class CustomerRepository {
             },
           },
         },
-
         {
           $group: {
             _id: "$_id.customerId",
@@ -855,18 +855,18 @@ class CustomerRepository {
                   },
                   then: {
                     $concat: [
-                      "$customerData.customerDetails.firstname",
+                      { $ifNull: ["$customerData.customerDetails.firstname", ""] },
                       " ",
-                      "$customerData.customerDetails.lastname",
+                      { $ifNull: ["$customerData.customerDetails.lastname", ""] },
                     ],
                   },
-                  else: "$customerData.customerDetails.firstname",
+                  else: { $ifNull: ["$customerData.customerDetails.firstname", ""] },
                 },
               },
-              _id: "$customerData.customerDetails._id",
-              branch: "$customerData.customerDetails.branch.branch_name",
-              mobile: "$customerData.customerDetails.mobile",
-              whatsapp: "$customerData.customerDetails.whatsapp",
+              _id: { $ifNull: ["$customerData.customerDetails._id", null] },
+              branch: { $ifNull: ["$customerData.customerDetails.branch.branch_name", "Unknown"] },
+              mobile: { $ifNull: ["$customerData.customerDetails.mobile", null] },
+              whatsapp: { $ifNull: ["$customerData.customerDetails.whatsapp", null] },
               gender: {
                 $switch: {
                   branches: [
@@ -892,43 +892,111 @@ class CustomerRepository {
                   default: "Unknown",
                 },
               },
-              address: "$customerData.customerDetails.address",
-              pan: "$customerData.customerDetails.pan",
-              aadharNumber: "$customerData.customerDetails.aadharNumber",
-              dateOfBirth: "$customerData.customerDetails.date_of_birth",
-              referralCode: "$customerData.customerDetails.referral_code",
-              weddingAnniversary: "$customerData.customerDetails.date_of_wed",
-              profileImage: "$customerData.customerDetails.cus_img",
+              address: { $ifNull: ["$customerData.customerDetails.address", ""] },
+              pan: { $ifNull: ["$customerData.customerDetails.pan", ""] },
+              aadharNumber: { $ifNull: ["$customerData.customerDetails.aadharNumber", ""] },
+              dateOfBirth: { $ifNull: ["$customerData.customerDetails.date_of_birth", null] },
+              referralCode: { $ifNull: ["$customerData.customerDetails.referral_code", ""] },
+              weddingAnniversary: { $ifNull: ["$customerData.customerDetails.date_of_wed", null] },
+              profileImage: { $ifNull: ["$customerData.customerDetails.cus_img", ""] },
             },
-            schemes: "$customerData.schemes",
-            totalOpenSchemes: "$customerData.totalOpenSchemes",
-            totalAmountPayable: "$customerData.totalAmountPayable",
-            totalWeightPayable: "$customerData.totalWeightPayable",
-            totalClosedSchemes: "$customerData.totalClosedSchemes",
-            precloseAccounts: "$customerData.precloseAccounts",
-            refundSchemes: "$customerData.refundSchemes",
+            schemes: { $ifNull: ["$customerData.schemes", []] },
+            totalOpenSchemes: { $ifNull: ["$customerData.totalOpenSchemes", 0] },
+            totalAmountPayable: { $ifNull: ["$customerData.totalAmountPayable", 0] },
+            totalWeightPayable: { $ifNull: ["$customerData.totalWeightPayable", 0] },
+            totalClosedSchemes: { $ifNull: ["$customerData.totalClosedSchemes", 0] },
+            precloseAccounts: { $ifNull: ["$customerData.precloseAccounts", 0] },
+            refundSchemes: { $ifNull: ["$customerData.refundSchemes", 0] },
             referralDetails: {
-              referralCount: "$referrals.referralCount.count",
-              walletAmount: "$walletData.walletData.total_reward_amt",
-              pendingAmount: "$walletData.walletData.balance_amt",
-              redeemedAmount: "$walletData.walletData.redeem_amt",
+              referralCount: { $ifNull: ["$referrals.referralCount.count", 0] },
+              walletAmount: { $ifNull: ["$walletData.walletData.total_reward_amt", 0] },
+              pendingAmount: { $ifNull: ["$walletData.walletData.balance_amt", 0] },
+              redeemedAmount: { $ifNull: ["$walletData.walletData.redeem_amt", 0] },
             },
-            totalGiftsIssued: "$giftStats.giftStats.totalGiftsIssued",
-            totalSchemeGifts: "$giftStats.giftStats.totalSchemeGifts",
-            totalNonSchemeGifts: "$giftStats.giftStats.totalNonSchemeGifts",
-            totalGiftsLeftToReceive:
-              "$giftStats.giftStats.totalGiftsLeftToReceive",
-            uniqueSchemesCount: "$customerData.uniqueSchemesCount",
-            totalSchemeAccounts:
-              "$customerData.customerDetails.totalSchemeAccounts",
+            totalGiftsIssued: { $ifNull: ["$giftStats.giftStats.totalGiftsIssued", 0] },
+            totalSchemeGifts: { $ifNull: ["$giftStats.giftStats.totalSchemeGifts", 0] },
+            totalNonSchemeGifts: { $ifNull: ["$giftStats.giftStats.totalNonSchemeGifts", 0] },
+            totalGiftsLeftToReceive: { $ifNull: ["$giftStats.giftStats.totalGiftsLeftToReceive", 0] },
+            uniqueSchemesCount: { $ifNull: ["$customerData.uniqueSchemesCount", 0] },
+            totalSchemeAccounts: { $ifNull: ["$customerData.customerDetails.totalSchemeAccounts", 0] },
           },
         },
       ]);
-console.log(result,"kd")
-      return result[0] || null;
+
+      return result[0] || {
+        customerDetails: {
+          customerName: "",
+          _id: null,
+          branch: "Unknown",
+          mobile: null,
+          whatsapp: null,
+          gender: "Unknown",
+          address: "",
+          pan: "",
+          aadharNumber: "",
+          dateOfBirth: null,
+          referralCode: "",
+          weddingAnniversary: null,
+          profileImage: "",
+        },
+        schemes: [],
+        totalOpenSchemes: 0,
+        totalAmountPayable: 0,
+        totalWeightPayable: 0,
+        totalClosedSchemes: 0,
+        precloseAccounts: 0,
+        refundSchemes: 0,
+        referralDetails: {
+          referralCount: 0,
+          walletAmount: 0,
+          pendingAmount: 0,
+          redeemedAmount: 0,
+        },
+        totalGiftsIssued: 0,
+        totalSchemeGifts: 0,
+        totalNonSchemeGifts: 0,
+        totalGiftsLeftToReceive: 0,
+        uniqueSchemesCount: 0,
+        totalSchemeAccounts: 0,
+      };
     } catch (error) {
       console.error(error);
-      return null;
+      return {
+        customerDetails: {
+          customerName: "",
+          _id: null,
+          branch: "Unknown",
+          mobile: null,
+          whatsapp: null,
+          gender: "Unknown",
+          address: "",
+          pan: "",
+          aadharNumber: "",
+          dateOfBirth: null,
+          referralCode: "",
+          weddingAnniversary: null,
+          profileImage: "",
+        },
+        schemes: [],
+        totalOpenSchemes: 0,
+        totalAmountPayable: 0,
+        totalWeightPayable: 0,
+        totalClosedSchemes: 0,
+        precloseAccounts: 0,
+        refundSchemes: 0,
+        referralDetails: {
+          referralCount: 0,
+          walletAmount: 0,
+          pendingAmount: 0,
+          redeemedAmount: 0,
+        },
+        totalGiftsIssued: 0,
+        totalSchemeGifts: 0,
+        totalNonSchemeGifts: 0,
+        totalGiftsLeftToReceive: 0,
+        uniqueSchemesCount: 0,
+        totalSchemeAccounts: 0,
+      };
     }
   }
 
