@@ -193,135 +193,134 @@ class CustomerUseCase {
   }
 
   async editCustomer(id, data, uploads, token) {
-    const genderImages = ["1749878753243.webp",'1749878926644.webp','1749878256269.webp']
+    const genderImages = ["1749878753243.webp", '1749878926644.webp', '1749878256269.webp'];
+    
     try {
-      if (!isValidObjectId(id)) {
-        return { success: false, message: "Provide a valid object id" };
-      }
+        if (!isValidObjectId(id)) {
+            return { success: false, message: "Provide a valid object id" };
+        }
 
-      const userExists = await this.customerRepository.findById(id);
-      if (!userExists) {
-        return { success: false, message: "No user found" };
-      }
-      
-      const existingUser = await this.customerRepository.checkUser(
-        id,
-        data.mobile
-      );
-      if (existingUser) {
-        return {
-          success: false,
-          message: "User already exists with same mobile number",
+        const userExists = await this.customerRepository.findById(id);
+        if (!userExists) {
+            return { success: false, message: "No user found" };
+        }
+
+        const existingUser = await this.customerRepository.checkUser(id, data.mobile);
+        if (existingUser) {
+            return {
+                success: false,
+                message: "User already exists with same mobile number",
+            };
+        }
+
+        const normalizeValue = (key, value) => {
+            if (["gender", "mobile", "pincode", "notification"].includes(key)) {
+                return Number(value);
+            }
+            if (value instanceof mongoose.Types.ObjectId) {
+                return value.toString();
+            }
+            if (value instanceof Date) {
+                return value.toISOString();
+            }
+            return value;
         };
-      }
 
-      const normalizeValue = (key, value) => {
-        if (["gender", "mobile", "pincode", "notification"].includes(key)) {
-          return Number(value);
-        }
-        if (value instanceof mongoose.Types.ObjectId) {
-          return value.toString();
-        }
-        if (value instanceof Date) {
-          return value.toISOString();
-        }
-        return value;
-      };
+        const fieldsToUpdate = {};
 
-      const fieldsToUpdate = {};
+        Object.keys(data).forEach((key) => {
+            const newValue = data[key];
 
-      Object.keys(data).forEach((key) => {
-        const newValue = data[key];
-
-        if (
-          ["_id", "createdAt", "updatedAt", "__v", "is_deleted"].includes(key) ||
-          normalizeValue(key, userExists[key]) === normalizeValue(key, newValue) ||
-          newValue === "" || newValue === null
-        ) {
-          return;
-        }
-      
-        fieldsToUpdate[key] = newValue;
-      });
-      
-
-      if (Object.keys(fieldsToUpdate).length === 0) {
-        return { success: false, message: "No fields to update" };
-      } else {
-        fieldsToUpdate.date_upd = Date.now();
-      }
-      const s3Configs = await this.s3Helper(token.id_client);
-
-      if (!s3Configs) {
-        return { success: false, messsage: "No s3bucket configuraiton found" };
-      }
-
-      if (uploads) {
-        try {
-          if (uploads.cus_img && uploads.cus_img[0]) {
             if (
-              userExists.cus_img &&
-              userExists.cus_img !== uploads.cus_img[0].filename
+                ["_id", "createdAt", "updatedAt", "__v", "is_deleted"].includes(key) ||
+                normalizeValue(key, userExists[key]) === normalizeValue(key, newValue) ||
+                newValue === "" || newValue === null
             ) {
-              const keyPath = `${s3Configs.s3display_url}${config.AWS_LOCAL_PATH}customer/${userExists?.cus_img}`;
-              await this.s3service.deleteFromS3(keyPath, s3Configs);
+                return;
             }
-            fieldsToUpdate.cus_img = await this.s3service.uploadToS3(
-              uploads.cus_img[0],
-              "customer",
-              s3Configs
-            );
-          }
+        
+            fieldsToUpdate[key] = newValue;
+        });
 
-          if (uploads.id_proof && uploads.id_proof[0]) {
-            if (
-              userExists.id_proof &&
-              userExists.id_proof !== uploads.id_proof[0].filename
-            ) {
-              const keyPath = `${s3Configs.s3display_url}${config.AWS_LOCAL_PATH}customer/${userExists?.id_proof}`;
-              await this.s3service.deleteFromS3(keyPath, s3Configs);
+        if (Object.keys(fieldsToUpdate).length === 0) {
+            return { success: false, message: "No fields to update" };
+        } else {
+            fieldsToUpdate.date_upd = Date.now();
+        }
+
+        const s3Configs = await this.s3Helper(token.id_client);
+        if (!s3Configs) {
+            return { success: false, messsage: "No s3bucket configuration found" };
+        }
+
+        if (uploads) {
+            try {
+                if (uploads.cus_img && uploads.cus_img[0]) {
+                    if (
+                        userExists.cus_img &&
+                        userExists.cus_img !== uploads.cus_img[0].filename &&
+                        !genderImages.includes(userExists.cus_img)
+                    ) {
+                        const keyPath = `${s3Configs.s3display_url}${config.AWS_LOCAL_PATH}customer/${userExists?.cus_img}`;
+                        await this.s3service.deleteFromS3(keyPath, s3Configs);
+                    }
+                    fieldsToUpdate.cus_img = await this.s3service.uploadToS3(
+                        uploads.cus_img[0],
+                        "customer",
+                        s3Configs
+                    );
+                } else if (data.gender !== undefined && data.gender !== null) {
+                    const genderIndex = Number(data.gender);
+                    if (!isNaN(genderIndex) && (!userExists.cus_img || genderImages.includes(userExists.cus_img))) {
+                        const selectedImage = genderImages[genderIndex % genderImages.length];
+                        fieldsToUpdate.cus_img = selectedImage;
+                    }
+                }
+
+                if (uploads.id_proof && uploads.id_proof[0]) {
+                    if (
+                        userExists.id_proof &&
+                        userExists.id_proof !== uploads.id_proof[0].filename
+                    ) {
+                        const keyPath = `${s3Configs.s3display_url}${config.AWS_LOCAL_PATH}customer/${userExists?.id_proof}`;
+                        await this.s3service.deleteFromS3(keyPath, s3Configs);
+                    }
+                    fieldsToUpdate.id_proof = await this.s3service.uploadToS3(
+                        uploads.id_proof[0],
+                        "customer",
+                        s3Configs
+                    );
+                }
+            } catch (error) {
+                console.error(error);
+                return { success: false, message: "Error uploading files" };
             }
-            fieldsToUpdate.id_proof = await this.s3service.uploadToS3(
-              uploads.id_proof[0],
-              "customer",
-              s3Configs
-            );
-          }
-        } catch (error) {
-          console.error(error);
-          return { success: false, message: "Error uploading files" };
+        } else if (data.gender !== undefined && data.gender !== null) {
+            const genderIndex = Number(data.gender);
+            if (!isNaN(genderIndex)) {
+                const currentImage = userExists.cus_img;
+                if (!currentImage || genderImages.includes(currentImage)) {
+                    const selectedImage = genderImages[genderIndex % genderImages.length];
+                    fieldsToUpdate.cus_img = selectedImage;
+                }
+            }
         }
-      }
 
-      if(genderImages.includes(userExists.cus_img) || !userExists.cus_img){
-        switch (Number(data.gender)) {
-          case 2: // female
-          fieldsToUpdate.cus_img = '1749878753243.webp';
-            break;
-          case 3: // others / non‑binary
-          fieldsToUpdate.cus_img = '1749878926644.webp';
-            break;
-          case 1: // male
-          default:
-          fieldsToUpdate.cus_img = '1749878256269.webp';
-            break;
-        }
-      }
+        const updatedCustomer = await this.customerRepository.findByIdAndUpdate(
+            id,
+            fieldsToUpdate
+        );
 
-      const savedData = await this.customerRepository.editCustomer(
-        id,
-        fieldsToUpdate
-      );
-      if (!savedData) {
-        return { success: false, message: "Failed to update customer" };
-      }
-
-      return { success: true, message: "Customer updated successfully" };
+        return {
+            success: true,
+            message: "Customer updated successfully",
+            data: updatedCustomer,
+        };
     } catch (error) {
-      console.error(error);
-      return { success: false, message: "Error while updating customer" };
+        console.error(error);
+        return { success: false, message: "Error updating customer" };
     }
-  }
+}
 
   async deleteCustomer(id) {
     try {

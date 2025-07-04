@@ -1,9 +1,8 @@
 import customerModel from "../../models/chit/customerModel.js";
 import schemeAccountModel from "../../models/chit/schemeAccountModel.js";
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import referralMessageMode from "../../models/chit/referralMessageMode.js";
-import config from "../../../config/chit/env.js";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
 class CustomerRepository {
   async findById(id) {
@@ -90,7 +89,7 @@ class CustomerRepository {
             id_proof: 1,
             referral_id: 1,
             referral_type: 1,
-            email:1,
+            email: 1,
             pan: 1,
             date_of_wed: 1,
             "branchDetails._id": 1,
@@ -212,7 +211,6 @@ class CustomerRepository {
 
   async addCustomer(data) {
     try {
-      return console.log(data)
       const savedUser = await customerModel.create(data);
 
       if (!savedUser) {
@@ -419,6 +417,37 @@ class CustomerRepository {
     }
   }
 
+  async findByIdAndUpdate(userId, data) {
+    try {
+      if (!isValidObjectId(userId)) {
+        return { success: false, message: "Provide a valid user ID" };
+      }
+
+      const updatedUser = await customerModel.findByIdAndUpdate(
+        userId,
+        data,
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return { success: false, message: "User not found" };
+      }
+
+      return {
+        success: true,
+        message: "Password updated successfully",
+        data: updatedUser,
+      };
+    } catch (error) {
+      console.error("Error updating password:", error);
+      return {
+        success: false,
+        message: "Failed to update password",
+        error: error.message,
+      };
+    }
+  }
+
   async getCustomersByBranch(branchId) {
     try {
       const customers = await customerModel.find(
@@ -529,7 +558,7 @@ class CustomerRepository {
     }
   }
 
-  async customerOverview({branch,mobile,idCustomer}) {
+  async customerOverview({ branch, mobile, idCustomer }) {
     try {
       const matchStage = idCustomer
         ? {
@@ -571,7 +600,9 @@ class CustomerRepository {
                   as: "scheme",
                 },
               },
-              { $unwind: { path: "$scheme", preserveNullAndEmptyArrays: true } },
+              {
+                $unwind: { path: "$scheme", preserveNullAndEmptyArrays: true },
+              },
               {
                 $lookup: {
                   from: "payments",
@@ -605,7 +636,10 @@ class CustomerRepository {
           },
         },
         {
-          $unwind: { path: "$schemeAccounts", preserveNullAndEmptyArrays: true },
+          $unwind: {
+            path: "$schemeAccounts",
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $group: {
@@ -828,7 +862,9 @@ class CustomerRepository {
             ],
           },
         },
-        { $unwind: { path: "$customerData", preserveNullAndEmptyArrays: true } },
+        {
+          $unwind: { path: "$customerData", preserveNullAndEmptyArrays: true },
+        },
         { $unwind: { path: "$referrals", preserveNullAndEmptyArrays: true } },
         { $unwind: { path: "$walletData", preserveNullAndEmptyArrays: true } },
         { $unwind: { path: "$giftStats", preserveNullAndEmptyArrays: true } },
@@ -855,18 +891,36 @@ class CustomerRepository {
                   },
                   then: {
                     $concat: [
-                      { $ifNull: ["$customerData.customerDetails.firstname", ""] },
+                      {
+                        $ifNull: [
+                          "$customerData.customerDetails.firstname",
+                          "",
+                        ],
+                      },
                       " ",
-                      { $ifNull: ["$customerData.customerDetails.lastname", ""] },
+                      {
+                        $ifNull: ["$customerData.customerDetails.lastname", ""],
+                      },
                     ],
                   },
-                  else: { $ifNull: ["$customerData.customerDetails.firstname", ""] },
+                  else: {
+                    $ifNull: ["$customerData.customerDetails.firstname", ""],
+                  },
                 },
               },
               _id: { $ifNull: ["$customerData.customerDetails._id", null] },
-              branch: { $ifNull: ["$customerData.customerDetails.branch.branch_name", "Unknown"] },
-              mobile: { $ifNull: ["$customerData.customerDetails.mobile", null] },
-              whatsapp: { $ifNull: ["$customerData.customerDetails.whatsapp", null] },
+              branch: {
+                $ifNull: [
+                  "$customerData.customerDetails.branch.branch_name",
+                  "Unknown",
+                ],
+              },
+              mobile: {
+                $ifNull: ["$customerData.customerDetails.mobile", null],
+              },
+              whatsapp: {
+                $ifNull: ["$customerData.customerDetails.whatsapp", null],
+              },
               gender: {
                 $switch: {
                   branches: [
@@ -892,73 +946,115 @@ class CustomerRepository {
                   default: "Unknown",
                 },
               },
-              address: { $ifNull: ["$customerData.customerDetails.address", ""] },
+              address: {
+                $ifNull: ["$customerData.customerDetails.address", ""],
+              },
               pan: { $ifNull: ["$customerData.customerDetails.pan", ""] },
-              aadharNumber: { $ifNull: ["$customerData.customerDetails.aadharNumber", ""] },
-              dateOfBirth: { $ifNull: ["$customerData.customerDetails.date_of_birth", null] },
-              referralCode: { $ifNull: ["$customerData.customerDetails.referral_code", ""] },
-              weddingAnniversary: { $ifNull: ["$customerData.customerDetails.date_of_wed", null] },
-              profileImage: { $ifNull: ["$customerData.customerDetails.cus_img", ""] },
+              aadharNumber: {
+                $ifNull: ["$customerData.customerDetails.aadharNumber", ""],
+              },
+              dateOfBirth: {
+                $ifNull: ["$customerData.customerDetails.date_of_birth", null],
+              },
+              referralCode: {
+                $ifNull: ["$customerData.customerDetails.referral_code", ""],
+              },
+              weddingAnniversary: {
+                $ifNull: ["$customerData.customerDetails.date_of_wed", null],
+              },
+              profileImage: {
+                $ifNull: ["$customerData.customerDetails.cus_img", ""],
+              },
             },
             schemes: { $ifNull: ["$customerData.schemes", []] },
-            totalOpenSchemes: { $ifNull: ["$customerData.totalOpenSchemes", 0] },
-            totalAmountPayable: { $ifNull: ["$customerData.totalAmountPayable", 0] },
-            totalWeightPayable: { $ifNull: ["$customerData.totalWeightPayable", 0] },
-            totalClosedSchemes: { $ifNull: ["$customerData.totalClosedSchemes", 0] },
-            precloseAccounts: { $ifNull: ["$customerData.precloseAccounts", 0] },
+            totalOpenSchemes: {
+              $ifNull: ["$customerData.totalOpenSchemes", 0],
+            },
+            totalAmountPayable: {
+              $ifNull: ["$customerData.totalAmountPayable", 0],
+            },
+            totalWeightPayable: {
+              $ifNull: ["$customerData.totalWeightPayable", 0],
+            },
+            totalClosedSchemes: {
+              $ifNull: ["$customerData.totalClosedSchemes", 0],
+            },
+            precloseAccounts: {
+              $ifNull: ["$customerData.precloseAccounts", 0],
+            },
             refundSchemes: { $ifNull: ["$customerData.refundSchemes", 0] },
             referralDetails: {
               referralCount: { $ifNull: ["$referrals.referralCount.count", 0] },
-              walletAmount: { $ifNull: ["$walletData.walletData.total_reward_amt", 0] },
-              pendingAmount: { $ifNull: ["$walletData.walletData.balance_amt", 0] },
-              redeemedAmount: { $ifNull: ["$walletData.walletData.redeem_amt", 0] },
+              walletAmount: {
+                $ifNull: ["$walletData.walletData.total_reward_amt", 0],
+              },
+              pendingAmount: {
+                $ifNull: ["$walletData.walletData.balance_amt", 0],
+              },
+              redeemedAmount: {
+                $ifNull: ["$walletData.walletData.redeem_amt", 0],
+              },
             },
-            totalGiftsIssued: { $ifNull: ["$giftStats.giftStats.totalGiftsIssued", 0] },
-            totalSchemeGifts: { $ifNull: ["$giftStats.giftStats.totalSchemeGifts", 0] },
-            totalNonSchemeGifts: { $ifNull: ["$giftStats.giftStats.totalNonSchemeGifts", 0] },
-            totalGiftsLeftToReceive: { $ifNull: ["$giftStats.giftStats.totalGiftsLeftToReceive", 0] },
-            uniqueSchemesCount: { $ifNull: ["$customerData.uniqueSchemesCount", 0] },
-            totalSchemeAccounts: { $ifNull: ["$customerData.customerDetails.totalSchemeAccounts", 0] },
+            totalGiftsIssued: {
+              $ifNull: ["$giftStats.giftStats.totalGiftsIssued", 0],
+            },
+            totalSchemeGifts: {
+              $ifNull: ["$giftStats.giftStats.totalSchemeGifts", 0],
+            },
+            totalNonSchemeGifts: {
+              $ifNull: ["$giftStats.giftStats.totalNonSchemeGifts", 0],
+            },
+            totalGiftsLeftToReceive: {
+              $ifNull: ["$giftStats.giftStats.totalGiftsLeftToReceive", 0],
+            },
+            uniqueSchemesCount: {
+              $ifNull: ["$customerData.uniqueSchemesCount", 0],
+            },
+            totalSchemeAccounts: {
+              $ifNull: ["$customerData.customerDetails.totalSchemeAccounts", 0],
+            },
           },
         },
       ]);
 
-      return result[0] || {
-        customerDetails: {
-          customerName: "",
-          _id: null,
-          branch: "Unknown",
-          mobile: null,
-          whatsapp: null,
-          gender: "Unknown",
-          address: "",
-          pan: "",
-          aadharNumber: "",
-          dateOfBirth: null,
-          referralCode: "",
-          weddingAnniversary: null,
-          profileImage: "",
-        },
-        schemes: [],
-        totalOpenSchemes: 0,
-        totalAmountPayable: 0,
-        totalWeightPayable: 0,
-        totalClosedSchemes: 0,
-        precloseAccounts: 0,
-        refundSchemes: 0,
-        referralDetails: {
-          referralCount: 0,
-          walletAmount: 0,
-          pendingAmount: 0,
-          redeemedAmount: 0,
-        },
-        totalGiftsIssued: 0,
-        totalSchemeGifts: 0,
-        totalNonSchemeGifts: 0,
-        totalGiftsLeftToReceive: 0,
-        uniqueSchemesCount: 0,
-        totalSchemeAccounts: 0,
-      };
+      return (
+        result[0] || {
+          customerDetails: {
+            customerName: "",
+            _id: null,
+            branch: "Unknown",
+            mobile: null,
+            whatsapp: null,
+            gender: "Unknown",
+            address: "",
+            pan: "",
+            aadharNumber: "",
+            dateOfBirth: null,
+            referralCode: "",
+            weddingAnniversary: null,
+            profileImage: "",
+          },
+          schemes: [],
+          totalOpenSchemes: 0,
+          totalAmountPayable: 0,
+          totalWeightPayable: 0,
+          totalClosedSchemes: 0,
+          precloseAccounts: 0,
+          refundSchemes: 0,
+          referralDetails: {
+            referralCount: 0,
+            walletAmount: 0,
+            pendingAmount: 0,
+            redeemedAmount: 0,
+          },
+          totalGiftsIssued: 0,
+          totalSchemeGifts: 0,
+          totalNonSchemeGifts: 0,
+          totalGiftsLeftToReceive: 0,
+          uniqueSchemesCount: 0,
+          totalSchemeAccounts: 0,
+        }
+      );
     } catch (error) {
       console.error(error);
       return {
@@ -1008,15 +1104,15 @@ class CustomerRepository {
         {
           $group: {
             _id: null,
-            ids: { $push: "$idStr" }
-          }
+            ids: { $push: "$idStr" },
+          },
         },
         {
           $project: {
             _id: 0,
-            ids: 1
-          }
-        }
+            ids: 1,
+          },
+        },
       ]);
 
       return result[0]?.ids || [];
@@ -1028,8 +1124,9 @@ class CustomerRepository {
 
   async getCustomerDataLess(idCustomer) {
     try {
-      const result = await customerModel.findById(idCustomer)
-      .select("password active is_deleted")
+      const result = await customerModel
+        .findById(idCustomer)
+        .select("password active is_deleted");
 
       return result;
     } catch (error) {
@@ -1040,61 +1137,64 @@ class CustomerRepository {
 
   async getCustomersByIds(customerIds, branchIds, fieldsToReturn = {}) {
     try {
-        const branchObjectIds = branchIds.map(id => new mongoose.Types.ObjectId(id));
+      const branchObjectIds = branchIds.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
 
-        const defaultFields = {
-            _id: 1,
-            mobile: 1,
-            whatsapp: 1,
-            firstname: 1,
-            id_branch: 1
-        };
+      const defaultFields = {
+        _id: 1,
+        mobile: 1,
+        whatsapp: 1,
+        firstname: 1,
+        id_branch: 1,
+      };
 
-        const projection = { ...defaultFields, ...fieldsToReturn };
+      const projection = { ...defaultFields, ...fieldsToReturn };
 
-        const result = await customerModel.aggregate([
-            {
-                $match: {
-                    _id: { $in: customerIds.map(id =>new mongoose.Types.ObjectId(id)) },
-                    id_branch: { $in: branchObjectIds },
-                    active: true
-                }
+      const result = await customerModel.aggregate([
+        {
+          $match: {
+            _id: {
+              $in: customerIds.map((id) => new mongoose.Types.ObjectId(id)),
             },
-            {
-                $project: projection
+            id_branch: { $in: branchObjectIds },
+            active: true,
+          },
+        },
+        {
+          $project: projection,
+        },
+        {
+          $lookup: {
+            from: "branches",
+            localField: "branchId",
+            foreignField: "_id",
+            as: "branchDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$branchDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            whatsappNumber: {
+              $ifNull: ["$whatsappNumber", "$mobile"],
             },
-            {
-                $lookup: {
-                    from: 'branches',
-                    localField: 'branchId',
-                    foreignField: '_id',
-                    as: 'branchDetails'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$branchDetails',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $addFields: {
-                    whatsappNumber: {
-                        $ifNull: ['$whatsappNumber', '$mobile']
-                    },
-                    // Add branch name for convenience
-                    branchName: '$branchDetails.name'
-                }
-            }
-        ]);
+            // Add branch name for convenience
+            branchName: "$branchDetails.name",
+          },
+        },
+      ]);
 
-        return result;
+      return result;
     } catch (error) {
-        console.error('Error in getCustomersByIds:', error);
-        throw error;
+      console.error("Error in getCustomersByIds:", error);
+      throw error;
     }
-}
-  
+  }
 }
 
 export default CustomerRepository;
