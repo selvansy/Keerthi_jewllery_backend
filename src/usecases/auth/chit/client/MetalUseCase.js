@@ -11,37 +11,62 @@ class MetalUseCase {
     this.metalRateRepo = new MetalRateRepository()
   } 
 
-  async addMetal(data,token) {
+  async addMetal(data, token) {
     try {
-      const metalName = data.metal_name.toLowerCase();
+      const metalName = data.metal_name.toLowerCase().trim();
       const exists = await this.metalRepository.findByName(metalName);
   
       if (exists) {
         return { success: false, message: "Metal already exists" };
       }
   
-      data.id_metal = 5;
-
-    if (/gold/i.test(data.metal_name)) {
-      data.id_metal = 1;
-    } else if (/silver/i.test(data.metal_name)) {
-      data.id_metal = 2;
-    } else if (/diamon[dt]/i.test(data.metal_name)) {
-      data.id_metal = 3;
-    } else if (/platinum/i.test(data.metal_name)) {
-      data.id_metal = 4;
-    }
+      //unknown metal
+      data.id_metal = 99;
+  
+      if (/^gold$/i.test(metalName)) {
+        data.id_metal = 1;
+      } else if (/^silver$/i.test(metalName)) {
+        data.id_metal = 2;
+      } else if (/^diamon[dt]$/i.test(metalName)) {
+        data.id_metal = 3;
+      } else if (/^platinum$/i.test(metalName)) {
+        data.id_metal = 4;
+      } else if (/^rose\s+gold$/i.test(metalName)) {
+        data.id_metal = 5;
+      } else if (/^white\s+gold$/i.test(metalName)) {
+        data.id_metal = 6;
+      } else if (/^titanium$/i.test(metalName)) {
+        data.id_metal = 7;
+      } else if (/^palladium$/i.test(metalName)) {
+        data.id_metal = 8;
+      } else if (/^rhodium$/i.test(metalName)) {
+        data.id_metal = 9;
+      } else if (/^copper$/i.test(metalName)) {
+        data.id_metal = 10;
+      } else if (/^brass$/i.test(metalName)) {
+        data.id_metal = 11;
+      } else if (/^stainless\s+steel$/i.test(metalName)) {
+        data.id_metal = 12;
+      } else if (/^tungsten$/i.test(metalName)) {
+        data.id_metal = 13;
+      } else if (/^zirconium$/i.test(metalName)) {
+        data.id_metal = 14;
+      } else if (/^cobalt$/i.test(metalName)) {
+        data.id_metal = 15;
+      } else if (/^nickel$/i.test(metalName)) {
+        data.id_metal = 16;
+      }
   
       const savedData = await this.metalRepository.addMetal(data);
   
       if (savedData) {
-       const updatedPurities =  await this.purityRepo.updateWithMetalNumber(data.id_metal,savedData._id)
-       console.log(updatedPurities)
-       await this.metalRateRepo.getIds(token?.id_branch,null,updatedPurities,savedData._id)
-
+        const updatedPurities = await this.purityRepo.updateWithMetalNumber(data.id_metal, savedData._id);
+        console.log(updatedPurities);
+  
+        await this.metalRateRepo.getIds(token?.id_branch, null, updatedPurities, savedData._id);
+  
         return { success: true, message: "Metal added successfully" };
       }
-
   
       return { success: false, message: "Failed to add metal" };
     } catch (error) {
@@ -50,7 +75,6 @@ class MetalUseCase {
     }
   }
   
-
   async editMetal(id, data) {
     try {
       if (!isValidObjectId(id)) {

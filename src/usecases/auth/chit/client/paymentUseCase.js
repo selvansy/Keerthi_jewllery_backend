@@ -1585,15 +1585,15 @@ class PaymentUseCase {
 
         const lastPaid = lastPaidData ? new Date(lastPaidData.createdAt) : null;
 
-        // if (
-        //   lastPaid &&
-        //   this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
-        // ) {
-        //   return {
-        //     success: false,
-        //     message: "Already completed today's payment for one of the schemes",
-        //   };
-        // }
+        if (
+          lastPaid &&
+          this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
+        ) {
+          return {
+            success: false,
+            message: "Already completed today's payment for one of the schemes",
+          };
+        }
 
         const totalInstallments =
           await this.paymentRepository.totalInstallments(
