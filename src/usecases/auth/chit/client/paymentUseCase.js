@@ -1930,7 +1930,7 @@ class PaymentUseCase {
       if (!schemeAccount) {
         customerData = await this.customerRepo.findOne({ _id: customerId });
         const accountData = {
-          active: true,
+          active: false,
           id_customer: customerId,
           id_scheme: idScheme,
           id_classification: idClassification,
@@ -2267,7 +2267,7 @@ class PaymentUseCase {
         // Prepare scheme account update
         const isFinalInstallment = (accountDetails.paid_installments + 1) === accountDetails.total_installments;
         const update = {
-          $set: { last_paid_date: new Date() },
+          $set: { last_paid_date: new Date(),active:true},
           $inc: {
             paid_installments: 1,
             paymentcount: 1,

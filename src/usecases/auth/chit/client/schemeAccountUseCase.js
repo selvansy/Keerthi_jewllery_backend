@@ -301,11 +301,11 @@ class SchemeAccountUseCase {
   };
 
   addedby = (type) => {
-    if (type == 1) {
+    if (type == 3) {
       return "Admin";
-    } else if (type == 2) {
+    } else if (type == 1) {
       return "Android";
-    } else if (type == 3) {
+    } else if (type == 2) {
       return "IOS";
     } else {
       return "Web";
@@ -1481,7 +1481,7 @@ class SchemeAccountUseCase {
   
       const pipeline = [];
   
-      pipeline.push({ $match: { is_deleted: false } });
+      pipeline.push({ $match: { is_deleted: false,active:true} });
   
       if (from_date && to_date) {
         pipeline.push({
@@ -1622,7 +1622,7 @@ class SchemeAccountUseCase {
             total_paidamount: calcpayment?.total_paidamount,
             total_weight: calcpayment?.total_weight,
             status_name: this.getStatusName(account.status),
-            created_through: this.addedby(account.created_through),
+            created_through: this.addedby(account.added_by),
           };
         })
       );
@@ -2153,7 +2153,7 @@ class SchemeAccountUseCase {
         arrobject.status = account?.status;
         arrobject.scheme_acc_number = account?.scheme_acc_number;
         arrobject.status_name = this.getStatusName(account?.status);
-        arrobject.created_through = this.addedby(account?.created_through);
+        arrobject.created_through = this.addedby(account?.added_by);
 
         return arrobject;
       });
