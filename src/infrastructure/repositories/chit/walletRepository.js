@@ -74,55 +74,138 @@ class WalletRepository {
     }
 
 
+    // async getCustomerWalletDetails(customerId) {
+    //     try {
+    //       const idCustomer = new mongoose.Types.ObjectId(customerId);
+      
+    //       const result = await walletModel.aggregate([
+    //         {
+    //           $match: {
+    //             id_customer: idCustomer
+    //           }
+    //         },
+    //         {
+    //           $lookup: {
+    //             from: "customers",
+    //             localField: "id_customer",
+    //             foreignField: "_id",
+    //             as: "customer"
+    //           }
+    //         },
+    //         {
+    //             $lookup: {
+    //               from: "schemeaccounts",
+    //               localField: "id_customer",
+    //               foreignField: "id_customer",
+    //               as: "schemeaccount"
+    //             }
+    //           },
+    //         {
+    //             $project: {
+    //               _id: 0,
+    //               balance_amt: 1,
+    //               firstname: { $arrayElemAt: ["$customer.firstname", 0] },
+    //               lastname: {
+    //                 $cond: {
+    //                   if: { $ne: [ { $arrayElemAt: ["$customer.lastname", 0] }, null ] },
+    //                   then: { $arrayElemAt: ["$customer.lastname", 0] },
+    //                   else: "$$REMOVE"
+    //                 }
+    //               },
+    //               address:{ $arrayElemAt: ["$customer.address", 0] },
+    //             }
+    //           }
+    //       ]);
+      
+    //       return result.length > 0 ? result[0] : 0;
+    //     } catch (error) {
+    //       console.error(error);
+    //       throw new Error("Failed to get customer wallet details");
+    //     }
+    //   }
     async getCustomerWalletDetails(customerId) {
         try {
-          const idCustomer = new mongoose.Types.ObjectId(customerId);
-      
-          const result = await walletModel.aggregate([
-            {
-              $match: {
-                id_customer: idCustomer
-              }
-            },
-            {
-              $lookup: {
-                from: "customers",
-                localField: "id_customer",
-                foreignField: "_id",
-                as: "customer"
-              }
-            },
-            {
-                $lookup: {
-                  from: "schemeaccounts",
-                  localField: "id_customer",
-                  foreignField: "id_customer",
-                  as: "schemeaccount"
-                }
-              },
-            {
-                $project: {
-                  _id: 0,
-                  balance_amt: 1,
-                  firstname: { $arrayElemAt: ["$customer.firstname", 0] },
-                  lastname: {
-                    $cond: {
-                      if: { $ne: [ { $arrayElemAt: ["$customer.lastname", 0] }, null ] },
-                      then: { $arrayElemAt: ["$customer.lastname", 0] },
-                      else: "$$REMOVE"
+            const idCustomer = new mongoose.Types.ObjectId(customerId);
+        
+            const result = await walletModel.aggregate([
+                {
+                    $match: {
+                        id_customer: idCustomer
                     }
-                  },
-                  address:{ $arrayElemAt: ["$customer.address", 0] },
+                },
+                {
+                    $lookup: {
+                        from: "customers",
+                        localField: "id_customer",
+                        foreignField: "_id",
+                        as: "customer"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "schemeaccounts",
+                        localField: "id_customer",
+                        foreignField: "id_customer",
+                        as: "schemeaccount"
+                    }
+                },
+                {
+                    $addFields: {
+                        activeSchemeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$schemeaccount",
+                                    as: "scheme",
+                                    cond: { $eq: ["$$scheme.status", 0] }
+                                }
+                            }
+                        },
+                        closedSchemeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$schemeaccount",
+                                    as: "scheme",
+                                    cond: { $eq: ["$$scheme.status", 1] }
+                                }
+                            }
+                        },
+                        completedSchemeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$schemeaccount",
+                                    as: "scheme",
+                                    cond: { $eq: ["$$scheme.status", 2] }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        balance_amt: 1,
+                        firstname: { $arrayElemAt: ["$customer.firstname", 0] },
+                        lastname: {
+                            $cond: {
+                                if: { $ne: [ { $arrayElemAt: ["$customer.lastname", 0] }, null ] },
+                                then: { $arrayElemAt: ["$customer.lastname", 0] },
+                                else: "$$REMOVE"
+                            }
+                        },
+                        address: { $arrayElemAt: ["$customer.address", 0] },
+                        active_scheme_count: "$activeSchemeCount",
+                        closedSchemeCount:"$closedSchemeCount",
+                        completedSchemeCount:"$completedSchemeCount"
+                    }
                 }
-              }
-          ]);
-      
-          return result.length > 0 ? result[0] : 0;
+            ]);
+        
+            return result.length > 0 ? result[0] : 0;
         } catch (error) {
-          console.error(error);
-          throw new Error("Failed to get customer wallet details");
+            console.error(error);
+            throw new Error("Failed to get customer wallet details");
         }
-      }
+    }
       
       
     async aggregateWallets(pipeline) {

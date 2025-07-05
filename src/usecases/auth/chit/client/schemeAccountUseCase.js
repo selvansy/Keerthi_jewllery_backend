@@ -107,11 +107,11 @@ class SchemeAccountUseCase {
         const input= {
           recipients: [data.referral_id],
           title: "Scheme Account Created",
-          message: `Thank you for referring ${data?.customer_name} to SENKA JEWELERS! Your referral has successfully created a ${schemeInfo.id_scheme.scheme_name} Scheme Account.`,
+          message: `Thank you for referring ${data?.customer_name} to KEERTHI JEWELERS! Your referral has successfully created a ${schemeInfo.id_scheme.scheme_name} Scheme Account.`,
           channel: "push",
         }
         await smsService.sendNotification(input);
-        await this.SaveNotificationRepo.saveNotification({
+        await this.saveNotificationUsecase.saveNotification({
           title: input.title,
           message: input.message,
           type:"alert",

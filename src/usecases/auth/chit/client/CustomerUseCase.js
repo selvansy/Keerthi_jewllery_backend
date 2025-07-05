@@ -432,7 +432,6 @@ class CustomerUseCase {
       let Data = "";
 
       if (search.length == 10) {
-        console.log("first")
         Data = await this.customerRepository.searchCustomerByMobile(searchTerm);
       } else {
         const code = `Cus-${search}`;

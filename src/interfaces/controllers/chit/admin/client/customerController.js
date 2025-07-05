@@ -194,7 +194,6 @@ class CustomerController {
 
   async getCustomerById(req, res) {
     const { id } = req.params;
-    console.log("id-----", id);
     try {
       if (!id) {
         return res.status(400).json({ message: "No valid id provide" });
@@ -250,9 +249,18 @@ class CustomerController {
         return res.status(400).json({ message: result.message });
       }
 
+      const returnData ={
+        firstname: result.data.firstname,
+        _id: result.data._id,
+      }
+
+      if(result.data.lastname){
+        returnData.lastname = result.data.lastname
+      }
+
       return res
         .status(200)
-        .json({ message: result.message, data: result.data });
+        .json({ message: result.message, data: returnData });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Internal server error" });

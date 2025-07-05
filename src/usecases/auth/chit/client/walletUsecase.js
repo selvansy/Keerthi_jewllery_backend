@@ -240,17 +240,13 @@ class WalletUsecase {
       }
 
       const walletData = await this.walletRepo.getCustomerWalletDetails(custData._id);
-      return console.log(walletData)
 
-      // if (walletData && walletData.is_deleted) {
-      //   return { success: false, message: "Wallet does not exist" };
-      // }
+      if (walletData && walletData.is_deleted) {
+        return { success: false, message: "No data found" };
+      }
 
-      // const customerSchemeAccounts = await this.schemeAccountRepo.getSchemeCountByCustomer(custData.mobile);
 
-      // const data = { walletData, ...customerSchemeAccounts, custData };
-
-      return { success: true, message: walletData ? "Wallet exists" : "Wallet not exists", data };
+      return { success: true, message: walletData ? "Wallet exists" : "Wallet not exists", data:walletData };
     } catch (error) {
       console.error("Error in getCustomerWalletDetails:", error);
       throw new Error("Internal server error");
