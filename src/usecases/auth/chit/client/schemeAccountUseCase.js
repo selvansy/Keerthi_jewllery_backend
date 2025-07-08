@@ -2187,9 +2187,12 @@ class SchemeAccountUseCase {
     }
   }
 
-  async overdueCalculation(){
+  async overdueCalculation(mobile){
     try {
-      const result = await this.schemeAccountRepository.overdueCalculation()
+      const customer= await this.customerRepo.findOne({mobile:mobile})
+
+      const customerId = new mongoose.Types.ObjectId(customer._id)
+      const result = await this.schemeAccountRepository.overdueCalculation(customerId)
 
       if(result){
         return {status:true,message:"Scheme accounts fetched successfully",result}

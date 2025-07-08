@@ -3,7 +3,8 @@ import walletRateModel from '../../models/chit/walletRateModel.js';
 import walletModel from '../../models/chit/walletModel.js'
 import referralListModel from '../../models/chit/referralListModel.js';
 import paymentModel from '../../models/chit/paymentModel.js';
-import mongoose, { ObjectId } from "mongoose"
+import mongoose, { ObjectId } from "mongoose";
+import customerModel from '../../models/chit/customerModel.js';
 
 
 class WalletRepository {
@@ -46,7 +47,6 @@ class WalletRepository {
 
     async addWalletHistory(data) {
         try {
-            console.log(data)
             const createdData = await walletListModel.create(data);
 
             if (createdData) {
@@ -125,87 +125,97 @@ class WalletRepository {
     //   }
     async getCustomerWalletDetails(customerId) {
         try {
-            const idCustomer = new mongoose.Types.ObjectId(customerId);
-        
-            const result = await walletModel.aggregate([
-                {
-                    $match: {
-                        id_customer: idCustomer
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "customers",
-                        localField: "id_customer",
-                        foreignField: "_id",
-                        as: "customer"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "schemeaccounts",
-                        localField: "id_customer",
-                        foreignField: "id_customer",
-                        as: "schemeaccount"
-                    }
-                },
-                {
-                    $addFields: {
-                        activeSchemeCount: {
-                            $size: {
-                                $filter: {
-                                    input: "$schemeaccount",
-                                    as: "scheme",
-                                    cond: { $eq: ["$$scheme.status", 0] }
-                                }
-                            }
-                        },
-                        closedSchemeCount: {
-                            $size: {
-                                $filter: {
-                                    input: "$schemeaccount",
-                                    as: "scheme",
-                                    cond: { $eq: ["$$scheme.status", 1] }
-                                }
-                            }
-                        },
-                        completedSchemeCount: {
-                            $size: {
-                                $filter: {
-                                    input: "$schemeaccount",
-                                    as: "scheme",
-                                    cond: { $eq: ["$$scheme.status", 2] }
-                                }
-                            }
+          const idCustomer = new mongoose.Types.ObjectId(customerId);
+      
+          const result = await customerModel.aggregate([
+            {
+              $match: { _id: idCustomer }
+            },
+            {
+                $lookup: {
+                  from: "wallets",
+                  let: { customerMobile: { $toString: "$mobile" } },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ["$mobile", "$$customerMobile"]
                         }
+                      }
                     }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        balance_amt: 1,
-                        firstname: { $arrayElemAt: ["$customer.firstname", 0] },
-                        lastname: {
-                            $cond: {
-                                if: { $ne: [ { $arrayElemAt: ["$customer.lastname", 0] }, null ] },
-                                then: { $arrayElemAt: ["$customer.lastname", 0] },
-                                else: "$$REMOVE"
-                            }
-                        },
-                        address: { $arrayElemAt: ["$customer.address", 0] },
-                        active_scheme_count: "$activeSchemeCount",
-                        closedSchemeCount:"$closedSchemeCount",
-                        completedSchemeCount:"$completedSchemeCount"
-                    }
+                  ],
+                  as: "wallets"
                 }
-            ]);
-        
-            return result.length > 0 ? result[0] : 0;
+              },           
+            {
+              $lookup: {
+                from: "schemeaccounts",
+                localField: "_id",
+                foreignField: "id_customer",
+                as: "schemeaccount"
+              }
+            },
+            {
+              $addFields: {
+                activeSchemeCount: {
+                  $size: {
+                    $filter: {
+                      input: "$schemeaccount",
+                      as: "scheme",
+                      cond: { $eq: ["$$scheme.status", 0] }
+                    }
+                  }
+                },
+                closedSchemeCount: {
+                  $size: {
+                    $filter: {
+                      input: "$schemeaccount",
+                      as: "scheme",
+                      cond: { $eq: ["$$scheme.status", 1] }
+                    }
+                  }
+                },
+                completedSchemeCount: {
+                  $size: {
+                    $filter: {
+                      input: "$schemeaccount",
+                      as: "scheme",
+                      cond: { $eq: ["$$scheme.status", 2] }
+                    }
+                  }
+                },
+                balance_amt: {
+                  $ifNull: [{ $arrayElemAt: ["$wallets.balance_amt", 0] }, 0]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                balance_amt: 1,
+                firstname: 1,
+                lastname: {
+                  $cond: {
+                    if: { $ne: ["$lastname", null] },
+                    then: "$lastname",
+                    else: "$$REMOVE"
+                  }
+                },
+                address: 1,
+                active_scheme_count: "$activeSchemeCount",
+                closedSchemeCount: "$closedSchemeCount",
+                completedSchemeCount: "$completedSchemeCount"
+              }
+            }
+          ]);
+      
+          return result.length > 0 ? result[0] : 0;
         } catch (error) {
-            console.error(error);
-            throw new Error("Failed to get customer wallet details");
+          console.error(error);
+          throw new Error("Failed to get customer wallet details");
         }
-    }
+      }
+      
       
       
     async aggregateWallets(pipeline) {
@@ -228,8 +238,6 @@ class WalletRepository {
             }
     
             const searchTerm = query.search || "";
-    
-            // Aggregation pipeline to support search in related collections
             const pipeline = [
                 { $match: baseMatch },
                 {
@@ -241,8 +249,6 @@ class WalletRepository {
                     }
                 },
                 { $unwind: { path: "$id_customer", preserveNullAndEmptyArrays: true } },
-    
-                // Lookup employee
                 {
                     $lookup: {
                         from: "employees",
@@ -281,8 +287,7 @@ class WalletRepository {
     
             const data = result[0]?.data || [];
             const totalCount = result[0]?.metadata[0]?.total || 0;
-    
-            // For totals (ignoring search filter for full totals)
+
             const aggregationPipeline = [
                 { $match: baseMatch },
                 {

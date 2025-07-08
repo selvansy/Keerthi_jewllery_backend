@@ -241,11 +241,14 @@ class WalletUsecase {
 
       const walletData = await this.walletRepo.getCustomerWalletDetails(custData._id);
 
+      const customerid = new mongoose.Types.ObjectId(custData._id)
+      const overDue = await this.schemeAccountRepo.overdueCalculation(customerid)
+
       if (walletData && walletData.is_deleted) {
         return { success: false, message: "No data found" };
       }
 
-
+      walletData.overDue = overDue?.totalOverdue || 0
       return { success: true, message: walletData ? "Wallet exists" : "Wallet not exists", data:walletData };
     } catch (error) {
       console.error("Error in getCustomerWalletDetails:", error);

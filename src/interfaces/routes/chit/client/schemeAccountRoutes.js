@@ -49,6 +49,7 @@ const schemeAccountController= new SchemeAccountContorller(schemAccoutUseCase,va
 
 router.use(authMiddleware.protect) 
 //!dont modify any api without proper checking !
+router.get('/overdue',(req,res)=>schemeAccountController.overdueCalculation(req,res))
 router.post('/search', (req, res) => schemeAccountController.customMobileSearch(req, res));
 router.get('/revert',(req,res)=>schemeAccountController.getRevertedDetails(req,res))
 router.get('/accountcount',(req,res)=>schemeAccountController.findCustomerAccountCounts(req,res))
@@ -78,5 +79,4 @@ router.get('/accnum/mobile/search', (req, res) => schemeAccountController.search
 router.get('/mobile/schemeaccounts', (req, res) => schemeAccountController.getAllSchemeAccountsForMobile(req, res));
 router.get('/mobile/metalsavings', (req, res) => schemeAccountController.getMetalBasedSavings(req, res));
 
-router.get('/overdue',(req,res)=>schemeAccountController.overdueCalculation(req,res))
 export default router;

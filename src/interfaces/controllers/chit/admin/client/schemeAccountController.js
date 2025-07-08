@@ -589,10 +589,10 @@ async getMetalBasedSavings(req, res) {
 
 async overdueCalculation(req, res) {
   try {
-    console.log(
-      "dfd"
-    )
-    const data = await this.schemeAccountUseCase.overdueCalculation();
+    const {mobile}= req.query
+    const mobileNumber = Number(mobile)
+    
+    const data = await this.schemeAccountUseCase.overdueCalculation(mobileNumber);
 
     if (!data) {
       return res.status(404).json({ success: false, message: "No scheme accounts found" });
