@@ -77,4 +77,6 @@ router.get('/accnum/mobile/search', (req, res) => schemeAccountController.search
 //!dont modify any api without proper checking !
 router.get('/mobile/schemeaccounts', (req, res) => schemeAccountController.getAllSchemeAccountsForMobile(req, res));
 router.get('/mobile/metalsavings', (req, res) => schemeAccountController.getMetalBasedSavings(req, res));
+
+router.get('/overdue',(req,res)=>schemeAccountController.overdueCalculation(req,res))
 export default router;

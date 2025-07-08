@@ -587,6 +587,28 @@ async getMetalBasedSavings(req, res) {
   }
 }
 
+async overdueCalculation(req, res) {
+  try {
+    console.log(
+      "dfd"
+    )
+    const data = await this.schemeAccountUseCase.overdueCalculation();
+
+    if (!data) {
+      return res.status(404).json({ success: false, message: "No scheme accounts found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Scheme account data fetched successfully",
+      data: data.result,
+    });
+  } catch (error) {
+    console.error("Error in getAllSchemeAccountsForMobile:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
 }
 
 export default SchemeAccountContorller;

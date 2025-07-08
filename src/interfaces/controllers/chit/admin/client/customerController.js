@@ -249,13 +249,15 @@ class CustomerController {
         return res.status(400).json({ message: result.message });
       }
 
+      console.log(result.data)
+
       const returnData ={
-        firstname: result.data.firstname,
-        _id: result.data._id,
+        firstname: result?.data?.firstname,
+        _id: result?.data?._id,
       }
 
-      if(result.data.lastname){
-        returnData.lastname = result.data.lastname
+      if(result?.data?.lastname){
+        returnData.lastname = result?.data?.lastname
       }
 
       return res

@@ -170,7 +170,7 @@ class UploadConfig {
                 'application/csv',
                 'application/zip',
                 'application/x-zip-compressed',
-                // 'application/octet-stream'
+                'application/octet-stream'
             ]
         };
 

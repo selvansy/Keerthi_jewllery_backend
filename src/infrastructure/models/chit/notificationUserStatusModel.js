@@ -18,7 +18,7 @@ const notificationSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['Gold Rate', 'special_offer', 'festival_offer', 'general',"Payment","Scheme account","Scheme","Wallet"],
+        // enum: ['Gold Rate', 'special_offer', 'festival_offer', 'general',"Payment","Scheme account","Scheme","Wallet"],
         default: 'general'
     },
     action: {

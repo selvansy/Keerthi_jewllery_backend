@@ -97,48 +97,48 @@ class PaymentUseCase {
         );
       }
 
-      if (
-        notificationData.whatsapp.enabled &&
-        notificationData.whatsapp.topupCount > 0
-      ) {
-        const whatsappInfo = await this.smsRepo.findOne({ active: true });
-        if (whatsappInfo) {
-          const whatsappData = {
-            numbers: [data.mobile],
-            message: whatsappInfo.schemeCompleteWhatsapp,
-            templateParams: { paymentAmount: data.payment_amount },
-            channel: "whatsapp",
-            customUrl: whatsappInfo.payment_url,
-          };
+      // if (
+      //   notificationData.whatsapp.enabled &&
+      //   notificationData.whatsapp.topupCount > 0
+      // ) {
+      //   const whatsappInfo = await this.smsRepo.findOne({ active: true });
+      //   if (whatsappInfo) {
+      //     const whatsappData = {
+      //       numbers: [data.mobile],
+      //       message: whatsappInfo.schemeCompleteWhatsapp,
+      //       templateParams: { paymentAmount: data.payment_amount },
+      //       channel: "whatsapp",
+      //       customUrl: whatsappInfo.payment_url,
+      //     };
 
-          const whatsappOutput = await smsService.sendNotification(
-            whatsappData
-          );
-          if (whatsappOutput) {
-            await this.topupRepo.decrementField({}, "WhatsApp", 1);
-          }
-        }
-      }
+      //     const whatsappOutput = await smsService.sendNotification(
+      //       whatsappData
+      //     );
+      //     if (whatsappOutput) {
+      //       await this.topupRepo.decrementField({}, "WhatsApp", 1);
+      //     }
+      //   }
+      // }
 
-      if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
-        const smsInfo = await this.smsRepo.findOne({ active: true });
-        if (smsInfo) {
-          const smsData = {
-            numbers: [data.mobile],
-            message: smsInfo.schemeComplete,
-            templateParams: { paymentAmount: data.payment_amount },
-            sms_type: "",
-            channel: "sms",
-            delayBetweenSMS: 1000,
-            customUrl: smsInfo.payment_url,
-          };
+      // if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
+      //   const smsInfo = await this.smsRepo.findOne({ active: true });
+      //   if (smsInfo) {
+      //     const smsData = {
+      //       numbers: [data.mobile],
+      //       message: smsInfo.schemeComplete,
+      //       templateParams: { paymentAmount: data.payment_amount },
+      //       sms_type: "",
+      //       channel: "sms",
+      //       delayBetweenSMS: 1000,
+      //       customUrl: smsInfo.payment_url,
+      //     };
 
-          const smsSendStatus = await smsService.sendNotification(smsData);
-          if (smsSendStatus) {
-            await this.topupRepo.decrementField({}, "SMS", 1);
-          }
-        }
-      }
+      //     const smsSendStatus = await smsService.sendNotification(smsData);
+      //     if (smsSendStatus) {
+      //       await this.topupRepo.decrementField({}, "SMS", 1);
+      //     }
+      //   }
+      // }
     } else {
       if (notificationData.push) {
         const inputMsg = {
@@ -159,49 +159,50 @@ class PaymentUseCase {
         );
       }
 
-      if (
-        notificationData.whatsapp.enabled &&
-        notificationData.whatsapp.topupCount > 0
-      ) {
-        const whatsappInfo = await this.smsRepo.findOne({ active: true });
-        if (whatsappInfo) {
-          const whatsappData = {
-            numbers: [data.mobile],
-            message: whatsappInfo.whatsappPayment,
-            templateParams: { paymentAmount: data.payment_amount },
-            channel: "whatsapp",
-            customUrl: whatsappInfo.payment_url,
-          };
+      // if (
+      //   notificationData.whatsapp.enabled &&
+      //   notificationData.whatsapp.topupCount > 0
+      // ) {
+      //   const whatsappInfo = await this.smsRepo.findOne({ active: true });
+      //   if (whatsappInfo) {
+      //     const whatsappData = {
+      //       numbers: [data.mobile],
+      //       message: whatsappInfo.whatsappPayment,
+      //       templateParams: { paymentAmount: data.payment_amount },
+      //       channel: "whatsapp",
+      //       customUrl: whatsappInfo.payment_url,
+      //     };
 
-          const whatsappOutput = await smsService.sendNotification(
-            whatsappData
-          );
-          if (whatsappOutput) {
-            await this.topupRepo.decrementField({}, "WhatsApp", 1);
-          }
-        }
-      }
+      //     const whatsappOutput = await smsService.sendNotification(
+      //       whatsappData
+      //     );
+      //     if (whatsappOutput) {
+      //       await this.topupRepo.decrementField({}, "WhatsApp", 1);
+      //     }
+      //   }
+      // }
 
-      if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
-        const smsInfo = await this.smsRepo.findOne({ active: true });
-        if (smsInfo) {
-          const smsData = {
-            numbers: [data.mobile],
-            message: smsInfo.payment_content,
-            templateParams: { paymentAmount: data.payment_amount },
-            sms_type: "",
-            channel: "sms",
-            delayBetweenSMS: 1000,
-            customUrl: smsInfo.payment_url,
-          };
+      // if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
+      //   const smsInfo = await this.smsRepo.findOne({ active: true });
+      //   if (smsInfo) {
+      //     const smsData = {
+      //       numbers: [data.mobile],
+      //       message: smsInfo.payment_content,
+      //       templateParams: { paymentAmount: data.payment_amount },
+      //       sms_type: "",
+      //       channel: "sms",
+      //       delayBetweenSMS: 1000,
+      //       customUrl: smsInfo.payment_url,
+      //     };
 
-          const smsSendStatus = await smsService.sendNotification(smsData);
-          if (smsSendStatus) {
-            await this.topupRepo.decrementField({}, "SMS", 1);
-            message = "Payment added successfully, SMS delivered to customer";
-          }
-        }
-      } else if (notificationData.sms.enabled) {
+      //     const smsSendStatus = await smsService.sendNotification(smsData);
+      //     if (smsSendStatus) {
+      //       await this.topupRepo.decrementField({}, "SMS", 1);
+      //       message = "Payment added successfully, SMS delivered to customer";
+      //     }
+      //   }
+      // } 
+      else if (notificationData.sms.enabled) {
         message = "Payment added successfully. Topup to send SMS to customers";
       }
     }
@@ -524,7 +525,7 @@ class PaymentUseCase {
           paymentCountIncrement.id_customer
         );
 
-        if (paymentCountIncrement) {
+        if (paymentCountIncrement && schemeAccData.referral_id !== null) {
           if (
             schemeCustomer.referral_id !== null &&
             schemeData.referralPercentage !== null
@@ -676,349 +677,6 @@ class PaymentUseCase {
     }
   }
 
-  // async digigoldCalculation(scheme,data,token){
-  //   try {
-  //     console.log(scheme)
-  //     if (!scheme)
-  //       return { success: false, message: "No related scheme found" };
-
-  //     const lastPaidData = await this.paymentRepository.findPaymentData(
-  //       data.id_scheme_account
-  //     );
-
-  //     const todayDate = new Date();
-
-  //     // if (lastPaidData) {
-  //     //   const lastPaid = new Date(lastPaidData.createdAt);
-
-  //     //   const todatPaidorNot =
-  //     //     this.toDateOnlyString(todayDate) === this.toDateOnlyString(lastPaid);
-
-  //     //   if (todatPaidorNot) {
-  //     //     return {
-  //     //       status: false,
-  //     //       message: "Already completed today's payment",
-  //     //     };
-  //     //   }
-  //     // }
-
-  //     const totalInstallments = await this.paymentRepository.totalInstallments(
-  //       data.id_scheme_account
-  //     );
-
-  //     // if (
-  //     //   Number(totalInstallments) + Number(data.installments) >
-  //     //   Number(schemeData.total_installments)
-  //     // ) {
-  //     //   return { status: false, message: "Scheme installment limit reached" };
-  //     // }
-
-  //     // const monthlyPaiments = await this.paymentRepository.getMonthlyPayments({
-  //     //   id: data.id_scheme_account,
-  //     //   date: todayDate,
-  //     // });
-
-  //     // if (
-  //     //   schemeData?.limit_installment &&
-  //     //   Number(monthlyPaiments) + Number(data.installments) >
-  //     //     Number(schemeData?.limit_installment)
-  //     // ) {
-  //     //   return { status: false, message: "Monthly payment limit reached" };
-  //     // }
-
-  //     const schemeAccData = await this.schemeAccountRepository.findById(
-  //       data.id_scheme_account
-  //     );
-
-  //     const paymentMode = await this.paymenModeRepo.findById(data.payment_mode);
-
-  //     let diffMonth = 0;
-  //     if (lastPaidData) {
-  //       const currentDate = moment();
-  //       const lastDate = moment(lastPaidData.date_payment);
-  //       diffMonth = this.getDifferenceInMonths(lastDate, currentDate);
-  //     }
-
-  //     // if (schemeData.limit_notpaid > 0 && diffMonth > 5) {
-  //     //   return {
-  //     //     success: false,
-  //     //     message:
-  //     //       "Scheme Account has not paid continuously for 6 months, go to preclose only",
-  //     //   };
-  //     // }
-
-  //     const args ={
-  //       scheme: scheme,
-  //       paymentDate: todayDate,
-  //       paymentAmount: data?.payment_amount,
-  //       installmentNumber:Number(schemeAccData?.paid_installments) + 1,
-  //       schemeJoinDate:schemeAccData?.start_date
-  //     }
-  //     const digidata = calculateDigiGoldBonus(args)
-
-  //     const raw = `${data.id_customer}${Date.now()}`;
-  //     const transactionId = crypto
-  //       .createHash("sha256")
-  //       .update(raw)
-  //       .digest("hex")
-  //       .slice(0, 15);
-
-  //     const generalSettings = await this.generalSettingRepository.findOne(
-  //       data.id_branch
-  //     );
-  //     if (!generalSettings) {
-  //       return {
-  //         success: false,
-  //         message: "No general settings found for this branch",
-  //       };
-  //     }
-
-  //     const paymentReceipt = await this.updatePaymentReceipt(
-  //       generalSettings,
-  //       scheme,
-  //       data.payment_receipt,
-  //       data.id_scheme
-  //     );
-
-  //     const totalAmount =
-  //       (Number(lastPaidData?.total_amt) || 0) + Number(data.payment_amount);
-  //     const dataToSave = {
-  //       ...data,
-  //       // bonus: bonus || 0,
-  //       id_employee: data?.created_by,
-  //       id_transaction: transactionId,
-  //       payment_receipt: paymentReceipt,
-  //       date_add: new Date(),
-  //       payment_status: data.payment_status || 1,
-  //       payment_type: data.payment_type || 1,
-  //       paid_installments: data.installments || 1,
-  //       cash_amount: data.cash_amount || 0,
-  //       card_amount: data.card_amount || 0,
-  //       gpay_amount: data.gpay_amount || 0,
-  //       itr_utr: data.itr_utr || null,
-  //       total_amt: totalAmount,
-  //       paymentModeName: paymentMode.mode_name,
-  //       digiBonus: digidata.appliedBonusPercent
-  //     };
-
-  //     const savedPayment = await this.paymentRepository.addPayment(dataToSave);
-
-  //     if (!savedPayment)
-  //       return { success: false, message: "Failed to save payment" };
-
-  //     const paymentCount = await this.paymentRepository.countDocuments(
-  //       data.id_scheme_account
-  //     );
-
-  //     let paymentCountCalc = 1;
-  //     if (!paymentCount) {
-  //       paymentCountCalc = Number(schemeAccData.paymentcount) + 1;
-  //     }
-  //     // return { success: false, message: "No related scheme payments found" };
-
-  //     const lastPaidDate = moment(data.date_payment).format("YYYY-MM-DD");
-
-  //     const newTotalInstallmentcount =
-  //       Number(schemeAccData.paid_installments) + Number(data.installments);
-  //     const updatedSchemeData = {
-  //       schemeAccountId: data.id_scheme_account,
-  //       paymentcount: paymentCountCalc,
-  //       last_paid_date: lastPaidDate,
-  //       paid_installments: newTotalInstallmentcount
-  //         ? newTotalInstallmentcount
-  //         : 1,
-  //     };
-
-  //     if (
-  //       Number(totalInstallments) + Number(data.installments) ==
-  //       Number(scheme.total_installments)
-  //     ) {
-  //       updatedSchemeData.status = 2;
-  //       updatedSchemeData.completedDate = new Date();
-  //     }
-
-  //     const paymentCountIncrement =
-  //       await this.schemeAccountRepository.updatePaymentCount(
-  //         updatedSchemeData
-  //       );
-
-  //     if (paymentCountIncrement) {
-  //       if (paymentCountIncrement.referral_id !== null) {
-  //         const referral = {
-  //           id_scheme_account: data?.id_scheme_account,
-  //           reference_no: paymentCountIncrement.referral_code,
-  //           reward_mode: 1,
-  //           created_by: token.id_employee,
-  //           modified_by: token.id_employee,
-  //         };
-
-  //         let walletOwner = null;
-
-  //         if (paymentCountIncrement.referral_type === "Customer") {
-  //           referral.id_customer = paymentCountIncrement.referral_id;
-  //           referral.referred_by = "Customer";
-  //           walletOwner = await this.customerRepo.findById(paymentCountIncrement.referral_id);
-  //         } else {
-  //           referral.id_employee = paymentCountIncrement.referral_id;
-  //           referral.referred_by = "Employee";
-  //           walletOwner = await this.employeeRepo.findById(paymentCountIncrement.referral_id);
-  //         }
-
-  //         const mobile = walletOwner?.mobile;
-  //         let wallet = await this.walletRepo.findWallet({mobile:mobile});
-  //         let creditedAmount = 0;
-  //         const walletData={}
-
-  //         if(paymentCountIncrement.referral_type === "Customer"){
-  //           creditedAmount = (Number(data.payment_amount) * Number(schemeData.referralPercentage)) / 100;
-  //           walletData.id_customer = walletOwner._id
-  //         }else{
-  //           creditedAmount = (Number(data.payment_amount) * Number(walletOwner.employeeIncentivePercentage)) / 100;
-  //           walletData.id_employee = walletOwner._id
-  //         }
-
-  //         if (creditedAmount !== 0) {
-  //           referral.credited_amount = creditedAmount;
-
-  //           if (!wallet) {
-
-  //             walletData.mobile= mobile,
-  //             walletData.balance_amt= creditedAmount,
-  //             walletData.total_reward_amt = creditedAmount,
-  //             walletData.created_by= token.id_employee,
-
-  //           wallet = await this.walletRepo.addWallet(walletData);
-  //           } else {
-  //             await this.walletRepo.creditAmount(wallet.id, creditedAmount);
-  //           }
-  //           await this.paymentRepository.addReferralPoint(referral);
-  //         }
-  //       }
-  //     }
-
-  //     const transactionDetails = {
-  //       transactionid: transactionId,
-  //       id_customer: data.id_customer,
-  //       id_branch: data.id_branch,
-  //       total_account: 1,
-  //       payment_type: 1,
-  //       platform: 0,
-  //       total_amount: data.total_amt,
-  //       trans_date: new Date(),
-  //       payment_mode: data.payment_mode,
-  //       mobile: data.mobile || "",
-  //       payment_status: 1,
-  //     };
-
-  //     const saveTransactionDetails =
-  //       await this.transactionDetailsRepository.addTransactionDetails(
-  //         transactionDetails
-  //       );
-
-  //     if (saveTransactionDetails) {
-  //       const subtransaction = {
-  //         transdetailid: saveTransactionDetails._id,
-  //         transactionid: transactionId,
-  //         id_customer: data.id_customer,
-  //         id_branch: data.id_customer,
-  //         payment_date: new Date(),
-  //         id_scheme_account: data.id_scheme_account,
-  //         id_scheme: data.id_scheme,
-  //         payment_amount: data.payment_amount,
-  //         paid_installments: data.installments,
-  //         scheme_total: data.total_amt,
-  //         metal_rate: data.metal_rate,
-  //         payment_mode: data.payment_mode,
-  //         payment_type: 1,
-  //         platform: 0,
-  //       };
-
-  //       if (data.metal_weight !== "") {
-  //         subtransaction.metal_weight = data.metal_weight;
-  //       } else {
-  //         subtransaction.metal_weight = null;
-  //       }
-
-  //       const savedTransaction =
-  //         await this.transactionRepository.addTransaction(subtransaction);
-
-  //       const notificationConfig= await this.notificationconfig.getConfig()
-
-  //       const isSmsPaymentProceedEnabled = notificationConfig?.sms?.enabled && notificationConfig?.sms?.settings?.schemeWise?.paymentProceed;
-
-  //       if (savedTransaction) {
-  //         if(isSmsPaymentProceedEnabled){
-  //           const smsLimit = await this.topupRepo.getTopupByClientId(
-  //             token.id_client
-  //           );
-
-  //           if (smsLimit && smsLimit.SMS > 0) {
-  //             const smsInfo = await this.smsRepo.findOne({
-  //               id_client: token.id_client,
-  //               sms_access: 1,
-  //               payment_sent: 1,
-  //             });
-
-  //             if (smsInfo) {
-  //               const smsurl = smsInfo.payment_url;
-
-  //               const smsData = {
-  //                 numbers: [data.mobile],
-  //                 message: smsInfo.payment_content,
-  //                 templateParams: { paymentAmount: data.payment_amount },
-  //                 sms_type: "",
-  //                 type: "sms",
-  //                 delayBetweenSMS: 1000,
-  //                 customUrl: smsurl,
-  //               };
-
-  //               const smsSendStatus = await smsService.sendSMS(smsData);
-
-  //               if (smsSendStatus) {
-  //                 let message = "";
-
-  //                 if (updatedSchemeData.status == 2) {
-  //                   message =
-  //                     "Scheme account completed, SMS delivered to customer";
-  //                 } else {
-  //                   message =
-  //                     "Payment added successfully, SMS delivered to customer";
-  //                 }
-  //                 return {
-  //                   success: true,
-  //                   message: message,
-  //                 };
-  //               }
-  //             } else {
-  //               return {
-  //                 success: true,
-  //                 message: "Payment added successfully",
-  //               };
-  //             }
-  //           } else {
-  //             return {
-  //               success: true,
-  //               message:
-  //                 "Payment added successfully. Topup to send sms to cutomers",
-  //             };
-  //           }
-  //         }
-
-  //         return { success: true, message: "Payment added successfully" };
-  //       } else {
-  //         return {
-  //           success: false,
-  //           message:
-  //             "There was a problem creating the transaction. Please try again.",
-  //         };
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error(error)
-  //     return {success:false,message: "Failed to add payment"}
-  //   }
-  // }
-
   async digigoldCalculation(scheme, data, token) {
     try {
       if (!scheme)
@@ -1029,15 +687,6 @@ class PaymentUseCase {
       const lastPaidData = await this.paymentRepository.findPaymentData(
         data.id_scheme_account
       );
-
-      // Prevent double payment on the same day
-      // if (lastPaidData) {
-      //   const lastPaid = new Date(lastPaidData.createdAt);
-      //   const isPaidToday = this.toDateOnlyString(todayDate) === this.toDateOnlyString(lastPaid);
-      //   if (isPaidToday) {
-      //     return { success: false, message: "Already completed today's payment" };
-      //   }
-      // }
 
       const totalInstallments = await this.paymentRepository.totalInstallments(
         data.id_scheme_account
@@ -2313,14 +1962,79 @@ class PaymentUseCase {
       ]);
 
 
+      // if (customer?.referral_id) {
+      //   const referralScheme = schemeAccountDetails.find(a => a?.id_scheme?.referralPercentage !== null);
+      //   if (!referralScheme) return;
+
+      //   const paymentData = payments.find(p => p.id_scheme_account.toString() === referralScheme._id.toString());
+      //   if (!paymentData) return;
+
+      //   const referral = {
+      //     id_scheme_account: referralScheme._id,
+      //     reference_no: customer.referral_code, 
+      //     reward_mode: 1,
+      //     created_by: data?.token?.id_employee || null,
+      //     modified_by: data?.token?.id_employee || null,
+      //   };
+
+      //   // Get the referrer details based on referral_id
+      //   let referrer = null;
+      //   if (customer.referral_type === "Customer") {
+      //     referral.id_customer = customer.referral_id;
+      //     referral.referred_by = "Customer";
+      //     referrer = await this.customerRepo.findById(customer.referral_id);
+      //   } else if (customer.referral_type === "Employee") {
+      //     referral.id_employee = customer.referral_id;
+      //     referral.referred_by = "Employee";
+      //     referrer = await this.employeeRepo.findById(customer.referral_id);
+      //   }
+
+      //   if (!referrer) {
+      //     console.log('Referrer not found');
+      //     return;
+      //   }
+
+      //   const mobile = referrer.mobile;
+      //   let wallet = await this.walletRepo.findWallet({ mobile });
+      //   const paymentAmount = Number(paymentData.payment_amount) || 0;
+      //   const referralPercentage = Number(referralScheme?.id_scheme?.referralPercentage) || 0;
+      //   const creditedAmount = (paymentAmount * referralPercentage) / 100;
+      //   console.log(paymentAmount,referralPercentage,"kd")
+      //   if (creditedAmount > 0 && !isNaN(creditedAmount)) {
+      //     referral.credited_amount = creditedAmount;
+
+      //     if (!wallet) {
+      //       const walletData = {
+      //         mobile,
+      //         balance_amt: creditedAmount,
+      //         total_reward_amt: creditedAmount,
+      //         created_by: data?.token?.id_employee || null,
+      //         ...(customer.referral_type === "Customer" 
+      //           ? { id_customer: referrer._id } 
+      //           : { id_employee: referrer._id })
+      //         };
+
+      //       await this.walletRepo.addWallet(walletData);
+      //     } else {
+      //       await this.walletRepo.creditAmount(wallet.id, creditedAmount);
+      //     }
+      //     await this.paymentRepository.addReferralPoint(referral);
+      //   }
+      // }
       if (customer?.referral_id) {
-        const referralScheme = schemeAccountDetails.find(a => a?.id_scheme?.referralPercentage !== null);
-        console.log(referralScheme,"ref")
+        const referralScheme = schemeAccountDetails.find(a =>
+          a?.id_scheme?.referralPercentage !== null &&
+          a?.referral_id?.toString() === customer.referral_id.toString()
+        );
+      
         if (!referralScheme) return;
-
-        const paymentData = payments.find(p => p.id_scheme_account.toString() === referralScheme._id.toString());
+      
+        const paymentData = payments.find(p =>
+          p.id_scheme_account.toString() === referralScheme._id.toString()
+        );
+      
         if (!paymentData) return;
-
+      
         const referral = {
           id_scheme_account: referralScheme._id,
           reference_no: customer.referral_code, 
@@ -2328,7 +2042,7 @@ class PaymentUseCase {
           created_by: data?.token?.id_employee || null,
           modified_by: data?.token?.id_employee || null,
         };
-
+      
         // Get the referrer details based on referral_id
         let referrer = null;
         if (customer.referral_type === "Customer") {
@@ -2340,21 +2054,21 @@ class PaymentUseCase {
           referral.referred_by = "Employee";
           referrer = await this.employeeRepo.findById(customer.referral_id);
         }
-
+      
         if (!referrer) {
           console.log('Referrer not found');
           return;
         }
-
+      
         const mobile = referrer.mobile;
         let wallet = await this.walletRepo.findWallet({ mobile });
         const paymentAmount = Number(paymentData.payment_amount) || 0;
         const referralPercentage = Number(referralScheme?.id_scheme?.referralPercentage) || 0;
         const creditedAmount = (paymentAmount * referralPercentage) / 100;
-        console.log(paymentAmount,referralPercentage,"kd")
+      
         if (creditedAmount > 0 && !isNaN(creditedAmount)) {
           referral.credited_amount = creditedAmount;
-
+      
           if (!wallet) {
             const walletData = {
               mobile,
@@ -2364,15 +2078,16 @@ class PaymentUseCase {
               ...(customer.referral_type === "Customer" 
                 ? { id_customer: referrer._id } 
                 : { id_employee: referrer._id })
-              };
-
+            };
+      
             await this.walletRepo.addWallet(walletData);
           } else {
             await this.walletRepo.creditAmount(wallet.id, creditedAmount);
           }
+      
           await this.paymentRepository.addReferralPoint(referral);
         }
-      }
+      }      
     } catch (error) {
       console.error("Error in completePayment:", error);
       throw error;

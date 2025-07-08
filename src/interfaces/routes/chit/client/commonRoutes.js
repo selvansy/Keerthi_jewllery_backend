@@ -22,6 +22,10 @@ router.get('/country',(req,res)=>commonController.getCountries(req,res))
 router.get('/relationship',(req,res)=>commonController.getAllRelationships(req,res))
 router.get('/gender',(req,res)=>commonController.getAllGender(req,res))
 
+//! app version check, add, update api section (do not modify with proper understanding)
+//*for mobile
+router.get('/check',(req,res)=>commonController.checkAppVersion(req,res));
+
 router.use(authMiddleware.protect);
 router.get('/wastagetype',(req,res)=>commonController.getAllWastagetype(req,res))
 router.get('/makingcharge',(req,res)=>commonController.getAllmakingcharge(req,res))
@@ -57,10 +61,6 @@ router.get('/redeem-type',(req,res)=>commonController.getRedeemType(req,res))
 router.get('/content-type',(req,res)=>commonController.getContentType(req,res))
 router.get('/faq-category',(req,res)=>commonController.getFaqCategories(req,res))
 
-
-//! app version check, add, update api section (do not modify with proper understanding)
-//*for mobile
-router.get('/check',(req,res)=>commonController.checkAppVersion(req,res));
 
 //!for superadmin to access,add, update the app update related data
 router.post("/add",(req,res)=>commonController.addAppVersionData(req,res));

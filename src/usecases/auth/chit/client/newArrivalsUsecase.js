@@ -294,12 +294,16 @@ class NewArrivalUseCase {
           customerId = token._id
         }
 
-        const { page, limit, from_date, to_date, id_branch, search,active } = query;
+        const { page, limit, from_date, to_date, id_branch, search,active,mobile} = query;
        
         const pageNum = page ? parseInt(page) : 1;
         const pageSize = limit ? parseInt(limit) : 10;
         const skip = (pageNum - 1) * pageSize;
-        const filter = { is_deleted: false };
+        const filter = { is_deleted: false};
+
+        if(mobile){
+          filter.active = true
+        }
   
   
         if (from_date && to_date) {
@@ -311,7 +315,7 @@ class NewArrivalUseCase {
   
           filter.createdAt = {
             $gte: startDate, 
-            $lte: endDate, 
+            $lte: endDate,
           };
         }
   

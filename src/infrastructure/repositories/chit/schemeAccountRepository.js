@@ -719,6 +719,7 @@ class SchemeAccountRepository {
                   total_paid_weight: 1,
                   total_paid_installments: "$paid_installments",
                   schemestatusName: 1,
+                  status:"$status",
                   schemeName: 1,
                   maturity_date: 1,
                   schemeType: 1,
@@ -913,8 +914,198 @@ class SchemeAccountRepository {
       throw error;
     }
   }
+
+  async overdueCalculation() {
+    try {
+      const result = await schemeAccountModel.aggregate([
+        {
+          $lookup: {
+            from: "schemes",
+            localField: "id_scheme",
+            foreignField: "_id",
+            as: "scheme"
+          }
+        },
+        { $unwind: "$scheme" },
+        {
+          $addFields: {
+            currentDate: new Date(),
+            startDateObj: "$start_date",
+            lastPaidDateObj: "$last_paid_date",
+            schemeInstallmentType: "$scheme.installment_type"
+          }
+        },
+        {
+          $addFields: {
+            expectedInstallmentCount: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ["$schemeInstallmentType", 1] }, // Monthly
+                    then: {
+                      $dateDiff: {
+                        startDate: "$startDateObj",
+                        endDate: new Date(),
+                        unit: "month"
+                      }
+                    }
+                  },
+                  {
+                    case: { $eq: ["$schemeInstallmentType", 2] }, // Weekly
+                    then: {
+                      $dateDiff: {
+                        startDate: "$startDateObj",
+                        endDate: new Date(),
+                        unit: "week"
+                      }
+                    }
+                  },
+                  {
+                    case: { $eq: ["$schemeInstallmentType", 3] }, // Daily
+                    then: {
+                      $dateDiff: {
+                        startDate: "$startDateObj",
+                        endDate: new Date(),
+                        unit: "day"
+                      }
+                    }
+                  },
+                  {
+                    case: { $eq: ["$schemeInstallmentType", 4] }, // Yearly
+                    then: {
+                      $dateDiff: {
+                        startDate: "$startDateObj",
+                        endDate: new Date(),
+                        unit: "year"
+                      }
+                    }
+                  }
+                ],
+                default: 0
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            expectedDueDates: {
+              $let: {
+                vars: {
+                  startDate: "$startDateObj",
+                  expectedCount: "$expectedInstallmentCount",
+                  installmentType: "$schemeInstallmentType"
+                },
+                in: {
+                  $map: {
+                    input: { $range: [0, { $add: ["$$expectedCount", 1] }] },
+                    as: "i",
+                    in: {
+                      $dateAdd: {
+                        startDate: "$$startDate",
+                        unit: {
+                          $switch: {
+                            branches: [
+                              { case: { $eq: ["$$installmentType", 1] }, then: "month" },
+                              { case: { $eq: ["$$installmentType", 2] }, then: "week" },
+                              { case: { $eq: ["$$installmentType", 3] }, then: "day" },
+                              { case: { $eq: ["$$installmentType", 4] }, then: "year" }
+                            ],
+                            default: "month"
+                          }
+                        },
+                        amount: "$$i"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            lastExpectedDueDate: { $arrayElemAt: ["$expectedDueDates", -1] },
+            nextDueDate: {
+              $dateAdd: {
+                startDate: { $arrayElemAt: ["$expectedDueDates", -1] },
+                unit: {
+                  $switch: {
+                    branches: [
+                      { case: { $eq: ["$schemeInstallmentType", 1] }, then: "month" },
+                      { case: { $eq: ["$schemeInstallmentType", 2] }, then: "week" },
+                      { case: { $eq: ["$schemeInstallmentType", 3] }, then: "day" },
+                      { case: { $eq: ["$schemeInstallmentType", 4] }, then: "year" }
+                    ],
+                    default: "month"
+                  }
+                },
+                amount: 1
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            overdueInstallments: {
+              $cond: {
+                if: {
+                  $gt: ["$expectedInstallmentCount", "$paid_installments"]
+                },
+                then: {
+                  $subtract: ["$expectedInstallmentCount", "$paid_installments"]
+                },
+                else: 0
+              }
+            },
+            isOverdue: {
+              $gt: ["$expectedInstallmentCount", "$paid_installments"]
+            },            
+            daysOverdue: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $ne: ["$paid_installments", "$total_installments"] },
+                    { $lt: ["$nextDueDate", new Date()] }
+                  ]
+                },
+                then: {
+                  $dateDiff: {
+                    startDate: "$nextDueDate",
+                    endDate: new Date(),
+                    unit: "day"
+                  }
+                },
+                else: 0
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            scheme_acc_number: 1,
+            account_name: 1,
+            start_date: 1,
+            last_paid_date: 1,
+            paid_installments: 1,
+            total_installments: 1,
+            installmentType: "$schemeInstallmentType",
+            expectedInstallmentCount: 1,
+            overdueInstallments: 1,
+            isOverdue: 1,
+            daysOverdue: 1,
+            nextDueDate: 1,
+            lastExpectedDueDate: 1
+          }
+        }
+      ]);
   
-  
+      console.log(result, "✅ Overdue calculation results");
+      return result;
+    } catch (error) {
+      console.error("❌ Error in overdue calculation:", error);
+      throw error;
+    }
+  }
   
   async bulkWrite(bulkOps) {
     try {

@@ -53,7 +53,7 @@ class SchemeAccountUseCase {
       const input = {
         recipients: [data.id_customer],
         title: "Scheme Account Created",
-        message: `Congratulations! Your ${schemeInfo.id_scheme.scheme_name} Scheme Account has been successfully created at SENKA JWELLERS.`,
+        message: `Congratulations! Your ${schemeInfo.id_scheme.scheme_name} Scheme Account has been successfully created at KEERTHI JWELLERS.`,
         channel: "push",
       }
       await smsService.sendNotification(input);
@@ -66,41 +66,41 @@ class SchemeAccountUseCase {
       },data.id_customer)
     }
   
-    if (notificationData.whatsapp.enabled && notificationData.whatsapp.topupCount > 0) {
-      const whatsappInfo = await this.smsRepo.findOne({ active: true });
-      if (whatsappInfo) {
-        const whatsappData = {
-          numbers: [data.mobile],
-          message: whatsappInfo.whatsappPayment,
-          templateParams: { paymentAmount: data.payment_amount },
-          channel: "whatsapp",
-          customUrl: whatsappInfo.payment_url,
-        };
-        const whatsappOutput = await smsService.sendNotification(whatsappData);
-        if (whatsappOutput) {
-          await this.topupRepo.decrementField({}, "WhatsApp", -1);
-        }
-      }
-    }
+    // if (notificationData.whatsapp.enabled && notificationData.whatsapp.topupCount > 0) {
+    //   const whatsappInfo = await this.smsRepo.findOne({ active: true });
+    //   if (whatsappInfo) {
+    //     const whatsappData = {
+    //       numbers: [data.mobile],
+    //       message: whatsappInfo.whatsappPayment,
+    //       templateParams: { paymentAmount: data.payment_amount },
+    //       channel: "whatsapp",
+    //       customUrl: whatsappInfo.payment_url,
+    //     };
+    //     const whatsappOutput = await smsService.sendNotification(whatsappData);
+    //     if (whatsappOutput) {
+    //       await this.topupRepo.decrementField({}, "WhatsApp", -1);
+    //     }
+    //   }
+    // }
   
-    if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
-      const smsInfo = await this.smsRepo.findOne({ active: true });
-      if (smsInfo) {
-        const smsData = {
-          numbers: [data.mobile],
-          message: smsInfo.payment_content,
-          templateParams: { paymentAmount: data.payment_amount },
-          sms_type: "",
-          channel: "sms",
-          delayBetweenSMS: 1000,
-          customUrl: smsInfo.payment_url,
-        };
-        const smsSendStatus = await smsService.sendNotification(smsData);
-        if (smsSendStatus) {
-          await this.topupRepo.decrementField({}, "SMS", 1);
-        }
-      }
-    }
+    // if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
+    //   const smsInfo = await this.smsRepo.findOne({ active: true });
+    //   if (smsInfo) {
+    //     const smsData = {
+    //       numbers: [data.mobile],
+    //       message: smsInfo.payment_content,
+    //       templateParams: { paymentAmount: data.payment_amount },
+    //       sms_type: "",
+    //       channel: "sms",
+    //       delayBetweenSMS: 1000,
+    //       customUrl: smsInfo.payment_url,
+    //     };
+    //     const smsSendStatus = await smsService.sendNotification(smsData);
+    //     if (smsSendStatus) {
+    //       await this.topupRepo.decrementField({}, "SMS", 1);
+    //     }
+    //   }
+    // }
 
     if(data.referral_id && referralNotification){
       if (notificationData.push) {
@@ -120,41 +120,41 @@ class SchemeAccountUseCase {
       }
     }
 
-    if (notificationData.whatsapp.enabled && notificationData.whatsapp.topupCount > 0) {
-      const whatsappInfo = await this.smsRepo.findOne({ active: true });
-      if (whatsappInfo) {
-        const whatsappData = {
-          numbers: [data.mobile],
-          message: whatsappInfo.whatsappPayment,
-          templateParams: { paymentAmount: data.payment_amount },
-          channel: "whatsapp",
-          customUrl: whatsappInfo.payment_url,
-        };
-        const whatsappOutput = await smsService.sendNotification(whatsappData);
-        if (whatsappOutput) {
-          await this.topupRepo.decrementField({}, "WhatsApp", -1);
-        }
-      }
-    }
+    // if (notificationData.whatsapp.enabled && notificationData.whatsapp.topupCount > 0) {
+    //   const whatsappInfo = await this.smsRepo.findOne({ active: true });
+    //   if (whatsappInfo) {
+    //     const whatsappData = {
+    //       numbers: [data.mobile],
+    //       message: whatsappInfo.whatsappPayment,
+    //       templateParams: { paymentAmount: data.payment_amount },
+    //       channel: "whatsapp",
+    //       customUrl: whatsappInfo.payment_url,
+    //     };
+    //     const whatsappOutput = await smsService.sendNotification(whatsappData);
+    //     if (whatsappOutput) {
+    //       await this.topupRepo.decrementField({}, "WhatsApp", -1);
+    //     }
+    //   }
+    // }
   
-    if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
-      const smsInfo = await this.smsRepo.findOne({ active: true });
-      if (smsInfo) {
-        const smsData = {
-          numbers: [data.mobile],
-          message: smsInfo.payment_content,
-          templateParams: { paymentAmount: data.payment_amount },
-          sms_type: "",
-          channel: "sms",
-          delayBetweenSMS: 1000,
-          customUrl: smsInfo.payment_url,
-        };
-        const smsSendStatus = await smsService.sendNotification(smsData);
-        if (smsSendStatus) {
-          await this.topupRepo.decrementField({}, "SMS", 1);
-        }
-      }
-    }
+    // if (notificationData.sms.enabled && notificationData.sms.topupCount > 0) {
+    //   const smsInfo = await this.smsRepo.findOne({ active: true });
+    //   if (smsInfo) {
+    //     const smsData = {
+    //       numbers: [data.mobile],
+    //       message: smsInfo.payment_content,
+    //       templateParams: { paymentAmount: data.payment_amount },
+    //       sms_type: "",
+    //       channel: "sms",
+    //       delayBetweenSMS: 1000,
+    //       customUrl: smsInfo.payment_url,
+    //     };
+    //     const smsSendStatus = await smsService.sendNotification(smsData);
+    //     if (smsSendStatus) {
+    //       await this.topupRepo.decrementField({}, "SMS", 1);
+    //     }
+    //   }
+    // }
   }
 
   async generateOtp() {
@@ -1171,56 +1171,25 @@ class SchemeAccountUseCase {
         };
       }
 
-      const smsLimit = await this.topupRepo.getTopupByClientId(
-        tokenData.id_client
-      );
+      const notificationData = await isNotificationEnabled("schemeClose");
 
-      if (smsLimit && smsLimit.SMS > 0) {
+      if (notificationData.push) {
         const schemeData = await this.schemeAccountRepository.find({ _id: id });
 
-        if (schemeData.length > 0 && schemeData[0]?.id_customer?.mobile) {
-          const smsInfo = await this.smsRepo.findOne({
-            id_client: tokenData.id_client,
-            sms_access: 1,
-            closeAcc: 1,
-          });
-
-          if (smsInfo) {
-            const smsurl = smsInfo.common_url;
-
-            const data = {
-              numbers: [schemeData[0]?.id_customer?.mobile],
-              message: smsInfo.closeAccContent,
-              templateParams: {
-                schemeaccNumber: schemeData[0]?.scheme_acc_number,
-                name: schemeData[0]?.id_customer?.firstname,
-              },
-              sms_type: "",
-              type: "sms",
-              customUrl: smsurl,
-            };
-
-            const smsSendStatus = await smsService.sendSMS(data);
-
-            if (smsSendStatus) {
-              return {
-                success: true,
-                message:
-                  "Scheme account closed. SMS has been successfully delivered to the customer.",
-              };
-            }
-          } else {
-            return {
-              success: true,
-              message: "Scheme account closed successfully",
-            };
-          }
+        const input = {
+          recipients: [data.id_customer],
+          title: "Scheme Account Created",
+          message: `Your ${schemeData.scheme_name} Scheme Account with KEERTHI JWELLERS has been successfully closed. We appreciate your association with us`,
+          channel: "push",
         }
-      } else {
-        return {
-          success: true,
-          message: "Scheme account closed. Topup to send sms to cutomers",
-        };
+        await smsService.sendNotification(input);
+        
+        await this.saveNotificationUsecase.saveNotification({
+          title: input.title,
+          message: input.message,
+          type:"alert",
+          category:'Scheme account'
+        },data.id_customer)
       }
 
       return {
@@ -2207,6 +2176,20 @@ class SchemeAccountUseCase {
       }
 
       const result = await this.schemeAccountRepository.getMetalBasedSavings(customerId)
+
+      if(result){
+        return {status:true,message:"Scheme accounts fetched successfully",result}
+      }
+
+      return {status:false,message:"Failed to get scheme account data"}
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  async overdueCalculation(){
+    try {
+      const result = await this.schemeAccountRepository.overdueCalculation()
 
       if(result){
         return {status:true,message:"Scheme accounts fetched successfully",result}
