@@ -1,6 +1,7 @@
 import metalRateModel from "../../models/chit/metalRateModel.js";
 import PuriytRepository from "./purityReporsitory.js";
 import purityModel from "../../models/chit/purityModel.js";
+import mongoose from 'mongoose'
 
 class MetalRateRepository {
   constructor() {
