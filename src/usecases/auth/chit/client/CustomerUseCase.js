@@ -4,6 +4,7 @@ import config from "../../../../config/chit/env.js";
 import crypto from "crypto";
 import { generateReferralCode } from "../../../../utils/cryptoGenerator.js";
 import smsService from "../../../../config/chit/smsService.js";
+import SchemeAccountRepository from '../../../../infrastructure/repositories/chit/schemeAccountRepository.js'
 
 class CustomerUseCase {
   constructor(
@@ -24,6 +25,7 @@ class CustomerUseCase {
     this.otpRepo = otpRepo;
     this.hashingService = hashingService;
     this.tokenService = tokenService;
+    this.schemeAccountRepo = new SchemeAccountRepository()
   }
 
   
@@ -193,7 +195,7 @@ class CustomerUseCase {
   }
 
   async editCustomer(id, data, uploads, token) {
-    const genderImages = ["1749878753243.webp", '1749878926644.webp', '1749878256269.webp'];
+    const genderImages = [null,'1749878256269.webp',"1749878753243.webp", '1749878926644.webp', ]; //null,male,female, other
     
     try {
         if (!isValidObjectId(id)) {
@@ -300,7 +302,8 @@ class CustomerUseCase {
             if (!isNaN(genderIndex)) {
                 const currentImage = userExists.cus_img;
                 if (!currentImage || genderImages.includes(currentImage)) {
-                    const selectedImage = genderImages[genderIndex % genderImages.length];
+                    // const selectedImage = genderImages[genderIndex % genderImages.length];
+                    const selectedImage = genderImages[genderIndex];
                     fieldsToUpdate.cus_img = selectedImage;
                 }
             }
@@ -399,6 +402,7 @@ class CustomerUseCase {
     const customers = await this.customerRepository.getCustomersByBranch(
       branchId
     );
+    
     return customers.length > 0 ? customers : [];
   }
 
@@ -413,6 +417,12 @@ class CustomerUseCase {
       if (!existsData) {
         return { success: false, message: "No customer found" };
       }
+
+     if(existsData.mpin){
+       existsData.mpinStatus = true
+     }else{
+      existsData.mpinStatus = false
+     }
 
       return {
         success: true,
@@ -978,7 +988,7 @@ class CustomerUseCase {
       }
 
       const customerData= await this.customerRepository.customerOverview({branch,mobile,idCustomer})
-      console.log(customerData)
+
       if(customerData){
         const s3Configs = await this.s3Helper();
         customerData.customerDetails.pathUrl = `${s3Configs.s3display_url}aupay/webadmin/assets/customer/`;
@@ -987,6 +997,15 @@ class CustomerUseCase {
       if(!customerData){
         return {success:false,message:"No customer details found"}
       }
+
+      const overdueData = await this.schemeAccountRepo.overdueCalculation(customerData.customerDetails._id)
+
+      customerData.overDueData = {
+        overdueSchemes:overdueData?.totalOverdueSchemes,
+        overdueCount:overdueData?.totalOverdueAccounts,
+        overdueAmount:overdueData?.totalFlexFixedOverdue
+      }
+
       return { success: true, message: "Customer details fetched successfully",data:customerData};
     } catch (error) {
       console.error(error);

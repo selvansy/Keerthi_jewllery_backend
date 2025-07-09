@@ -500,7 +500,7 @@ class SchemeAccountUseCase {
       data.date_add = new Date();
       data.date_upd = new Date();
       data.added_by = 0;
-      data.status = 0;
+      // data.status = 0;
       data.amount=0;
       data.weight=0
 
