@@ -11,22 +11,18 @@ class EmployeeUseCase {
     this.s3Repo= s3Repo;
   }
 
-  async s3Helper(id_client){
+  async s3Helper(){
     try {
-      const s3settings = await this.s3Repo.getSettingByClient(id_client);
+      const s3settings = await this.s3Repo.getSetting();
 
-      if (s3settings.length < 0) {
-        return { success: false, message: "S3 configuration not found" };
-      }
-
-      const configData = s3settings[0]
+      // const configData = s3settings[0]
 
       const configuration = {
-        s3key: configData?.s3key,
-        s3secret: configData?.s3secret,
-        s3bucket_name: configData?.s3bucket_name,
-        s3display_url: configData?.s3display_url,
-        region: configData?.region,
+        s3key: s3settings?.s3key,
+        s3secret: s3settings?.s3secret,
+        s3bucket_name: s3settings?.s3bucket_name,
+        s3display_url: s3settings?.s3display_url,
+        region: s3settings?.region,
       };
 
       return configuration

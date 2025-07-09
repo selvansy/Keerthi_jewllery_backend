@@ -252,7 +252,6 @@ class NotificationService {
   // }
 
   async  _sendSMS(numbers, message, providerConfig, type, customUrl) {
-    console.log(numbers,message,type,customUrl)
     if (!Array.isArray(numbers)) {
       numbers = [numbers];
     }
@@ -274,8 +273,8 @@ class NotificationService {
         try {
           if (customUrl) {
             url = customUrl
-              .replace(/xxxmobilexxx/g, encodeURIComponent(number))
-              .replace(/xxxmessagexxx/g, encodeURIComponent(message));
+            .replace(/xxxmobilexxx/g, encodeURIComponent(number))
+            .replace(/xxxmessagexxx/g, encodeURIComponent(message));
           } else {
             const params = new URLSearchParams({
               ...providerConfig.params,
@@ -284,7 +283,8 @@ class NotificationService {
             });
             url = `${providerConfig.baseUrl}?${params.toString()}`;
           }
-  
+          
+          console.log(url)
           const response = await axios.get(url);
   
           if (response.status === 200) {

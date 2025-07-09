@@ -112,6 +112,7 @@ class EmployeeRepository {
                 resume: 1,
                 pan:1,
                 whatsappNumber:1,
+                department:1,
                 employeeIncentivePercentage:1,
                 "id_branch._id": 1,
                 "id_branch.branch_name": 1,

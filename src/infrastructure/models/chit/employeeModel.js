@@ -34,8 +34,8 @@ const employeeSchema = new mongoose.Schema({
   },
   whatsappNumber: {
     type: String,
-    required: true,
-    unique: true,
+    // required: true,
+    // unique: true,
     match: [/^\d{10}$/, 'Please enter a valid mobile number'],
   },
   address: {
