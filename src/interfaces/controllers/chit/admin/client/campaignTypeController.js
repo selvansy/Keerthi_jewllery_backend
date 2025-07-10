@@ -7,20 +7,21 @@ class CampaignTypeController {
   async addCampaignTypeSetting(req, res) {
     try {
       const { error } = this.validator.campaignTypeValidations.validate(req.body);
-
+      
       if (error) {
         return res.status(400).json({ message: error.details[0].message });
       }
       
       req.body.createdBy = req.user.id_employee;
- 
+      
       const data= req.body;
-
+      
       const result = await this.campaignTypeUseCase.addCampaignType(data);
 
       if (!result.success) {
         return res.status(400).json({ message: result.message });
       }
+
       return res.status(201).json({ message: result.message });
     } catch (error) {
       console.error(error);

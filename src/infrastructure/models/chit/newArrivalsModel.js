@@ -11,18 +11,17 @@ const newarrivalsSchema = new mongoose.Schema({
         required: true,
         ref:'Product'
     },
-    description: {
-        type: String,
-        required: true
-    },
+    // description: {
+    //     type: String,
+    // },
     active: {
         type:Boolean,
         default:true
         
     },
-    images_Url:{
-        type:[String]
-    },
+    // images_Url:{
+    //     type:[String]
+    // },
   
     created_by: {
         type: mongoose.Schema.Types.ObjectId,

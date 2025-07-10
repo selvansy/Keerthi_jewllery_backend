@@ -113,6 +113,7 @@ class SchemeAccountRepository {
 
   async getCustomerAccount(query) {
     try {
+      console.log(query)
       const data = await schemeAccountModel.aggregate([
         { $match: query },
         { $sort: { _id: -1 } },
@@ -125,6 +126,15 @@ class SchemeAccountRepository {
           }
         },
         { $unwind: { path: "$id_scheme", preserveNullAndEmptyArrays: false } },
+        {
+          $lookup: {
+            from: "metalrates",
+            localField: "id_scheme.id_metal",
+            foreignField: "material_type_id",
+            as: "metalrate"
+          }
+        },
+        { $unwind: { path: "$metalrate", preserveNullAndEmptyArrays: false } },
         {
           $lookup: {
             from: "payments",
@@ -160,7 +170,19 @@ class SchemeAccountRepository {
             statusName: "$schemestatuses",
           }
         },
-        { $project: { payments: 0, schemestatuses: 0 } }        
+        {
+          $project: {
+            _id: 1,
+            scheme_acc_number: 1,
+            id_scheme: 1,
+            total_metal_weight: 1,
+            status: 1,
+            statusName: 1,
+            metalRate: "$metalrate.rate",
+            createdAt: 1, // if needed
+            updatedAt: 1  // if needed
+          }
+        }
       ]);
   
       if (!data || data.length === 0) {

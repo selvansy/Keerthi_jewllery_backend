@@ -32,35 +32,32 @@ class NewArrivalUseCase {
     }
   }
 
-  async addNewArrivals(newArrivalData, image_files) {
+  async addNewArrivals(newArrivalData, image_files = false) {
     try {
-      if(!isValidObjectId(newArrivalData.id_product)){
+      if (!isValidObjectId(newArrivalData.id_product)) {
         return { success: false, message: "Provide a valid Product ID" };
       }
-
-      if(!isValidObjectId(newArrivalData.id_branch)){
+  
+      if (!isValidObjectId(newArrivalData.id_branch)) {
         return { success: false, message: "Provide a valid Branch ID" };
       }
-
-
-      const exisitingBranch=await this.branchRepository.findById(newArrivalData.id_branch)
-      if(!exisitingBranch){
-        return {success:false,message:"Branch not found"}
+  
+      const exisitingBranch = await this.branchRepository.findById(newArrivalData.id_branch);
+      if (!exisitingBranch) {
+        return { success: false, message: "Branch not found" };
       }
-
-      const s3configs= await this.s3Helper(newArrivalData.id_branch)
-
-      const uploadPromises = image_files.map((image) =>
-        this.s3service
-          .uploadToS3(image, "newarrivals",s3configs)
-          .then((uploadedUrl) => uploadedUrl)
-      );
-      const uploadedImages = await Promise.all(uploadPromises);
-      newArrivalData.images_Url = uploadedImages;
-
-      const saveNewArrivals = await this.newArrivalRepository.addNewArrivals(
-        newArrivalData
-      );
+  
+      // const s3configs = await this.s3Helper(newArrivalData.id_branch);
+  
+      // const uploadPromises = image_files.map((image) =>
+      //   this.s3service
+      //     .uploadToS3(image, "newarrivals", s3configs)
+      //     .then((uploadedUrl) => uploadedUrl)
+      // );
+      // const uploadedImages = await Promise.all(uploadPromises);
+      // newArrivalData.images_Url = uploadedImages;
+  
+      const saveNewArrivals = await this.newArrivalRepository.addNewArrivals(newArrivalData);
       if (saveNewArrivals) {
         return { success: true, message: "New arrivals added successfully" };
       } else {
@@ -74,106 +71,101 @@ class NewArrivalUseCase {
         error: err.message,
       };
     }
-  }
+  }  
 
-  async editNewArrivals(id, newArrivalData, image_files) {
+  async editNewArrivals(id, newArrivalData, image_files = false) {
     try {
-        if (!isValidObjectId(id)) {
-            return { success: false, message: "Provide a valid object ID" };
-        }
-        if (newArrivalData.id_branch && !isValidObjectId(newArrivalData.id_branch)) {
-            return { success: false, message: "Provide a valid Branch ID" };
-        }
-        if (newArrivalData.id_product && !isValidObjectId(newArrivalData.id_product)) {
-            return { success: false, message: "Provide a valid Product ID" };
-        }
-
-        const existingNewArrival = await this.newArrivalRepository.findById(id);
-        console.log(existingNewArrival)
-        if (!existingNewArrival) {
-            return { success: false, message: "New Arrivals not found" };
-        }
-
-      
-
-        const updateFields = {};
-        for (let key in newArrivalData) {
-          if (key === "id_branch" || key === "id_product") {
-              if (
-                  !new mongoose.Types.ObjectId(newArrivalData[key]).equals(
-                      new mongoose.Types.ObjectId(existingNewArrival[key])
-                  )
-              ) {
-                  updateFields[key] = newArrivalData[key];
-              }
-          } else if (
-              newArrivalData[key] !== existingNewArrival[key] &&
-              newArrivalData[key] !== undefined
-          ) {
-              updateFields[key] = newArrivalData[key];
-          }
+      if (!isValidObjectId(id)) {
+        return { success: false, message: "Provide a valid object ID" };
       }
-      
-
-        if (Object.keys(updateFields).length === 0) {
-            return { success: false, message: "No changes found." };
+      if (newArrivalData.id_branch && !isValidObjectId(newArrivalData.id_branch)) {
+        return { success: false, message: "Provide a valid Branch ID" };
+      }
+      if (newArrivalData.id_product && !isValidObjectId(newArrivalData.id_product)) {
+        return { success: false, message: "Provide a valid Product ID" };
+      }
+  
+      const existingNewArrival = await this.newArrivalRepository.findById(id);
+      console.log(existingNewArrival);
+      if (!existingNewArrival) {
+        return { success: false, message: "New Arrivals not found" };
+      }
+  
+      const updateFields = {};
+      for (let key in newArrivalData) {
+        if (key === "id_branch" || key === "id_product") {
+          if (
+            !new mongoose.Types.ObjectId(newArrivalData[key]).equals(
+              new mongoose.Types.ObjectId(existingNewArrival[key])
+            )
+          ) {
+            updateFields[key] = newArrivalData[key];
+          }
+        } else if (
+          newArrivalData[key] !== existingNewArrival[key] &&
+          newArrivalData[key] !== undefined
+        ) {
+          updateFields[key] = newArrivalData[key];
         }
-
-        if (updateFields.id_branch) {
-            const existingBranch = await this.branchRepository.findById(newArrivalData.id_branch);
-            if (!existingBranch) {
-                return { success: false, message: "Branch not found" };
-            }
+      }
+  
+      if (Object.keys(updateFields).length === 0) {
+        return { success: false, message: "No changes found." };
+      }
+  
+      if (updateFields.id_branch) {
+        const existingBranch = await this.branchRepository.findById(newArrivalData.id_branch);
+        if (!existingBranch) {
+          return { success: false, message: "Branch not found" };
         }
-        if (Array.isArray(image_files)) {
-            const s3configs = await this.s3Helper(newArrivalData.id_branch || existingNewArrival.id_branch);
-            const existingImages = existingNewArrival.images_Url || [];
-
-            const imagesToRemove = existingImages.filter(
-                (img) => !image_files.includes(img)
-            );
-
-            const removePromises = imagesToRemove.map((img) =>
-                this.s3service.deleteFromS3(
-                    `${s3configs.s3display_url}${config.AWS_LOCAL_PATH}newArrivals/${img}`,
-                    s3configs
-                )
-            );
-            await Promise.all(removePromises);
-
-            const newImagesToUpload = image_files.filter(
-                (img) => !existingImages.includes(img)
-            );
-            const uploadPromises = newImagesToUpload.map((image) =>
-                this.s3service.uploadToS3(image, "newarrivals", s3configs)
-            );
-            const uploadedImages = await Promise.all(uploadPromises);
-
-            updateFields.images_Url = [
-                ...image_files.filter((img) => existingImages.includes(img)),
-                ...uploadedImages,
-            ];
-        }
-
-        const updateNewArrivals = await this.newArrivalRepository.editNewArrivals(
-            id,
-            updateFields
-        );
-
-        if (updateNewArrivals) {
-            return { success: true, message: "New arrivals updated successfully" };
-        }
-        return { success: false, message: "Failed to update new arrivals" };
-
+      }
+  
+      // if (Array.isArray(image_files)) {
+      //   const s3configs = await this.s3Helper(newArrivalData.id_branch || existingNewArrival.id_branch);
+      //   const existingImages = existingNewArrival.images_Url || [];
+  
+      //   const imagesToRemove = existingImages.filter(
+      //     (img) => !image_files.includes(img)
+      //   );
+  
+      //   const removePromises = imagesToRemove.map((img) =>
+      //     this.s3service.deleteFromS3(
+      //       `${s3configs.s3display_url}${config.AWS_LOCAL_PATH}newArrivals/${img}`,
+      //       s3configs
+      //     )
+      //   );
+      //   await Promise.all(removePromises);
+  
+      //   const newImagesToUpload = image_files.filter(
+      //     (img) => !existingImages.includes(img)
+      //   );
+      //   const uploadPromises = newImagesToUpload.map((image) =>
+      //     this.s3service.uploadToS3(image, "newarrivals", s3configs)
+      //   );
+      //   const uploadedImages = await Promise.all(uploadPromises);
+  
+      //   updateFields.images_Url = [
+      //     ...image_files.filter((img) => existingImages.includes(img)),
+      //     ...uploadedImages,
+      //   ];
+      // }
+  
+      const updateNewArrivals = await this.newArrivalRepository.editNewArrivals(id, updateFields);
+  
+      if (updateNewArrivals) {
+        return { success: true, message: "New arrivals updated successfully" };
+      }
+      return { success: false, message: "Failed to update new arrivals" };
     } catch (err) {
-        console.error(err);
-        return {
-            success: false,
-            message: "An error occurred while Editing new arrivals.",
-            error: err.message,
-        };
+      console.error(err);
+      return {
+        success: false,
+        message: "An error occurred while Editing new arrivals.",
+        error: err.message,
+      };
     }
-}
+  }
+  
 
 
   async deleteNewArrivals(id) {

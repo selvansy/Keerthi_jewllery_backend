@@ -21,14 +21,14 @@ class NewArrivalsValidation {
         "string.base": "Branch Id must be a string",
       }),
 
-      description: Joi.string()
-      .trim()
-      .required()
-      .messages({
-        "any.required": "Description is required",
-        "string.empty": "Description cannot be empty",
-        "string.base": "Description must be a string",
-      }),
+      // description: Joi.string()
+      // .trim()
+      // .required()
+      // .messages({
+      //   "any.required": "Description is required",
+      //   "string.empty": "Description cannot be empty",
+      //   "string.base": "Description must be a string",
+      // }),
      
 
     start_date: Joi.string()

@@ -1448,9 +1448,10 @@ class SchemeAccountUseCase {
       const pageNum = page ? parseInt(page) : 1;
       const pageSize = limit ? parseInt(limit) : 10;
   
+      // Main pipeline for data fetching
       const pipeline = [];
   
-      pipeline.push({ $match: { is_deleted: false,active:true} });
+      pipeline.push({ $match: { is_deleted: false, active: true } });
   
       if (from_date && to_date) {
         pipeline.push({
@@ -1478,7 +1479,6 @@ class SchemeAccountUseCase {
         pipeline.push({ $match: { status: { $in: [0, 1, 2, 3, 4] } } });
       }
       
-  
       if (search) {
         const regex = new RegExp(search, "i");
         const isMobile = /^\d{10}$/.test(search);
@@ -1501,20 +1501,19 @@ class SchemeAccountUseCase {
         }
       }
   
+      // Lookup stages
       pipeline.push(
         { $lookup: { from: "customers", localField: "id_customer", foreignField: "_id", as: "customer" } },
         { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
-  
         { $lookup: { from: "schemes", localField: "id_scheme", foreignField: "_id", as: "scheme" } },
         { $unwind: { path: "$scheme", preserveNullAndEmptyArrays: true } },
-  
         { $lookup: { from: "branches", localField: "id_branch", foreignField: "_id", as: "branch" } },
         { $unwind: { path: "$branch", preserveNullAndEmptyArrays: true } },
-  
         { $lookup: { from: "schemeclassifications", localField: "id_classification", foreignField: "_id", as: "classification" } },
         { $unwind: { path: "$classification", preserveNullAndEmptyArrays: true } }
       );
   
+      // Add computed fields
       pipeline.push({
         $addFields: {
           customer_name: {
@@ -1546,14 +1545,29 @@ class SchemeAccountUseCase {
           },
         },
       });
-  
-      pipeline.push({ $sort: { createdAt: -1 } });
-      pipeline.push({ $skip: (pageNum - 1) * pageSize });
-      pipeline.push({ $limit: pageSize });
-  
-      const data = await this.schemeAccountRepository.aggregate(pipeline);
-      const totalCount = await this.schemeAccountRepository.countDocuments(pipeline[0].$match);
-  
+
+      // Create a copy of the pipeline for counting (without pagination/sorting)
+      const countPipeline = [...pipeline];
+      
+      // Add sorting and pagination to main pipeline
+      pipeline.push(
+        { $sort: { createdAt: -1 } },
+        { $skip: (pageNum - 1) * pageSize },
+        { $limit: pageSize }
+      );
+
+      // Add count stage to count pipeline
+      countPipeline.push({ $count: "totalCount" });
+
+      // Execute both pipelines in parallel
+      const [data, countResult] = await Promise.all([
+        this.schemeAccountRepository.aggregate(pipeline),
+        this.schemeAccountRepository.aggregate(countPipeline)
+      ]);
+
+      const totalCount = countResult[0]?.totalCount || 0;
+
+      // Enrich the data with additional information
       const enrichedData = await Promise.all(
         data?.map(async (account) => {
           const [
@@ -1611,7 +1625,7 @@ class SchemeAccountUseCase {
         message: "An error occurred while fetching data",
       };
     }
-  }
+}
 
   async getPaymentByAccNumber(accNum) {
     try {

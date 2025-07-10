@@ -433,6 +433,7 @@ class PaymentUseCase {
         const generalSettings = await this.generalSettingRepository.findOne(
           data.id_branch
         );
+
         if (!generalSettings) {
           return {
             success: false,

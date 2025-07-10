@@ -105,6 +105,7 @@ class CustomerUseCase {
         whatsapp: data?.whatsapp || data.mobile || null,
         added_by: data?.added_by || 0,
         address: data?.address || "",
+        email:data?.email || null
       };
 
       const s3Configs = await this.s3Helper(token.id_client);
@@ -771,6 +772,8 @@ class CustomerUseCase {
       userData.password = hashPassword;
       const referralCode = generateReferralCode(userData.mobile);
       userData.referral_code = `Cus-${referralCode}`;
+      
+      console.log(userData)
 
       const savedUser = await this.customerRepository.addCustomer(userData);
       if (!savedUser) {

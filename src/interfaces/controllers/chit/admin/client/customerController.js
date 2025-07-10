@@ -93,7 +93,7 @@ class CustomerController {
         date_of_birth,
         address,
       } = req.body;
-      
+
       let validate = {};
 
       if (req.body.skip) {
@@ -118,11 +118,11 @@ class CustomerController {
       }
 
       let error;
-      
+
       if (!req.body.skip) {
         ({ error } = this.validator.customerValidations.validate(validate));
       }
-      
+
       if (error) {
         return res.status(400).json({ message: error.details[0].message });
       }
@@ -249,15 +249,15 @@ class CustomerController {
         return res.status(400).json({ message: result.message });
       }
 
-      console.log(result.data)
+      console.log(result.data);
 
-      const returnData ={
+      const returnData = {
         firstname: result?.data?.firstname,
         _id: result?.data?._id,
-      }
+      };
 
-      if(result?.data?.lastname){
-        returnData.lastname = result?.data?.lastname
+      if (result?.data?.lastname) {
+        returnData.lastname = result?.data?.lastname;
       }
 
       return res
@@ -346,7 +346,6 @@ class CustomerController {
 
   async signup(req, res) {
     try {
-      console.log(req.body);
       const { firstname, mobile, mpin, id_branch, password } = req.body;
 
       if (!firstname) {
@@ -394,6 +393,7 @@ class CustomerController {
         mpin,
         id_branch,
         password,
+        email,
       };
 
       const result = await this.customerUseCase.signup(userData);
@@ -615,7 +615,7 @@ class CustomerController {
   async changeMpin(req, res) {
     try {
       const { oldMpin, mpin } = req.body;
-      const {mobile} = req.user
+      const { mobile } = req.user;
 
       if (!mobile) {
         return res.status(400).json({ message: "Mobile number is required." });
@@ -679,40 +679,47 @@ class CustomerController {
   async customerOverview(req, res) {
     try {
       const { branch, mobile, idCustomer } = req.body;
-
+  
       if (!idCustomer) {
         if (!branch) {
           return res.status(400).json({ message: "Branch is required" });
         }
+  
         if (!mobile) {
-          return res.status(400).json({ messsage: "Provide mobile number" });
+          return res.status(400).json({ message: "Provide mobile number" });
+        }
+  
+        const mobileNumber = mobile?.toString().trim();
+        if (!/^\d{10}$/.test(mobileNumber)) {
+          return res.status(400).json({ message: "Enter a valid mobile number" });
         }
       }
-
+  
       const result = await this.customerUseCase.customerOverview(
         branch,
         mobile,
         idCustomer
       );
-
-      if (result.success) {
+      
+      if (result?.data?.customerDetails?._id) {
         return res
           .status(200)
           .json({ message: result.message, data: result.data });
       }
-
-      return res.status(400).json({ message: result.message });
+  
+      return res.status(400).json({ message:"No customer data found" });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Internal server error" });
     }
   }
+  
 
   async findUsersBySchema(req, res) {
     try {
       const { id_branch, id_scheme } = req.body;
 
-      if (id_branch.length<1) {
+      if (id_branch.length < 1) {
         return res.status(400).json({ message: "Branch is required" });
       }
 
@@ -721,7 +728,7 @@ class CustomerController {
       }
       const result = await this.customerUseCase.findUsersBySchema({
         branchId: id_branch,
-        schemeId:id_scheme,
+        schemeId: id_scheme,
       });
       if (result.success) {
         return res
@@ -738,11 +745,11 @@ class CustomerController {
 
   async changePassword(req, res) {
     try {
-      const {oldpass,newpass,confirmpass} = req.body;
-      const {_id}= req.user
+      const { oldpass, newpass, confirmpass } = req.body;
+      const { _id } = req.user;
 
-      if(!oldpass & !newpass & !confirmpass){
-        return res.status(400).json({message:"All fields required"})
+      if (!oldpass & !newpass & !confirmpass) {
+        return res.status(400).json({ message: "All fields required" });
       }
 
       if (!oldpass) {
@@ -758,13 +765,17 @@ class CustomerController {
       // }
 
       if (newpass !== confirmpass) {
-        return res.status(400).json({ message: "New password and Confirmpassword is not mathcing"});
+        return res
+          .status(400)
+          .json({
+            message: "New password and Confirmpassword is not mathcing",
+          });
       }
 
       const result = await this.customerUseCase.changePassword({
-        idCustomer:_id,
-        oldPass:oldpass,
-        newPass:newpass
+        idCustomer: _id,
+        oldPass: oldpass,
+        newPass: newpass,
       });
 
       if (result.success) {
@@ -782,16 +793,16 @@ class CustomerController {
 
   async verfiyPassword(req, res) {
     try {
-      const {password} = req.body;
-      const {_id}= req.user
+      const { password } = req.body;
+      const { _id } = req.user;
 
-      if(!password){
-        return res.status(400).json({message:"Password is required"})
+      if (!password) {
+        return res.status(400).json({ message: "Password is required" });
       }
 
       const result = await this.customerUseCase.verfiyPassword({
-        idCustomer:_id,
-        password:password
+        idCustomer: _id,
+        password: password,
       });
 
       if (result.success) {

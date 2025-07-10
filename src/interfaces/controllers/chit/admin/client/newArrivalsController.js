@@ -6,11 +6,7 @@ class NewArrivalsController {
 
   async addNewArrivals(req, res) {
     try {
-      if (!req.files.new_arrivals_img) {
-        return res.status(400).json({ message: "Image is required" });
-      }
-
-      
+      console.log(req.body)
       const { error } = await this.validation.newArrivalsValidation.validate(
         req.body
       );
@@ -21,7 +17,7 @@ class NewArrivalsController {
       req.body.created_by = req.user.id_employee;
       const addNewArrivals = await this.newArrivalUsecase.addNewArrivals(
         req.body,
-        req.files.new_arrivals_img
+        // req.files.new_arrivals_img
       );
       if (addNewArrivals.success) {
         return res.status(201).json({ message: addNewArrivals.message });
@@ -40,11 +36,11 @@ class NewArrivalsController {
       if (!id) {
         return res.status(400).json({ message: "New arrival Id is required" });
       }
-      console.log(req.body)
 
-      if (!req.files.new_arrivals_img &&!req.body.new_arrivals_img) {
-        return res.status(400).json({ message: "Image is required" });
-      }
+      // if (!req.files.new_arrivals_img &&!req.body.new_arrivals_img) {
+      //   return res.status(400).json({ message: "Image is required" });
+      // }
+
       const { error } = await this.validation.newArrivalsValidation.validate(
         req.body
       );
@@ -55,7 +51,7 @@ class NewArrivalsController {
       const updateNewArrivals = await this.newArrivalUsecase.editNewArrivals(
         id,
         req.body,
-        req.files.new_arrivals_img ? req.files.new_arrivals_img : req.body.new_arrivals_img
+        // req.files.new_arrivals_img ? req.files.new_arrivals_img : req.body.new_arrivals_img
       );
 
       if (updateNewArrivals.success) {

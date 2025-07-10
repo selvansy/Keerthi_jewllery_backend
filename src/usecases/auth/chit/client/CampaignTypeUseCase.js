@@ -10,6 +10,7 @@ class CampaignTypeUseCase {
     try {
       const exists = await this.campaignTypeRepository.findByName(data.name);
 
+      console.log(data)
       if (exists) {
         return { success: false, message: "CampaignType already exists" };
       }
@@ -19,6 +20,7 @@ class CampaignTypeUseCase {
       if (savedData) {
         return { success: true, message: "CampaignType created successfully" };
       }
+
 
       return { success: false, message: "Failed to create CampaignType" };
     } catch (error) {

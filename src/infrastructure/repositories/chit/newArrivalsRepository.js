@@ -155,9 +155,15 @@ class NewArrivalRepository {
   async getNewArrivals(filter, skip, limit, customerId) {
     try {
       const isValidCustomerId = customerId && mongoose.Types.ObjectId.isValid(customerId);
+      const currentDate = new Date();
+  
       return await newArrivalsModel.aggregate([
         { $match: filter },
-        { $sort: { createdAt: -1 } }, // Descending for "newest first"
+        ...(isValidCustomerId
+          ? [{ $match: { end_date: { $gt: currentDate } } }]
+          : []
+        ),
+        { $sort: { createdAt: -1 } },
   
         {
           $lookup: {
@@ -215,7 +221,7 @@ class NewArrivalRepository {
           $project: {
             id_product: "$productDetails._id",
             product_name: "$productDetails.product_name",
-            images_Url: 1,
+            images_Url: "$productDetails.product_image",
             start_date: 1,
             end_date: 1,
             createdAt: 1,
@@ -224,7 +230,7 @@ class NewArrivalRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "aupay/webadmin/assets/newarrivals/"
+                "aupay/webadmin/assets/products/"
               ]
             }
           }
@@ -237,6 +243,7 @@ class NewArrivalRepository {
       throw new Error("Database error occurred while getting new arrivals");
     }
   }
+  
   
       async countNewArrivals(filter) {
         return await newArrivalsModel.countDocuments(filter);
