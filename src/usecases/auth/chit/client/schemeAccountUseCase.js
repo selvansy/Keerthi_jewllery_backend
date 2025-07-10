@@ -1435,15 +1435,8 @@ class SchemeAccountUseCase {
         from_date,
         to_date,
         id_branch,
-        id_employee,
-        scheme_status,
-        id_scheme,
-        id_classification,
-        collectionuserid,
-        added_by,
         search,
         type,
-        scheme_type,
       } = passedData;
   
       const pageNum = page ? parseInt(page) : 1;
@@ -1465,15 +1458,6 @@ class SchemeAccountUseCase {
         });
       }
   
-      if (added_by) pipeline.push({ $match: { added_by: parseInt(added_by) } });
-      if (scheme_status) pipeline.push({ $match: { status: parseInt(scheme_status) } });
-      if (id_branch) pipeline.push({ $match: { id_branch } });
-      if (id_scheme) pipeline.push({ $match: { id_scheme } });
-      if (id_classification) pipeline.push({ $match: { id_classification } });
-      if (id_employee) pipeline.push({ $match: { created_by: id_employee } });
-      if (collectionuserid) pipeline.push({ $match: { collectionuserid } });
-      if (scheme_type) pipeline.push({ $match: { "id_scheme.scheme_type": scheme_type } });
-  
       if (type !== "") {
         pipeline.push({ $match: { status: type } });
       } else {
@@ -1485,6 +1469,7 @@ class SchemeAccountUseCase {
         const isMobile = /^\d{10}$/.test(search);
         if (isMobile) {
           const customer = await this.customerRepo.findOne({ mobile: Number(search) });
+
           if (customer) {
             pipeline.push({ $match: { id_customer: customer._id } });
           } else {
@@ -1562,7 +1547,7 @@ class SchemeAccountUseCase {
 
       // Execute both pipelines in parallel
       const [data, countResult] = await Promise.all([
-        this.schemeAccountRepository.aggregate(pipeline),
+        this.schemeAccountRepository.getAccounts(pipeline),
         this.schemeAccountRepository.aggregate(countPipeline)
       ]);
 

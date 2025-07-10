@@ -1101,9 +1101,18 @@ class ReportRepository {
             as: "PaymentMode",
           },
         },
+        {
+          $lookup: {
+            from: "paymentorders",
+            foreignField: "orderId",
+            localField: "id_transaction",
+            as: "paymentOrders",
+          },
+        },
         { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
         { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
         { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$paymentOrders", preserveNullAndEmptyArrays: true } },
         {
           $lookup: {
             from: "schemeclassifications",
@@ -1132,14 +1141,19 @@ class ReportRepository {
             preserveNullAndEmptyArrays: true,
           },
         },
-
-        // Move this BEFORE $facet so both branches can use it
+        // Add this new stage to handle the id_transaction logic
         {
           $addFields: {
+            id_transaction: {
+              $cond: {
+                if: { $ifNull: ["$paymentOrders.cf_payment_id", false] },
+                then: "$paymentOrders.cf_payment_id",
+                else: "$id_transaction"
+              }
+            },
             totalPaidInstallment: "$paid_installments", // just aliasing for consistency
           },
         },
-
         {
           $facet: {
             metadata: [

@@ -113,7 +113,6 @@ class SchemeAccountRepository {
 
   async getCustomerAccount(query, skip, limit, ema) {
     try {
-        // Step 1: Shared initial pipeline up to the point where "ema" is applied
         const basePipeline = [
             { $match: query },
             {
@@ -374,7 +373,23 @@ class SchemeAccountRepository {
         return newSchemeAcc
       }
 
-      return true;
+      return false;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async getAccounts(pipeline) {
+    try {
+      const newSchemeAcc = await schemeAccountModel.aggregate(pipeline);
+      console.log(newSchemeAcc)
+      
+
+      if(newSchemeAcc.length > 0){
+        return newSchemeAcc
+      }
+
+      return false;
     } catch (error) {
       console.error(error);
     }
