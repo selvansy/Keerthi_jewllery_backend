@@ -959,39 +959,39 @@ class SchemeAccountUseCase {
         this.getcloseaccount(account._id)
       ]);
 
-      arrobject.scheme_type = scheme.scheme_type;
+      arrobject.scheme_type = scheme?.scheme_type;
       arrobject.id_scheme = scheme;
-      arrobject.scheme_typename = schemetype.scheme_typename;
-      arrobject.metal_name = metalrow.metal;
-      arrobject.purity_name = purityrow.purity_name;
-      arrobject.last_paid_date = lastpayment.last_paid_date;
-      arrobject.last_paid_installment = lastpayment.last_paid_installment;
-      arrobject.last_paid_amount = lastpayment.last_paid_amount;
-      arrobject.last_paid_weight = lastpayment.last_paid_weight;
-      arrobject.total_gifts_issued = gift_issues.received_gift;
-      arrobject.gift_type = scheme.gift_type;
-      arrobject.issue_gift = scheme.gift_percentage;
-      arrobject.received_gift = gift_issues.received_gift;
-      arrobject.excess_amount = gift_issues.excess_amount;
-      arrobject.balance_gift = parseInt(scheme.gift_percentage) - parseInt(gift_issues.received_gift);
-      arrobject.received_gift_amount = parseFloat(gift_issues.gift_amount) - parseFloat(gift_issues.excess_amount);
-      arrobject.scheme_amount = scheme.amount;
-      arrobject.gift_percentage = scheme.gift_percentage;
+      arrobject.scheme_typename = schemetype?.scheme_typename;
+      arrobject.metal_name = metalrow?.metal;
+      arrobject.purity_name = purityrow?.purity_name;
+      arrobject.last_paid_date = lastpayment?.last_paid_date;
+      arrobject.last_paid_installment = lastpayment?.last_paid_installment;
+      arrobject.last_paid_amount = lastpayment?.last_paid_amount;
+      arrobject.last_paid_weight = lastpayment?.last_paid_weight;
+      arrobject.total_gifts_issued = gift_issues?.received_gift;
+      arrobject.gift_type = scheme?.gift_type;
+      arrobject.issue_gift = scheme?.gift_percentage;
+      arrobject.received_gift = gift_issues?.received_gift;
+      arrobject.excess_amount = gift_issues?.excess_amount;
+      arrobject.balance_gift = parseInt(scheme?.gift_percentage) - parseInt(gift_issues?.received_gift);
+      arrobject.received_gift_amount = parseFloat(gift_issues?.gift_amount) - parseFloat(gift_issues?.excess_amount);
+      arrobject.scheme_amount = scheme?.amount;
+      arrobject.gift_percentage = scheme?.gift_percentage;
       arrobject.allocate_gift_amount = 0;
       
       let allocate_gift_amount = 0;
       let balance_gift_amount = 0;
-      if (scheme.gift_type === 1 && parseInt(scheme.gift_percentage) > 0) {
-        allocate_gift_amount = (scheme.amount * scheme.gift_percentage) / 100;
-        balance_gift_amount = allocate_gift_amount - (parseFloat(gift_issues.gift_amount) - parseFloat(gift_issues.excess_amount));
+      if (scheme.gift_type === 1 && parseInt(scheme?.gift_percentage) > 0) {
+        allocate_gift_amount = (scheme?.amount * scheme?.gift_percentage) / 100;
+        balance_gift_amount = allocate_gift_amount - (parseFloat(gift_issues?.gift_amount) - parseFloat(gift_issues?.excess_amount));
       }
       arrobject.allocate_gift_amount = allocate_gift_amount;
       arrobject.balance_gift_amount = balance_gift_amount;
 
-      arrobject.bill_no = billrow.bill_no;
-      arrobject.bill_date = billrow.bill_date;
-      arrobject.return_amount = billrow.return_amount;
-      arrobject.word_convert = this.convertNumberToWord(billrow.return_amount);
+      arrobject.bill_no = billrow?.bill_no;
+      arrobject.bill_date = billrow?.bill_date;
+      arrobject.return_amount = billrow?.return_amount;
+      arrobject.word_convert = this.convertNumberToWord(billrow?.return_amount);
 
       arrobject.fine_amount = calcpayment.fine_amount || 0;
       // arrobject.total_paidinstallments = calcpayment.total_installments;
@@ -1005,12 +1005,12 @@ class SchemeAccountUseCase {
 
       // Create scheme summary similar to searchAccMobile
       const schemeSummary = [{
-        scheme_acc_no: arrobject.scheme_acc_number,
-        scheme_acc_id: arrobject._id,
-        scheme_type: arrobject.scheme_type,
-        scheme_name: arrobject.scheme_name,
-        Allottedgifts: arrobject.id_scheme.no_of_gifts,
-        total_giftIssues: arrobject.total_gifts_issued
+        scheme_acc_no: arrobject?.scheme_acc_number,
+        scheme_acc_id: arrobject?._id,
+        scheme_type: arrobject?.scheme_type,
+        scheme_name: arrobject?.scheme_name,
+        Allottedgifts: arrobject?.id_scheme.no_of_gifts,
+        total_giftIssues: arrobject?.total_gifts_issued
       }];
 
       return {
@@ -1388,7 +1388,7 @@ class SchemeAccountUseCase {
     }
   }
 
-  async getCustomerAccount(branchId, customerId) {
+  async getCustomerAccount(branchId, customerId,skip,limit,ema) {
     try {
       if (!isValidObjectId(branchId)) {
         return {
@@ -1409,11 +1409,12 @@ class SchemeAccountUseCase {
         id_customer: new mongoose.Types.ObjectId(customerId),
         active: true,
         status:0
-      });
+      },Number(skip),Number(limit),ema);
 
       if (!Data) {
         return { success: false, message: "No scheme account found" };
       }
+      
 
       return {
         success: true,

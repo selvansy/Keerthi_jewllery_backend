@@ -156,19 +156,66 @@ class PuriytRepository {
 
     async puityTable({ query, documentskip, documentlimit }) {
         try {
-            const totalCount = await purityModel.countDocuments(query);
-            const data = await purityModel
-                .find(query)
-                .skip(documentskip)
-                .limit(documentlimit)
-                .populate({path:'id_metal', select:('_id active metal_name')})
-                .select('purity_name _id active id_purity id_metal display_app');
-
-            if (!data || data.length === 0) return null;
-
+            const aggregationPipeline = [
+                { $match: query },
+                {
+                    $lookup: {
+                        from: 'schemes',
+                        localField: '_id',
+                        foreignField: 'id_purity',
+                        as: 'relatedSchemes'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'metals',
+                        localField: 'id_metal',
+                        foreignField: '_id',
+                        as: 'metalData'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$metalData",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $addFields: {
+                        isUsed: { $cond: [{ $gt: [{ $size: "$relatedSchemes" }, 0] }, true, false] }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        purity_name: 1,
+                        active: 1,
+                        isUsed: 1,
+                        metal_name: "$metalData.metal_name"
+                    }
+                },
+                {
+                    $facet: {
+                        data: [
+                            { $skip: documentskip },
+                            { $limit: documentlimit }
+                        ],
+                        totalCount: [
+                            { $count: "count" }
+                        ]
+                    }
+                }
+            ];
+    
+            const result = await purityModel.aggregate(aggregationPipeline);
+    
+            const data = result[0]?.data || [];
+            const totalCount = result[0]?.totalCount[0]?.count || 0;
+    
             return { data, totalCount };
         } catch (error) {
-            console.error("Error in getAllPurity:", error);
+            console.error("Error in puityTable:", error);
+            throw new Error("Database error occurred while fetching purity data.");
         }
     }
 

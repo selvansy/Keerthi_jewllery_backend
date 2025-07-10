@@ -362,6 +362,7 @@ class SchemeAccountContorller{
 
       async getCustomerAccount(req, res) {
         const {branchId,customerId} = req.params;
+        const {skip,limit,ema}= req.query
       try {
           if(!branchId){
               return res.status(400).json({message:'Provide a branch id'})
@@ -370,7 +371,7 @@ class SchemeAccountContorller{
             return res.status(400).json({message:'Provide a customer id'})
         }
 
-        const result = await this.schemeAccountUseCase.getCustomerAccount(branchId,customerId);
+        const result = await this.schemeAccountUseCase.getCustomerAccount(branchId,customerId,skip,limit,ema);
   
         if (!result.success) {
           return res.status(400).json({ message: result.message });

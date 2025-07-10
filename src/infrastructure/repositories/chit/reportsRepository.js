@@ -2776,41 +2776,33 @@ class ReportRepository {
     }
   }
 
-  async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId, type) {
+  async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId,type) {
     try {
-      const schemeObjectId = new mongoose.Types.ObjectId(schemeId);
-      const fieldToSum = type === "weight" ? "weight" : "amount";
-
       const totalCountAgg = await schemeAccountModel.aggregate([
         {
           $match: {
-            id_scheme: schemeObjectId,
+            id_scheme: new mongoose.Types.ObjectId(schemeId),
             ...filter,
           },
         },
-        { $count: "totalCount" },
+        {
+          $count: "totalCount",
+        },
       ]);
 
       const totalCount = totalCountAgg[0]?.totalCount || 0;
       const totalPages = Math.ceil(totalCount / limit);
       const currentPage = Math.floor(skip / limit) + 1;
 
+      const fieldToSum = type === 'weight' ? "$metal_weight" : "$payment_amount";
+  
       const schemeDetails = await schemeAccountModel.aggregate([
         {
           $match: {
-            id_scheme: schemeObjectId,
+            id_scheme: new mongoose.Types.ObjectId(schemeId),
             ...filter,
           },
         },
-        {
-          $lookup: {
-            from: "schemes",
-            localField: "id_scheme",
-            foreignField: "_id",
-            as: "Scheme",
-          },
-        },
-        { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
         {
           $lookup: {
             from: "customers",
@@ -2826,53 +2818,41 @@ class ReportRepository {
             localField: "_id",
             foreignField: "id_scheme_account",
             pipeline: [
-              {
+              { 
                 $group: {
                   _id: null,
-                  totalValue: { $sum: `$${fieldToSum}` },
-                },
-              },
+                  totalValue: { $sum: fieldToSum }
+                }
+              }
             ],
             as: "PaymentSummary",
           },
         },
         {
           $addFields: {
-            totalValue: {
-              $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0],
+            totalValue: { 
+              $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0] 
             },
           },
         },
         {
           $project: {
-            _id: "$Customer._id",
+            _id: 0,
             customer: "$account_name",
             mobile: "$Customer.mobile",
             accounter_fname: "$Customer.firstname",
             accounter_lname: "$Customer.lastname",
             schemeAccNumber: "$scheme_acc_number",
             joinedDate: "$start_date",
-            maturityDate: {
-              $cond: {
-                if: { $in: ["$Scheme.scheme_type", [10, 14]] },
-                then: {
-                  $dateAdd: {
-                    startDate: "$createdAt", // or "$start_date" if more accurate
-                    unit: "day",
-                    amount: { $toInt: "$Scheme.noOfDays" },
-                  },
-                },
-                else: "$maturity_date",
-              },
-            },
+            maturityDate: "$maturity_date",
             paidInstallments: "$paid_installments",
-            totalValue: "$totalValue",
+            totalValue:1 ,
           },
         },
         { $skip: skip },
         { $limit: limit },
       ]);
-
+  
       return {
         data: schemeDetails,
         totalPages,
@@ -2880,7 +2860,7 @@ class ReportRepository {
         currentPage,
       };
     } catch (err) {
-      console.error("Error in getAmountDetailedView:", err);
+      console.log(err);
       throw err;
     }
   }

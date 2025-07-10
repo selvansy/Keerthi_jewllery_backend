@@ -111,89 +111,122 @@ class SchemeAccountRepository {
     }
   }
 
-  async getCustomerAccount(query) {
+  async getCustomerAccount(query, skip, limit, ema) {
     try {
-      console.log(query)
-      const data = await schemeAccountModel.aggregate([
-        { $match: query },
-        { $sort: { _id: -1 } },
-        {
-          $lookup: {
-            from: "schemes",
-            localField: "id_scheme",
-            foreignField: "_id",
-            as: "id_scheme"
-          }
-        },
-        { $unwind: { path: "$id_scheme", preserveNullAndEmptyArrays: false } },
-        {
-          $lookup: {
-            from: "metalrates",
-            localField: "id_scheme.id_metal",
-            foreignField: "material_type_id",
-            as: "metalrate"
-          }
-        },
-        { $unwind: { path: "$metalrate", preserveNullAndEmptyArrays: false } },
-        {
-          $lookup: {
-            from: "payments",
-            localField: "_id",
-            foreignField: "id_scheme_account",
-            as: "payments"
-          }
-        },
-        {
-          $addFields: {
-            total_metal_weight: {
-              $sum: {
-                $map: {
-                  input: "$payments",
-                  as: "p",
-                  in: { $ifNull: ["$$p.metal_weight", 0] }
+        // Step 1: Shared initial pipeline up to the point where "ema" is applied
+        const basePipeline = [
+            { $match: query },
+            {
+                $lookup: {
+                    from: "schemes",
+                    localField: "id_scheme",
+                    foreignField: "_id",
+                    as: "id_scheme"
                 }
-              }
+            },
+            ...(ema
+                ? [
+                    {
+                        $match: {
+                            "id_scheme.scheme_type": { $nin: [10, 14] }
+                        }
+                    }
+                ]
+                : []
+            ),
+            { $unwind: { path: "$id_scheme", preserveNullAndEmptyArrays: false } }
+        ];
+
+        // Step 2: Count documents with applied filters
+        const totalDocsAggregation = await schemeAccountModel.aggregate([
+            ...basePipeline,
+            { $count: "total" }
+        ]);
+
+        const totalDocs = totalDocsAggregation[0]?.total || 0;
+
+        // Step 3: Add remaining pipeline steps for data fetching
+        const data = await schemeAccountModel.aggregate([
+            ...basePipeline,
+            { $sort: { _id: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: "metalrates",
+                    let: { metalId: "$id_scheme.id_metal" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$material_type_id", "$$metalId"] }
+                            }
+                        },
+                        { $sort: { createdAt: -1 } },
+                        { $limit: 1 }
+                    ],
+                    as: "metalrate"
+                }
+            },
+            { $unwind: { path: "$metalrate", preserveNullAndEmptyArrays: true } },
+            {
+                $lookup: {
+                    from: "payments",
+                    localField: "_id",
+                    foreignField: "id_scheme_account",
+                    as: "payments"
+                }
+            },
+            {
+                $addFields: {
+                    total_metal_weight: {
+                        $sum: {
+                            $map: {
+                                input: "$payments",
+                                as: "p",
+                                in: { $ifNull: ["$$p.metal_weight", 0] }
+                            }
+                        }
+                    },
+                    metalRate: "$metalrate.rate"
+                }
+            },
+            {
+                $lookup: {
+                    from: "schemestatuses",
+                    localField: "status",
+                    foreignField: "id_status",
+                    as: "schemestatuses"
+                }
+            },
+            { $unwind: { path: "$schemestatuses", preserveNullAndEmptyArrays: true } },
+            {
+                $addFields: {
+                    statusName: "$schemestatuses"
+                }
+            },
+            {
+                $project: {
+                    payments: 0,
+                    schemestatuses: 0,
+                    metalrate: 0
+                }
             }
-          }
-        },
-        {
-          $lookup: {
-            from: "schemestatuses",
-            localField: "status",
-            foreignField: "id_status",
-            as: "schemestatuses"
-          }
-        },
-        { $unwind: { path: "$schemestatuses", preserveNullAndEmptyArrays: true } },
-        {
-          $addFields: {
-            statusName: "$schemestatuses",
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            scheme_acc_number: 1,
-            id_scheme: 1,
-            total_metal_weight: 1,
-            status: 1,
-            statusName: 1,
-            metalRate: "$metalrate.rate",
-            createdAt: 1, // if needed
-            updatedAt: 1  // if needed
-          }
-        }
-      ]);
-  
-      if (!data || data.length === 0) {
-        return null;
-      }
-  
-      return data;
+        ]);
+
+        return {
+            data,
+            total: totalDocs,
+            skip,
+            limit,
+            hasMore: skip + limit < totalDocs
+        };
+
     } catch (error) {
-      console.error(error);
+        console.error(error);
+        throw error;
     }
-  }
+}
+
   
 
   async editSchemeAccount(id, data) {

@@ -87,21 +87,58 @@ class MetalRepository {
 
     async metalTableData({ query, documentskip, documentlimit }) {
         try {
-            const totalCount = await metalModel.countDocuments(query);
-            const data = await metalModel
-                .find(query)
-                .skip(documentskip)
-                .limit(documentlimit)
-                .select('metal_name _id active id_metal');
-
-            if (!data || data.length === 0) return null;
-
+            const aggregationPipeline = [
+                { $match: query },
+                {
+                    $lookup: {
+                        from: 'schemes',
+                        localField: '_id',
+                        foreignField: 'id_metal',
+                        as: 'relatedSchemes'
+                    }
+                },
+                {
+                    $addFields: {
+                        isUsed: { $cond: [{ $gt: [{ $size: '$relatedSchemes' }, 0] }, true, false] }
+                    }
+                },
+                {
+                    $project: {
+                        metal_name: 1,
+                        _id: 1,
+                        active: 1,
+                        id_metal: 1,
+                        isUsed: 1
+                    }
+                },
+                {
+                    $facet: {
+                        data: [
+                            { $skip: documentskip },
+                            { $limit: documentlimit }
+                        ],
+                        totalCount: [
+                            { $count: 'count' }
+                        ]
+                    }
+                }
+            ];
+    
+            const result = await metalModel.aggregate(aggregationPipeline);
+    
+            const data = result[0]?.data || [];
+            const totalCount = result[0]?.totalCount[0]?.count || 0;
+    
+            if (data.length === 0) return null;
+    
             return { data, totalCount };
+    
         } catch (error) {
-            console.error("Error in getAllMetals:", error);
-            throw new Error("Database error occurred while fetching all metals.");
+            console.error("Error in metalTableData:", error);
+            throw new Error("Database error occurred while fetching metals.");
         }
     }
+    
 
     async findAll(){
         try {

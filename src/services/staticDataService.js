@@ -166,8 +166,9 @@ export const multiPaymentmodeData = () => {
     { id: "1", name: "Cash", name: "Cash", parameter: "cash_amount" },
     { id: "2", name: "Debit Card", parameter: "debitcard_amount" },
     { id: "3", name: "Credit Card", parameter: "card_amount" },
-    { id: "4", name: "Phone Pay", parameter: "phonepay_amount" },
-    { id: "5", name: "Gpay", parameter: "gpay_amount" },
+    { id: "4", name: "UPI", parameter: "upi_amount" },
+    // { id: "4", name: "Phone Pay", parameter: "phonepay_amount" },
+    // { id: "5", name: "Gpay", parameter: "gpay_amount" },
   ];
 };
 
