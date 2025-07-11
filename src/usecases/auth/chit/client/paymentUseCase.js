@@ -365,12 +365,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
-          }
+          // if (todatPaidorNot) {
+          //   return {
+          //     status: false,
+          //     message: "Already completed today's payment",
+          //   };
+          // }
         }
 
         const totalInstallments =
@@ -392,13 +392,13 @@ class PaymentUseCase {
           }
         );
 
-        if (
-          schemeData?.limit_installment &&
-          Number(monthlyPaiments) + Number(data.installments) >
-            Number(schemeData?.limit_installment)
-        ) {
-          return { status: false, message: "Monthly payment limit reached" };
-        }
+        // if (
+        //   schemeData?.limit_installment &&
+        //   Number(monthlyPaiments) + Number(data.installments) >
+        //     Number(schemeData?.limit_installment)
+        // ) {
+        //   return { status: false, message: "Monthly payment limit reached" };
+        // }
 
         const schemeAccData = await this.schemeAccountRepository.findById(
           data.id_scheme_account
@@ -1235,15 +1235,15 @@ class PaymentUseCase {
 
         const lastPaid = lastPaidData ? new Date(lastPaidData.createdAt) : null;
 
-        if (
-          lastPaid &&
-          this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
-        ) {
-          return {
-            success: false,
-            message: "Already completed today's payment for one of the schemes",
-          };
-        }
+        // if (
+        //   lastPaid &&
+        //   this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
+        // ) {
+        //   return {
+        //     success: false,
+        //     message: "Already completed today's payment for one of the schemes",
+        //   };
+        // }
 
         const totalInstallments =
           await this.paymentRepository.totalInstallments(
@@ -1262,12 +1262,13 @@ class PaymentUseCase {
         const monthlyPayments = await this.paymentRepository.getMonthlyPayments(
           { id: data.id_scheme_account, date: todayDate }
         );
-        if (
-          Number(monthlyPayments) + Number(data.installments) >
-          Number(schemeData.limit_installment)
-        ) {
-          return { success: false, message: "Monthly payment limit reached" };
-        }
+
+        // if (
+        //   Number(monthlyPayments) + Number(data.installments) >
+        //   Number(schemeData.limit_installment)
+        // ) {
+        //   return { success: false, message: "Monthly payment limit reached" };
+        // }
 
         let diffMonth = 0;
         if (lastPaidData) {
