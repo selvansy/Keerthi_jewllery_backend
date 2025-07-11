@@ -28,16 +28,16 @@ class PurityUseCase {
         return { success: false, message: "Failed to add purity" };
       }
 
-      const metalRate = {
-        id_branch: token.id_branch,
-        purity_id: savedData._id,
-        material_type_id: data.id_metal,
-        rate: 0,
-        created_by: token.id_employee,
-        modified_by:  token.id_employee
-      };      
+      // const metalRate = {
+      //   id_branch: token.id_branch,
+      //   purity_id: savedData._id,
+      //   material_type_id: data.id_metal,
+      //   rate: 0,
+      //   created_by: token.id_employee,
+      //   modified_by:  token.id_employee
+      // };      
 
-      await this.metalRateRepo.addInitialRate(metalRate)
+      // await this.metalRateRepo.addInitialRate(metalRate)
       return { success: true, message: "Purity added successfully" };
     } catch (error) {
       console.error(error);
