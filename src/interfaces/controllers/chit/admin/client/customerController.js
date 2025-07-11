@@ -346,7 +346,7 @@ class CustomerController {
 
   async signup(req, res) {
     try {
-      const { firstname, mobile, mpin, id_branch, password } = req.body;
+      const { firstname, mobile, mpin, id_branch, password,email} = req.body;
 
       if (!firstname) {
         return res.status(400).json({ message: "First name is required." });
