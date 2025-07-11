@@ -954,6 +954,7 @@ async getCustomerRefferal(bodyData) {
       const query = {
         active: true,
         is_deleted: false,
+        paid_installments: { $gte: 1 },
       };
   
       if (from_date && to_date) {
@@ -1258,9 +1259,11 @@ async getCustomerRefferal(bodyData) {
         searchCriteria.$or = [
           { gift_name: { $regex: searchTerm, $options: "i" } },
           { gift_code: { $regex: searchTerm, $options: "i" } },
+          { account_name: { $regex: searchTerm, $options: "i" } },
+          { scheme_acc_number: { $regex: searchTerm, $options: "i" } },
         ];
       }
-
+console.log(searchCriteria)
       const query = {
         active: true,
         id_branch,

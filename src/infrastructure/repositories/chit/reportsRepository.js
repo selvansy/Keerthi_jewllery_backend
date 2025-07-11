@@ -2685,8 +2685,6 @@ class ReportRepository {
   async getSchemeDetailedView(filter, skip = 0, limit = 10, schemeId) {
     try {
       const today = new Date();
-
-      // Step 1: First, count total matching documents
       const totalCountAgg = await schemeAccountModel.aggregate([
         {
           $match: {
