@@ -6,10 +6,10 @@ class PurityUseCase {
   constructor(purityRepository,metalRateRepo) {
     this.purityRepository = purityRepository;
     this.metalRateRepo = metalRateRepo;
-    this.metalRepo = new MetalRepository()
+    this.metalRepo = new MetalRepository();
   }
 
-  async addPurity(data) {
+  async addPurity(data,token) {
     try {
       const exists = await this.purityRepository.findOne({
         purity_name: { $regex: new RegExp(`^${data.purity_name}$`, "i") },is_deleted:false
@@ -28,6 +28,16 @@ class PurityUseCase {
         return { success: false, message: "Failed to add purity" };
       }
 
+      const metalRate = {
+        id_branch: token.id_branch,
+        purity_id: savedData._id,
+        material_type_id: data.id_metal,
+        rate: 0,
+        created_by: token.id_employee,
+        modified_by:  token.id_employee
+      };      
+
+      await this.metalRateRepo.addInitialRate(metalRate)
       return { success: true, message: "Purity added successfully" };
     } catch (error) {
       console.error(error);

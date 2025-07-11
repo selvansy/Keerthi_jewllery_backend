@@ -389,6 +389,21 @@ class MetalRateRepository {
       throw new Error("Database error while fetching/updating metal rate IDs");
     }
   }
+
+  async addInitialRate(data) {
+    try {
+      const metalData = await metalRateModel.create(data)
+
+      if (!metalData) {
+        return null;
+      }
+
+      return metalData;
+    } catch (error) {
+      console.error(error);
+      throw new Error("Database error occurred while fetching data");
+    }
+  }
 }
 
 export default MetalRateRepository;

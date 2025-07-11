@@ -191,6 +191,7 @@ class PuriytRepository {
                         purity_name: 1,
                         active: 1,
                         isUsed: 1,
+                        id_metal:"$metalData",
                         metal_name: "$metalData.metal_name"
                     }
                 },
@@ -218,6 +219,24 @@ class PuriytRepository {
             throw new Error("Database error occurred while fetching purity data.");
         }
     }
+    // async puityTable({ query, documentskip, documentlimit }) {
+    //     try {
+    //         const totalCount = await purityModel.countDocuments(query);
+    //         const data = await purityModel
+    //             .find(query)
+    //             .skip(documentskip)
+    //             .limit(documentlimit)
+    //             .populate({path:'id_metal', select:('_id active metal_name')})
+    //             .select('purity_name _id active id_purity id_metal display_app');
+
+    //         if (!data || data.length === 0) return null;
+
+    //         return { data, totalCount };
+    //     } catch (error) {
+    //         console.error("Error in getAllPurity:", error);
+    //     }
+    // }
+
 
     async updateWithMetalNumber(number, data) {
         try {

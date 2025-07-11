@@ -14,7 +14,7 @@ class PurityController{
             }
 
             const data= {...req.body};
-            const result = await this.purityUseCase.addPurity(data)
+            const result = await this.purityUseCase.addPurity(data,req.user)
 
             if(!result.success){
                 return res.status(400).json({message:result.message})

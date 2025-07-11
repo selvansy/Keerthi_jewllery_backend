@@ -305,6 +305,8 @@ class ReportUseCase {
           { id_transaction: { $regex: searchRegex } },
           { remark: { $regex: searchRegex } },
           { itr_utr: { $regex: searchRegex } },
+          { account_name: { $regex: searchTerm, $options: "i" } },
+          { scheme_acc_number: { $regex: searchTerm, $options: "i" } },
         ];
       }
   
@@ -1026,6 +1028,7 @@ async getCustomerRefferal(bodyData) {
       const documentSkip = (pageNum - 1) * pageSize;
       const documentLimit = pageSize;
 
+
       const Data = await this.reportRepo.getActiveAccounts(
         query, 
         documentSkip, 
@@ -1036,7 +1039,6 @@ async getCustomerRefferal(bodyData) {
         return { success: true, message: "No data found", data: [] };
       }
 
-      console.log(Data)
       return {
         success: true,
         message: "Scheme based details fetched successfully",
@@ -1259,11 +1261,9 @@ async getCustomerRefferal(bodyData) {
         searchCriteria.$or = [
           { gift_name: { $regex: searchTerm, $options: "i" } },
           { gift_code: { $regex: searchTerm, $options: "i" } },
-          { account_name: { $regex: searchTerm, $options: "i" } },
-          { scheme_acc_number: { $regex: searchTerm, $options: "i" } },
         ];
       }
-console.log(searchCriteria)
+
       const query = {
         active: true,
         id_branch,
