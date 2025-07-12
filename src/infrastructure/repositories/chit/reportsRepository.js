@@ -2073,10 +2073,9 @@ class ReportRepository {
   }
 
   async getAmountPayble(filter, skip, limit) {
-    console.log("fd");
     try {
       filter = {
-        status: { $in: [0, 2] },
+        status: { $in: [0] },
         $or: [{ weight: { $exists: false } }, { weight: null }, { weight: 0 }],
       };
 
@@ -2164,7 +2163,7 @@ class ReportRepository {
           },
         },
       ]);
-
+console.log(amountPaybleData)
       const totalDocuments = amountPaybleData[0]?.metadata[0]?.total || 0;
       const totalPages = Math.ceil(totalDocuments / limit);
       const data = amountPaybleData[0]?.data || [];
@@ -2417,7 +2416,10 @@ class ReportRepository {
       if (type === "weight") {
         filter["scheme_type"] = { $in: [12, 3, 4, 2, 5, 6, 10, 14] };
       }
-      console.log(filter);
+      else{
+        filter["scheme_type"] = { $nin: [12, 3, 4, 2, 5, 6, 10, 14] };
+      }
+
       const schemes = await schemeModel.aggregate([
         { $match: { ...filter } },
         {
@@ -2433,11 +2435,11 @@ class ReportRepository {
         return { success: false, message: "No schemes found" };
       }
 
-      const fieldToSum =
-        type === "weight"
-          ? "$Payments.metal_weight"
-          : "$Payments.payment_amount";
-      // const fieldToSum = type === 'weight' ? "$weight" : "$amount";
+      // const fieldToSum =
+      //   type === "weight"
+      //     ? "$Payments.metal_weight"
+      //     : "$Payments.payment_amount";
+      const fieldToSum = type === 'weight' ? "$weight" : "$amount";
 
       const result = await schemeAccountModel.aggregate([
         {

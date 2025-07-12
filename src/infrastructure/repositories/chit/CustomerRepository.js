@@ -91,6 +91,7 @@ class CustomerRepository {
             referral_type: 1,
             email: 1,
             pan: 1,
+            mpin:1,
             date_of_wed: 1,
             "branchDetails._id": 1,
             "branchDetails.branch_name": 1,

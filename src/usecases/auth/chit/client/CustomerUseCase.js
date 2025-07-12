@@ -418,6 +418,7 @@ class CustomerUseCase {
       if (!existsData) {
         return { success: false, message: "No customer found" };
       }
+      console.log(existsData,"kd")
 
      if(existsData.mpin){
        existsData.mpinStatus = true

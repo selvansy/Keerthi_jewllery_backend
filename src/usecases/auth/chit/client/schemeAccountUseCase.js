@@ -499,10 +499,18 @@ class SchemeAccountUseCase {
       data.typeofcustomer = 0;
       data.date_add = new Date();
       data.date_upd = new Date();
-      data.added_by = data?.platform?.toLowerCase() === "android" ? 1 : 2;
+      data.added_by = 0;
       // data.status = 0;
       data.amount=0;
       data.weight=0
+
+      if(data?.platform){
+         if(data?.platform?.toLowerCase() === "android"){
+          data.added_by = 1
+         }else{
+          data.added_by =2
+         }
+      }
 
       const customerData = await this.customerRepo.findById(data.id_customer);
       const schemeData = await this.schemeRespo.findById(data.id_scheme);

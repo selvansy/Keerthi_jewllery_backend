@@ -103,6 +103,7 @@ class ReportController {
   async getAmountPayble(req, res) {
     try {
       const body = {...req.body}
+
       const result = await this.reportUsecase.getAmountPayable(body);
       return res.status(200).json(result);
     } catch (error) {
