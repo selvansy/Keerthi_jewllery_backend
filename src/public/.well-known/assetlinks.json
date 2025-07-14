@@ -1,9 +1,9 @@
 [{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "com.atts.aupayv5",
-    "package_name": "com.atts.aupayv5",
-    "sha256_cert_fingerprints":
-    ["85:98:31:EA:0D:3A:21:A2:94:BC:79:D9:B2:38:45:E5:73:73:E2:CB:69:D9:BA:9F:D4:43:FE:F0:31:B1:64:70"]
-  }
-}]
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "com.keerthijewellers.app",
+      "package_name": "com.keerthijewellers.app",
+      "sha256_cert_fingerprints":
+      ["D7:17:08:A2:AD:91:92:44:80:41:1A:79:D2:07:2A:AE:D9:5D:3A:EC:AF:20:B6:AD:B0:27:BB:A2:2C:3A:EA:29"]
+    }
+  }]

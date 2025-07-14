@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "com.atts.aupayv5",
+    "package_name": "com.atts.aupayv5",
+    "sha256_cert_fingerprints":
+    ["85:98:31:EA:0D:3A:21:A2:94:BC:79:D9:B2:38:45:E5:73:73:E2:CB:69:D9:BA:9F:D4:43:FE:F0:31:B1:64:70"]
+  }
+}]
