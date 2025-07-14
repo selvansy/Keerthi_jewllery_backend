@@ -8,6 +8,7 @@ import crypto, { randomInt } from "crypto";
 import schemeAccountModel from "../../../../infrastructure/models/chit/schemeAccountModel.js";
 import isNotificationEnabled from "../../../../utils/notificationEnableChecket.js";
 import SaveNotificationUsecase from "./saveNotificationUsecase.js";
+import SaveNotificationRepo from "../../../../infrastructure/repositories/chit/saveNotificationRepo.js";
 
 class PaymentUseCase {
   constructor(
@@ -44,7 +45,8 @@ class PaymentUseCase {
     this.employeeRepo = employeeRepo;
     this.walletRepo = walletRepo;
     this.notificationconfig = notificationconfig;
-    this.saveNotificationUsecase = new SaveNotificationUsecase();
+    this.saveNotificationRepo = new SaveNotificationRepo()
+    this.saveNotificationUsecase = new SaveNotificationUsecase(this.saveNotificationRepo);
   }
 
   getDifferenceInMonths = (startDate, endDate) => {
@@ -79,21 +81,21 @@ class PaymentUseCase {
 
       if (notificationData.push) {
         const inputMsg = {
-          recipients: [data.id_customer],
+          recipients: [data.id_customer || token._id],
           title: "Scheme Completed",
           message: `Your scheme has been completed with final payment of ₹${data.payment_amount}.`,
           channel: "push",
         };
 
         await smsService.sendNotification(inputMsg);
-        await saveNotificationUsecase.saveNotification(
+        await  this.saveNotificationUsecase.saveNotification(
           {
             title: inputMsg.title,
             message: inputMsg.message,
             type: "alert",
             category: "Payment",
           },
-          token._id
+          token._id || data.id_customer
         );
       }
 
@@ -142,7 +144,7 @@ class PaymentUseCase {
     } else {
       if (notificationData.push) {
         const inputMsg = {
-          recipients: [data.id_customer],
+          recipients: [data.id_customer || token._id],
           title: "Payment Received",
           message: `Your payment of ₹${data.payment_amount} was successfully received.`,
           channel: "push",
@@ -346,7 +348,18 @@ class PaymentUseCase {
 
   async addPayment(data, token) {
     try {
+      const weightSchemes = [12,3,4];
+
       const schemeData = await this.schemeRepository.findById(data.id_scheme);
+
+      if(weightSchemes.includes(schemeData.scheme_type)){
+          const max = schemeData.max_weight
+          const min = schemeData.min_weight
+          
+      }else{
+
+        this.paymentValidator(schemeData.max_amount,schemeData.min_amount,data?.installments,data?.payment_amount)
+      }
 
       if (schemeData.scheme_type !== 10 && schemeData.scheme_type !== 14) {
         if (!schemeData)
@@ -365,12 +378,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          // if (todatPaidorNot) {
-          //   return {
-          //     status: false,
-          //     message: "Already completed today's payment",
-          //   };
-          // }
+          if (todatPaidorNot) {
+            return {
+              status: false,
+              message: "Already completed today's payment",
+            };
+          }
         }
 
         const totalInstallments =
@@ -392,13 +405,13 @@ class PaymentUseCase {
           }
         );
 
-        // if (
-        //   schemeData?.limit_installment &&
-        //   Number(monthlyPaiments) + Number(data.installments) >
-        //     Number(schemeData?.limit_installment)
-        // ) {
-        //   return { status: false, message: "Monthly payment limit reached" };
-        // }
+        if (
+          schemeData?.limit_installment &&
+          Number(monthlyPaiments) + Number(data.installments) >
+            Number(schemeData?.limit_installment)
+        ) {
+          return { status: false, message: "Monthly payment limit reached" };
+        }
 
         const schemeAccData = await this.schemeAccountRepository.findById(
           data.id_scheme_account
@@ -1249,6 +1262,8 @@ class PaymentUseCase {
           await this.paymentRepository.totalInstallments(
             data.id_scheme_account
           );
+          console.log (Number(totalInstallments) ,Number(data.installments) ,
+          Number(schemeData.total_installments))
         if (
           Number(totalInstallments) + Number(data.installments) >
           Number(schemeData.total_installments)

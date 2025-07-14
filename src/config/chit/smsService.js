@@ -196,60 +196,59 @@ class NotificationService {
     }
   }
 
-  // async _sendSMS(number, message, providerConfig, type, customUrl) {
-  //   console.log(number,message)
-  //   let url;
-  //   number = number.replace(/^91/, "");
+//   async _sendSMS(number, message, providerConfig, type, customUrl) {
+//     let url;
+//     number = number.replace(/^91/, "");
 
-  //   if (customUrl) {
-  //     url = customUrl
-  //       .replace(/xxxmobilexxx/g, encodeURIComponent(number))
-  //       .replace(/xxxmessagexxx/g, encodeURIComponent(message));
-  //   } else {
-  //     const params = new URLSearchParams({
-  //       ...providerConfig.params,
-  //       phone: number,
-  //       text: message,
-  //     });
-  //     url = `${providerConfig.baseUrl}?${params.toString()}`;
-  //   }
-
-  //   const response = await axios.get(url);
-  //   return {
-  //     http_status: response.status,
-  //     server_response: response.data,
-  //   };
-  // }
-  // async _sendSMS(numbers, message, providerConfig, type, customUrl) {
-  //   console.log(numbers,message,providerConfig,type,customUrl)
-  //   if (!Array.isArray(numbers)) {
-  //     numbers = [numbers];
-  //   }
+//     if (customUrl) {
+//       url = customUrl
+//         .replace(/xxxmobilexxx/g, encodeURIComponent(number))
+//         .replace(/xxxmessagexxx/g, encodeURIComponent(message));
+//     } else {
+//       const params = new URLSearchParams({
+//         ...providerConfig.params,
+//         phone: number,
+//         text: message,
+//       });
+//       url = `${providerConfig.baseUrl}?${params.toString()}`;
+//     }
+// console.log(url)
+//     const response = await axios.get(url);
+//     return {
+//       http_status: response.status,
+//       server_response: response.data,
+//     };
+//   }
+//   async _sendSMS(numbers, message, providerConfig, type, customUrl) {
+//     console.log(numbers,message,providerConfig,type,customUrl)
+//     if (!Array.isArray(numbers)) {
+//       numbers = [numbers];
+//     }
   
-  //   for (const num of numbers) {
-  //     const number = num.toString().replace(/^91/, "");
+//     for (const num of numbers) {
+//       const number = num.toString().replace(/^91/, "");
   
-  //     let url;
-  //     if (customUrl) {
-  //       url = customUrl
-  //         .replace(/xxxmobilexxx/g, encodeURIComponent(number))
-  //         .replace(/xxxmessagexxx/g, encodeURIComponent(message));
-  //     } else {
-  //       const params = new URLSearchParams({
-  //         ...providerConfig.params,
-  //         phone: number,
-  //         text: message,
-  //       });
-  //       url = `${providerConfig.baseUrl}?${params.toString()}`;
-  //     }
-  // // return console.log(url)
-  //     const response = await axios.get(url);
-  //     return {
-  //       http_status: response.status,
-  //       server_response: response.data,
-  //     };
-  //   }
-  // }
+//       let url;
+//       if (customUrl) {
+//         url = customUrl
+//           .replace(/xxxmobilexxx/g, encodeURIComponent(number))
+//           .replace(/xxxmessagexxx/g, encodeURIComponent(message));
+//       } else {
+//         const params = new URLSearchParams({
+//           ...providerConfig.params,
+//           phone: number,
+//           text: message,
+//         });
+//         url = `${providerConfig.baseUrl}?${params.toString()}`;
+//       }
+//   // return console.log(url)
+//       const response = await axios.get(url);
+//       return {
+//         http_status: response.status,
+//         server_response: response.data,
+//       };
+//     }
+//   }
 
   async  _sendSMS(numbers, message, providerConfig, type, customUrl) {
     if (!Array.isArray(numbers)) {

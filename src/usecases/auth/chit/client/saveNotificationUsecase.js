@@ -5,6 +5,7 @@ class SaveNotificationUsecase {
 
     async saveNotification(data,userData) {
         try {
+            console.log(data,userData,"fro")
             const savedNotification = await this.savenotificaitonRepo.saveNotification(data);
 
             if(savedNotification){

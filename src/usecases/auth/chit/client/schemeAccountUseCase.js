@@ -1695,7 +1695,7 @@ class SchemeAccountUseCase {
         }
 
         const data = {
-          numbers: mobile,
+          numbers: [mobile],
           message: smsContent,
           templateParams: { otp: otp },
           sms_type: "",
