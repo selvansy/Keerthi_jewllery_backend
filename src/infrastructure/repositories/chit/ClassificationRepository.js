@@ -133,7 +133,7 @@ class ClassificationRepository {
 
   //scheme classification 
   async getSchemeClassification(){
-    const classData= await schemeClassificationModel.find({})
+    const classData= await schemeClassificationModel.find({active:true,is_deleted:false})
 
     if (classData.length > 0) {
         return classData;
