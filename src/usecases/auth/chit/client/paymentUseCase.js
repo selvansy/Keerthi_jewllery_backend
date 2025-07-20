@@ -378,12 +378,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
-          }
+          // if (todatPaidorNot) {
+          //   return {
+          //     status: false,
+          //     message: "Already completed today's payment",
+          //   };
+          // }
         }
 
         const totalInstallments =
@@ -636,7 +636,7 @@ class PaymentUseCase {
             payment_amount: data.payment_amount,
             paid_installments: data.installments,
             scheme_total: data.total_amt,
-            metal_rate: data.metal_rate,
+            metal_rate: data?.metal_rate,
             payment_mode: data.payment_mode,
             payment_type: 1,
             platform: 0,

@@ -320,6 +320,8 @@ class ReportUseCase {
         skip,
         perPage
       );
+
+      console.log(data,"data")
   
       return {
         success: true,

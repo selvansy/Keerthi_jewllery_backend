@@ -1196,7 +1196,7 @@ class ReportRepository {
                   id_transaction: 1,
                   payment_receipt: 1,
                   createdAt: 1,
-                  totalPaidInstallment: 1,
+                  totalPaidInstallment: "$SchemeAccount.paid_installments",
                 },
               },
             ],
