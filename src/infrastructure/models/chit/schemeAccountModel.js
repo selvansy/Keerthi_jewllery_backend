@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 
 const schemeAccountSchema = new mongoose.Schema(
   {
-    accountschemeid: {
-      type: Number,
-      default: 0,
-    },
+    // accountschemeid: {
+    //   type: Number,
+    //   default: 0,
+    // },
     id_classification: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

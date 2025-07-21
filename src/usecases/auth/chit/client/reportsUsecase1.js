@@ -456,20 +456,6 @@ class ReportUseCase {
     return await this.reportRepo.countSchemeAccounts(filter);
   }
 
-  async _getTotalPaidAccount(id_branch, id_scheme, id_classification, status) {
-    let filter =
-      status === 1
-        ? { accountschemeid: { $ne: 0 }, active: true }
-        : { accountschemeid: 0, active: true };
-
-    if (id_branch) filter.id_branch = id_branch;
-    if (id_scheme) filter.id_scheme = id_scheme;
-    if (id_classification)
-      filter["id_scheme.id_classification"] = id_classification;
-
-    return await this.reportRepo.countSchemeAccounts(filter);
-  }
-
   async getOutstandingReport(filters) {
     const {
       page = 1,

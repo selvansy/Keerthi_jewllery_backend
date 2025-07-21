@@ -804,7 +804,6 @@ class SchemeAccountUseCase {
   //       maturity_date: account.maturity_date,
   //       last_paid_date: account.last_paid_date,
   //       scheme_acc_number: account.scheme_acc_number,
-  //       accountschemeid: account.accountschemeid,
   //       active: account.active,
   //       id_customer: account.id_customer,
   //       id_classification: account.id_classification,
@@ -928,7 +927,7 @@ class SchemeAccountUseCase {
         maturity_date: account.maturity_date,
         last_paid_date: account.last_paid_date,
         scheme_acc_number: account.scheme_acc_number,
-        accountschemeid: account.accountschemeid,
+        // accountschemeid: account.accountschemeid,
         active: account.active,
         id_customer: account.id_customer,
         id_classification: account.id_classification,
@@ -1266,7 +1265,7 @@ class SchemeAccountUseCase {
           maturity_date: account?.maturity_date,
           last_paid_date: account?.last_paid_date,
           scheme_acc_number: account?.scheme_acc_number,
-          accountschemeid: account?.accountschemeid,
+          // accountschemeid: account?.accountschemeid,
           active: account?.active,
           flexFixed: account?.flexFixed
         };
@@ -1876,7 +1875,7 @@ class SchemeAccountUseCase {
           maturity_date: account?.maturity_date,
           last_paid_date: account?.last_paid_date,
           scheme_acc_number: account?.scheme_acc_number,
-          accountschemeid: account?.accountschemeid,
+          // accountschemeid: account?.accountschemeid,
           active: account?.active,
           paidInstallments: account?.paid_installments
         };
@@ -2070,7 +2069,7 @@ class SchemeAccountUseCase {
         arrobject.maturity_date = account?.maturity_date;
         arrobject.last_paid_date = account?.last_paid_date;
         arrobject.scheme_acc_number = account?.scheme_acc_number;
-        arrobject.accountschemeid = account?.accountschemeid;
+        // arrobject.accountschemeid = account?.accountschemeid;
         arrobject.active = account?.active;
 
         const scheme = account?.id_scheme;

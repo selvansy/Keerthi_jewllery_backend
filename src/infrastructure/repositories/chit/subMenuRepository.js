@@ -91,7 +91,7 @@ class SubMenuRepository {
 
   async getUserPrermission() {
     try {
-      const submenuData = await subMenuModel.find({ active: true }).sort({display_order:1});
+      const submenuData = await subMenuModel.find({ active: true,adminVisible:false}).sort({display_order:1});
 
       if (submenuData.length === 0) {
         return null;

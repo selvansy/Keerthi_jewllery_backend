@@ -32,20 +32,33 @@ class PaymentRepository {
     }
   }
 
+  // async lastPayment(schemeId) {
+  //   try {
+  //     const lastPayment = await paymentModel
+  //       .findOne({ id_scheme: schemeId })
+  //       .sort({ payment_receipt: -1 })
+  //       .select("payment_receipt");
+
+  //     if (!lastPayment) {
+  //       return null;
+  //     }
+
+  //     return lastPayment;
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
   async lastPayment(schemeId) {
     try {
       const lastPayment = await paymentModel
         .findOne({ id_scheme: schemeId })
-        .sort({ payment_receipt: -1 })
+        .sort({ _id: -1 })
         .select("payment_receipt");
-
-      if (!lastPayment) {
-        return null;
-      }
-
-      return lastPayment;
+  
+      return lastPayment || null;
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 

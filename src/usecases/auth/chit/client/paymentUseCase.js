@@ -319,17 +319,19 @@ class PaymentUseCase {
     try {
       const lastPayment = await this.paymentRepository.lastPayment(schemeId);
 
-      if (generalSetting.display_receiptno) {
-        return lastPayment
-          ? lastPayment.payment_receipt + 1
-          : scheme.payment_receipt;
-      } else if (generalSetting.display_receiptno === 4) {
-        return recieptNumber;
-      } else {
-        return lastPayment
-          ? lastPayment.payment_receipt + 1
-          : scheme.payment_receipt;
-      }
+      return lastPayment ?  lastPayment.payment_receipt + 1 : 1
+
+      // if (generalSetting.display_receiptno) {
+      //   return lastPayment
+      //     ? lastPayment.payment_receipt + 1
+      //     : scheme.payment_receipt;
+      // } else if (generalSetting.display_receiptno === 4) {
+      //   return recieptNumber;
+      // } else {
+      //   return lastPayment
+      //     ? lastPayment.payment_receipt + 1
+      //     : scheme.payment_receipt;
+      // }
     } catch (error) {
       console.error("Error updating payment receipt:", error.message);
       throw error;
@@ -348,18 +350,7 @@ class PaymentUseCase {
 
   async addPayment(data, token) {
     try {
-      // const weightSchemes = [12,3,4];
-
       const schemeData = await this.schemeRepository.findById(data.id_scheme);
-
-      // if(weightSchemes.includes(schemeData.scheme_type)){
-      //     const max = schemeData.max_weight
-      //     const min = schemeData.min_weight
-          
-      // }else{
-
-      //   this.paymentValidator(schemeData.max_amount,schemeData.min_amount,data?.installments,data?.payment_amount)
-      // }
 
       if (schemeData.scheme_type !== 10 && schemeData.scheme_type !== 14) {
         if (!schemeData)
@@ -378,12 +369,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          // if (todatPaidorNot) {
-          //   return {
-          //     status: false,
-          //     message: "Already completed today's payment",
-          //   };
-          // }
+          if (todatPaidorNot) {
+            return {
+              status: false,
+              message: "Already completed today's payment",
+            };
+          }
         }
 
         const totalInstallments =

@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
-import Customer from '../../infrastructure/models/chit/customerModel.js';
+import Customer from '../infrastructure/models/chit/customerModel.js';
 // import Notification from '../../infrastructure/models/chit/notificationUserStatusModel.js';
-import NotificationConfig from '../../infrastructure/models/chit/notificationConfigModel.js';
-import smsService from './smsService.js';
+import NotificationConfig from '../infrastructure/models/chit/notificationConfigModel.js';
+import smsService from '../config/chit/smsService.js';
 
 dotenv.config();
 
