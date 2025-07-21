@@ -19,7 +19,6 @@ class giftInwardsRepository{
 
     async findOne(query){
         try {
-           console.log("query",query)
             const giftData= await giftInwardsModel.findOne(query).lean()
             if(!giftData){
                 return null;

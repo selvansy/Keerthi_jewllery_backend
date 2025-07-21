@@ -150,8 +150,6 @@ class ProjectAccessController {
       if (!result || !result.success) {
         return res.status(200).json({ status: "Success", message: result?.message || "No data found", data: [] });
       }
-
-      console.log("ress---",result)
   
       res.status(200).json({
         status: "Success",

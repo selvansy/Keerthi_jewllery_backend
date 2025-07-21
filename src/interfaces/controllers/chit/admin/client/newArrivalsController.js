@@ -6,7 +6,6 @@ class NewArrivalsController {
 
   async addNewArrivals(req, res) {
     try {
-      console.log(req.body)
       const { error } = await this.validation.newArrivalsValidation.validate(
         req.body
       );

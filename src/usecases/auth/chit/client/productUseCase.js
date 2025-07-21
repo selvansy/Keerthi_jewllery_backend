@@ -298,7 +298,6 @@ class ProductUseCase {
       if (!existingProduct) {
         return { success: false, message: "Product not found" };
       }
-      console.log(existingProduct)
       const updatedProduct = await this.productRepository.changeStatus(
         id,
         existingProduct.active
@@ -368,7 +367,6 @@ class ProductUseCase {
       }
       const productBranch = await this.productRepository.findByBranchId(id);
       const rate = await this.getTodayMatelRate(id)
-      console.log(rate)
       if (productBranch) {
         return {
           success: true,

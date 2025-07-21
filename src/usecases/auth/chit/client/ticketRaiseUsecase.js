@@ -31,7 +31,6 @@ class TicketRaiseUseCase {
 
   async addTicket(data, ticket_img) {
     try {
-        console.log(ticket_img)
       const ticketNumber = `TKT-${new Date()
         .toLocaleString("en-GB")
         .replace(
@@ -84,7 +83,6 @@ class TicketRaiseUseCase {
   async getTicket(query, branch, employeeId) {
     try {
       const { page, limit, from_date, to_date, id_branch, search } = query;
-        console.log(query)
       const pageNum = page ? parseInt(page) : 1;
       const pageSize = limit ? parseInt(limit) : 10;
       const skip = (pageNum - 1) * pageSize;
@@ -109,8 +107,6 @@ class TicketRaiseUseCase {
         const searchRegex = new RegExp(search, "i");
         filter.$or = [{ id_ticketNo: { $regex: searchRegex } }];
       }
-
-      console.log(filter);
 
       const tickets = await this.ticketRaiseRepository.getTickets(
         filter,

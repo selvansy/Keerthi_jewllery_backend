@@ -8,7 +8,6 @@ class OfferController {
     try {
       const offerData = req.body;
       const createdBy = req.user.id_employee;
-      console.log(offerData)
       // offerData.offer_image = req.files.offer_image;
       const { error } = await this.offerValidator.offerValidations.validate(
         offerData

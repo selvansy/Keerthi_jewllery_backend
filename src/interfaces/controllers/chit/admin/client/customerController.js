@@ -200,7 +200,6 @@ class CustomerController {
       }
 
       const result = await this.customerUseCase.getCustomerById(id);
-      console.log("resujlt=------", result);
 
       if (!result.success) {
         return res.status(400).json({ message: result.message });
@@ -248,8 +247,6 @@ class CustomerController {
       if (!result.success) {
         return res.status(400).json({ message: result.message });
       }
-
-      console.log(result.data);
 
       const returnData = {
         firstname: result?.data?.firstname,
@@ -412,7 +409,7 @@ class CustomerController {
   async verifyOtp(req, res) {
     try {
       const { mobile, otp, type } = req.body;
-      console.log(req.body);
+
       if (!mobile || !otp) {
         return res
           .status(400)

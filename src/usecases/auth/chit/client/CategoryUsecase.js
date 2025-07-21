@@ -15,7 +15,6 @@ class CategoryUseCase {
 
   async addCategory(categoryData) {
     try {
-      console.log(categoryData)
       const branchValidation = this.validateObjectId(
         categoryData.id_branch,
         "Branch"

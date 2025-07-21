@@ -43,7 +43,6 @@ class EmployeeRepository {
 
   async findById(id) {
     try {
-      console.log(id)
       const userData = await employeeModel.aggregate([
         {
             $match: { _id: new mongoose.Types.ObjectId(id), is_deleted: false },

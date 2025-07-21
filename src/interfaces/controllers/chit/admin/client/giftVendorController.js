@@ -56,7 +56,7 @@ class giftVendorController {
              }
 
              const result= await this.giftVendorUseCase.editGiftVendor(id,data);
-             console.log("result",result)
+
             if(!result.success){
                 return res.status(400).json({message:result.message})
              }

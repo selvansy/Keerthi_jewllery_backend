@@ -202,7 +202,6 @@ class metalRateUseCase {
       }
 
       const metalData = await this.metalRepo.findById(metalId)
-      console.log(metalData)
 
       if(metalData?.is_deleted){
         return {success:false,message:"No metal found, add new metal"}

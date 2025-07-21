@@ -70,7 +70,6 @@ class ClientUseCase {
 
   async updateClient(id,data) {
     try {
-      console.log("id",id,data)
       const existingClient = await this.clientRepository.findById(id);
 
       if (existingClient && !isValidObjectId(existingClient._id)) {

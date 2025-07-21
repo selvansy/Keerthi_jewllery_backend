@@ -71,7 +71,6 @@ const handleCustomerUpload = async (data) => {
       }
   
       console.timeEnd("Validation time");
-      console.log("skipped",skipped)
   
       if (skipped.length > 0) {
         console.warn(`❌ Upload skipped. ${skipped.length} invalid row(s) found.`);
@@ -139,10 +138,8 @@ const handleSchemeAccountUpload = async (data) => {
 
     for (let index = 0; index < data.length; index++) {
       const account = data[index];
-      console.log(account)
-      
+
       const normalizedScheme = normalizeString(account.id_scheme);
-      console.log(normalizedScheme,"shc")
     //   const normalizedCustomer = normalizeString(account.id_customer);
     //   const normalizedBranch = normalizeString(account.id_branch);
     //   const normalizedClassification = normalizeString(account.id_classification);
@@ -181,7 +178,6 @@ const handleSchemeAccountUpload = async (data) => {
     }
 
     console.timeEnd("Validation time");
-    console.log(`✅ Valid records: ${processedData.length}, ❌ Skipped: ${skipped.length}`);
 
     if (processedData.length === 0) {
       return {

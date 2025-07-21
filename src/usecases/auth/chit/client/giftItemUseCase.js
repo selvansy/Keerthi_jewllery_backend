@@ -100,10 +100,6 @@ class giftItemUseCase {
           return;
         }
 
-        console.log("data-----",data)
-        console.log("normalizeValue---",data[key])
-        console.log("fieldsToUpdate---",fieldsToUpdate[key])
-
         if (normalizeValue(exists[key]) !== normalizeValue(data[key])) {
        
           fieldsToUpdate[key] = data[key];

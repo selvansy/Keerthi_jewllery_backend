@@ -1248,7 +1248,6 @@ class ReportRepository {
       const currentPage = Math.floor(skip / limit) + 1;
 
       if (query.payment_mode) {
-        console.log("first")
         pipeline.push(
           {
             $group: {
@@ -1279,7 +1278,6 @@ class ReportRepository {
           { $limit: limit }
         );
       } else {
-        console.log("second")
         pipeline.push(
           {
             $group: {
@@ -1432,7 +1430,7 @@ class ReportRepository {
 
       return { totalDocuments, totalPages, data };
     } catch (err) {
-      console.log(err);
+    console.error(err);
       throw new Error("Failed to get completed Account data");
     }
   }
@@ -1566,7 +1564,7 @@ class ReportRepository {
 
       return { totalDocuments, totalPages, data };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1739,7 +1737,7 @@ class ReportRepository {
 
       return { totalDocuments, totalPages, data };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1902,7 +1900,7 @@ class ReportRepository {
 
       return { totalDocuments, totalPages, data };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1913,7 +1911,6 @@ class ReportRepository {
         query.id_branch = new mongoose.Types.ObjectId(query.id_branch);
       }
 
-      console.log("query--", query);
       const documents = await giftItemModel.countDocuments(query);
 
       const result = await giftItemModel.aggregate([
@@ -2163,7 +2160,6 @@ class ReportRepository {
           },
         },
       ]);
-console.log(amountPaybleData)
       const totalDocuments = amountPaybleData[0]?.metadata[0]?.total || 0;
       const totalPages = Math.ceil(totalDocuments / limit);
       const data = amountPaybleData[0]?.data || [];
@@ -2174,7 +2170,7 @@ console.log(amountPaybleData)
         data,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw new Error("Failed to get Amount payble report");
     }
   }
@@ -2278,7 +2274,7 @@ console.log(amountPaybleData)
         data: amountPaybleData,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw new Error("Failed to get Amount payble report");
     }
   }
@@ -2405,7 +2401,7 @@ console.log(amountPaybleData)
         totalCount: result[0]?.totalCount || 0,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -2655,7 +2651,7 @@ console.log(amountPaybleData)
             },
           },
         },
-        { $match: { ReferralBonuses: { $ne: [] } } }, // Only include referrals with bonuses
+        { $match: { ReferralBonuses: { $ne: [] } } },
         {
           $facet: {
             data: [{ $skip: skip || 0 }, { $limit: limit || 50 }],
@@ -2665,7 +2661,6 @@ console.log(amountPaybleData)
       ];
 
       const result = await referralListModel.aggregate(pipeline);
-      console.log(result, "kd");
 
       return {
         success: true,
@@ -2678,7 +2673,7 @@ console.log(amountPaybleData)
         currentPage: skip && limit ? Math.floor(skip / limit) + 1 : 1,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -2785,7 +2780,7 @@ console.log(amountPaybleData)
         currentPage,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -2874,7 +2869,7 @@ console.log(amountPaybleData)
         currentPage,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }

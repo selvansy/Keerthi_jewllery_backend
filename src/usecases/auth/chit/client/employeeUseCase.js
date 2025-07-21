@@ -101,7 +101,7 @@ class EmployeeUseCase {
       const fieldsToUpdate = {};
       if (uploads && uploads.image || uploads.resume) {
         const s3Configs = await this.s3Helper(token.id_client)
-        console.log(uploads,';f')
+
         try {
           if(uploads && uploads.image){
             if (uploads.image[0].buffer) {

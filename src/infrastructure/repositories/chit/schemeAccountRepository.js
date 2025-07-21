@@ -276,7 +276,6 @@ class SchemeAccountRepository {
 //       }
 //     ]);
 
-//     console.log(data)
 
 //     return data.length > 0 ? data : null;
 //   } catch (error) {

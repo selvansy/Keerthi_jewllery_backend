@@ -52,8 +52,6 @@ router.post("/", upload.single("file"), async (req, res) => {
     if (output.skippedCount == 0) {
       return res.status(200).json({ message: output.message });
     } else {
-
-      console.log(output);
       const [key, value] =
         Object.entries(output.skippedRecords[0].missingFields).find(
           ([_, v]) => v !== undefined

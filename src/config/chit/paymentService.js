@@ -34,8 +34,6 @@ router.post("/cashfree", async (req, res) => {
     return res.status(403).json({ message: "Invalid signature" });
   }
 
-  console.log("Webhook verified successfully:", req.body,"ll");
-
   res.status(200).json({ message: "Webhook received successfully" });
 });
 

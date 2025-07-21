@@ -38,7 +38,7 @@ class UserRoleController{
             }
 
             const result = await this.userRoleUseCase.updateUserRole(id,role_name);
-console.log(result)
+
             if(!result.success){
                 return res.status(400).json({message:result.message})
             }

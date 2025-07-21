@@ -517,8 +517,6 @@ class SchemeAccountUseCase {
 
       const digiExists = await this.schemeAccountRepository.findOne({id_customer:data?.id_customer,id_scheme:data?.id_scheme,status:0})
 
-    //  return console.log(schemeData.scheme_type, digiExists)
-
     if ((schemeData.scheme_type == 10 || schemeData.scheme_type == 14) && digiExists) {
       return {
         success: false,
@@ -1213,7 +1211,6 @@ class SchemeAccountUseCase {
   }
 
   async searchMobieSchemeAccount(branchId, searchValue) {
-    console.log("1",branchId, searchValue)
     try {
       if (!isValidObjectId(branchId)) {
         return {
@@ -1825,7 +1822,6 @@ class SchemeAccountUseCase {
 
   async searchAccMobile(branchId, value) {
     try {
-      console.log("2")
       if (!isValidObjectId(branchId)) {
         return {
           success: false,

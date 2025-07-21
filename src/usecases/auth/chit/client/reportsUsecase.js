@@ -380,7 +380,6 @@ class ReportUseCase {
         throw new Error("End date cannot be before start date");
       }
 
-      // Convert to UTC with timezone adjustment (Asia/Kolkata - UTC+5:30)
       const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
       const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
 
@@ -389,7 +388,6 @@ class ReportUseCase {
         $lte: endDate,
       };
     } else {
-      // Default to today's date in local timezone
       const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
       const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
 
@@ -452,31 +450,25 @@ class ReportUseCase {
     const query = { active: true };
 
     if (from_date && to_date) {
-      const startDate = new Date(from_date);
-      const endDate = new Date(to_date);
-    
-      if (isNaN(startDate) || isNaN(endDate)) {
-        throw new Error("Invalid date format.");
+      if (new Date(to_date) < new Date(from_date)) {
+        throw new Error("End date cannot be before start date");
       }
-    
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
-    
+
+      // Convert to UTC with timezone adjustment (Asia/Kolkata - UTC+5:30)
+      const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+      const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
+
       query.updatedAt = {
         $gte: startDate,
         $lte: endDate,
       };
     } else {
-      const today = new Date();
-      
-      const startOfToday = new Date(today);
-      startOfToday.setHours(0, 0, 0, 0);
-    
-      const endOfToday = new Date(today);
-      endOfToday.setHours(23, 59, 59, 999);
-    
-      query.createdAt = {
-        $gte: this.addOneDay(startOfToday),
+      // Default to today's date in local timezone
+      const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
+      const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
+
+      query.updatedAt = {
+        $gte: startOfToday,
         $lte: endOfToday,
       };
     }
@@ -717,32 +709,34 @@ class ReportUseCase {
 
   async getAmountPayable(bodyData) {
     try {
-      const { page, limit, from_date, to_date,type} = bodyData;
+      const { page, limit, from_date, to_date, type } = bodyData;
   
       const pageNum = page ? parseInt(page) : 1;
       const pageSize = limit ? parseInt(limit) : 10;
-  
-      // Construct the query object
+
       const query = {
         active: true,
         is_deleted: false,
       };
       
-      if (from_date && to_date) {
-        if (new Date(to_date) < new Date(from_date)) {
-          throw new Error("End date cannot be before start date");
-        }
-  
-        // Convert to UTC with timezone adjustment (Asia/Kolkata - UTC+5:30)
-        const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+      if (to_date) {
         const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
-  
         query.createdAt = {
-          $gte: startDate,
           $lte: endDate,
         };
+        if (from_date) {
+          if (new Date(to_date) < new Date(from_date)) {
+            throw new Error("End date cannot be before start date");
+          }
+          const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+          query.createdAt.$gte = startDate;
+        }
+      } else if (from_date) {
+        const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+        query.createdAt = {
+          $gte: startDate,
+        };
       } else {
-        // Default to today's date in local timezone
         const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
         const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
   
@@ -776,7 +770,7 @@ class ReportUseCase {
       };
     } catch (error) {
       console.error("Error in data:", error);
-      return { success: false, message: "Error while getting data" };
+      return { success: false, message: error.message || "Error while getting data" };
     }
   }
 
@@ -1020,22 +1014,10 @@ async getCustomerRefferal(bodyData) {
         paid_installments: { $gte: 1 },
       };
   
-      // if (from_date && to_date) {
-      //   query.createdAt = {
-      //     $gte: new Date(from_date),
-      //     $lte: new Date(to_date), 
-      //   };
-      // } else if (from_date) {
-      //   query.createdAt = { $gte: new Date(from_date) };
-      // } else if (to_date) {
-      //   query.createdAt = { $lte: new Date(to_date) }; 
-      // }
       if (from_date && to_date) {
         if (new Date(to_date) < new Date(from_date)) {
           throw new Error("End date cannot be before start date");
         }
-  
-        // Convert to UTC with timezone adjustment (Asia/Kolkata - UTC+5:30)
         const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
         const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
   
@@ -1044,7 +1026,6 @@ async getCustomerRefferal(bodyData) {
           $lte: endDate,
         };
       } else {
-        // Default to today's date in local timezone
         const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
         const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
   

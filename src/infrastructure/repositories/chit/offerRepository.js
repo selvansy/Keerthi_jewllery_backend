@@ -4,7 +4,6 @@ import OffersModel from "../../models/chit/offersModel.js";
 class OfferRepository {
   async addOffer(offerData) {
     try {
-      console.log(offerData)
       const createOffer = new OffersModel(offerData);
       await createOffer.save();
 
@@ -12,7 +11,7 @@ class OfferRepository {
 
       return createOffer
     } catch (err) {
-      console.log(err)
+      console.error(err)
       throw new Error("Database error occured while adding offer");
     }
   }
@@ -82,7 +81,7 @@ class OfferRepository {
       }
 
       const offerData = await OffersModel.findOne(filter);
-      console.log(offerData)
+
       if (!offerData) return null;
 
       return {
@@ -191,7 +190,7 @@ class OfferRepository {
       ]);
       
     }catch(err){
-      console.log(err)
+      console.error(err)
       throw new Error("Database error occured while get offer");
     }
   }

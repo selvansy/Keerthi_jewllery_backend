@@ -159,8 +159,6 @@ class PushNotificationRepository {
 
   async  pushnotificationTable(query, skip, limit) {
     try {
-        
-         console.log("query---lp;kjhg",query)
         const totalCount = await pushNotificationModel.countDocuments(query);
         const data = await pushNotificationModel
             .find(query)

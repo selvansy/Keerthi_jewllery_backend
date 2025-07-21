@@ -31,8 +31,6 @@ class NotifyUsecase {
   addOneDay(dateStr) {
     const date = new Date(dateStr);
     date.setDate(date.getDate() + 1);
-    console.log("in", dateStr);
-    console.log("out", date.toISOString());
     return date.toISOString();
   }
 
@@ -207,7 +205,6 @@ class NotifyUsecase {
   //         //             paymentId: id_payment,
   //         //             customerId: customer.id_customer,
   //         //         });
-  //         //         console.log("WhatsApp Results:", whatsappResult);
 
   //         // }
   //         // if (email) {

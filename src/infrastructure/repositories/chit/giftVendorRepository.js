@@ -33,8 +33,6 @@ class giftVendorRepository {
                 $or: [{ mobile }, { gst }]
             });
 
-            console.log("existingVendor",existingVendor)
-
             if (existingVendor) {
                 return existingVendor;
             }
@@ -44,31 +42,6 @@ class giftVendorRepository {
             console.error(error);
         }
     }
-
-    // async checExists(id, mobile, gst) {
-    //     try {
-    //         const objectId = mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null;
-    
-    //         if (!objectId) {
-    //             console.error("Invalid ObjectId");
-    //             return null;
-    //         }
-    
-    //         const existingVendor = await giftVendorModel.findOne({
-    //             _id: { $ne: objectId }, 
-    //             is_deleted: false,
-    //             $or: [{ mobile }, { gst}]
-    //         });
-    
-    //         console.log("Query result:", existingVendor);
-    
-    //         return existingVendor || null;
-    //     } catch (error) {
-    //         console.error("Error in checkExists:", error);
-    //         return null; 
-    //     }
-    // }
-    
 
     async checkMobileGst(mobile, gst) {
         try {

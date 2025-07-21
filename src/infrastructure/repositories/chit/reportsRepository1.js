@@ -570,9 +570,6 @@ class ReportRepository {
 
   async pendingDuePayment(page, limit, query) {
     try {
-      console.log(
-        "dkd"
-      )
       const dueData = await schemeAccountModel.aggregate([
         { $match: query},
          {
@@ -915,7 +912,6 @@ class ReportRepository {
   async getPreCloseReport(query,page, limit ) {
     try {
       query.status=3
-      console.log(query)
       const preCloseData = await schemeAccountModel.aggregate([
         { $match:query },
         {
@@ -1107,10 +1103,9 @@ class ReportRepository {
         },
       ]);
 
-      console.log(preCloseData);
       return preCloseData;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1200,7 +1195,7 @@ class ReportRepository {
 
       return redeemption;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1342,10 +1337,9 @@ class ReportRepository {
         },
       ]);
 
-      console.log(refundReport);
       return refundReport;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1526,10 +1520,10 @@ class ReportRepository {
           },
         },
       ]);
-  console.log(overAllData,'d;')
+
       return overAllData;
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -1587,7 +1581,7 @@ class ReportRepository {
       const currentPage = Math.floor(skip / pageSize) + 1;
   
       const paginatedData = mergedData.slice(skip, skip + pageSize);
-      console.log(paginatedData)
+
       return {
         data: paginatedData,
         totalDocuments,
@@ -1599,22 +1593,6 @@ class ReportRepository {
     }
   }
   
-  
-  
-  
-
-  // async employeeReferralReport(page,limit,query){
-  //   try{
-
-  //     const referralReport=await customerModel.find()
-
-  //     console.log(re)
-  //     return referralReport
-  //   }catch(err){
-  //     console.log(err)
-  //     throw err
-  //   }
-  // }
 
   async countSchemes(query) {
     return await Scheme.countDocuments(query);
@@ -2194,7 +2172,7 @@ class ReportRepository {
         { $skip: (page - 1) * limit },
         { $limit: limit },
       ]);
-      console.log(dueData);
+
       if (dueData.length > 0) {
         return dueData;
       }

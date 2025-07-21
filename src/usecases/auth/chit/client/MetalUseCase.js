@@ -61,7 +61,6 @@ class MetalUseCase {
   
       if (savedData) {
         const updatedPurities = await this.purityRepo.updateWithMetalNumber(data.id_metal, savedData._id);
-        console.log(updatedPurities);
   
         await this.metalRateRepo.getIds(token?.id_branch, null, updatedPurities, savedData._id);
   

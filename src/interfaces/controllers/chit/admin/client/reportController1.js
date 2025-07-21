@@ -6,7 +6,6 @@ class ReportController {
   async accountsummary(req, res) {
     try {
       const reportData = await this.reportUsecase.countSummaryReportController(req.body);
-      console.log(reportData)
       res.status(200).json(reportData);
     } catch (error) {
       console.error(error);
@@ -16,7 +15,6 @@ class ReportController {
   async getPaymentSummary(req, res) {
     try {
       const reportData = await this.reportUsecase.getPaymentSummary(req.body);
-      console.log(reportData)
       res.status(200).json(reportData);
     } catch (error) {
       console.error(error);
@@ -26,7 +24,6 @@ class ReportController {
   async getPreCloseSummary(req, res) {
     try {
       const reportData = await this.reportUsecase.getPreCloseSummary(req.body);
-      console.log(reportData)
       res.status(200).json(reportData);
     } catch (error) {
       console.error(error);
@@ -36,7 +33,6 @@ class ReportController {
   async getRedeemptionSummary(req, res) {
     try {
       const reportData = await this.reportUsecase.getRedeemptionSummary(req.body);
-      console.log(reportData)
       res.status(200).json(reportData);
     } catch (error) {
       console.error(error);
@@ -47,7 +43,6 @@ class ReportController {
   async getRefundSummary(req, res) {
     try {
       const reportData = await this.reportUsecase.getRefundSummary(req.body);
-      console.log(reportData)
       res.status(200).json(reportData);
     } catch (error) {
       console.error(error);

@@ -136,7 +136,6 @@ class CategoryRepository {
 
     async getCategory(filter, skip, limit) {
       try{
-        console.log(filter)
         return await CategoryModel.find(filter)
         .skip(skip)
         .limit(limit)

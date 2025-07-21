@@ -109,7 +109,6 @@ class StaffUseCase {
     if (!sataffData || sataffData.length === 0) {
       return { success: false, message: "No active accounts found" };
     }
-    console.log(sataffData)
     return {
       success: true,
       message: "Staff data fetched successfully",

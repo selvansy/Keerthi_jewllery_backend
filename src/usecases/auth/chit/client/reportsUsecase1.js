@@ -143,7 +143,7 @@ class ReportUseCase {
     const pageSize = limit ? parseInt(limit) : 10;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const schemes = await this.reportRepo.accountSummary(query,search, skip, limit);
-    console.log(schemes)
+
     return {
       data: schemes.data,
       totalDocuments: schemes.totalDocuments,
@@ -618,9 +618,6 @@ class ReportUseCase {
     try {
       const { page, limit, from_date, to_date, id_scheme, id_branch, search } =
         filterdata;
-        console.log(
-          "dkd"
-        )
       const pageNum = page ? parseInt(page) : 1;
       const pageSize = limit ? parseInt(limit) : 10;
 

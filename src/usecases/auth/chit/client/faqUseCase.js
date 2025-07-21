@@ -145,7 +145,6 @@ class faqUseCase {
             }
 
             const deletedfaq = await this.faqRepo.deletefaq(id);
-            console.log("deleted",deletedfaq)
 
             if (!deletedfaq) {
                 return { success: false, message: "Failed to delete faq" };

@@ -38,7 +38,7 @@ class CategoryController {
       const  validate=  {category_name,id_metal,id_branch}
      
       const { error } = this.validator.categoryValidations.validate(validate);
-      console.log(error)
+
       if (error) {
         return res.status(400).json(error.details[0].message);
       }

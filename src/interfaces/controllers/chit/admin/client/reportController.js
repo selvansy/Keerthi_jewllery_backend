@@ -29,7 +29,6 @@ class ReportController {
   // async accountsummary(req, res) {
   //   try {
   //     const reportData = await this.reportUsecase.countSummaryReportController(req.body);
-  //     console.log(reportData)
   //     res.status(200).json(reportData);
   //   } catch (error) {
   //     console.error(error);
@@ -92,7 +91,6 @@ class ReportController {
     try {
       const body = {...req.body}
       const result = await this.reportUsecase.getPaymentLedger(body);
-      console.log(result,"kd")
       return res.status(200).json(result);
     } catch (error) {
       console.error(error);

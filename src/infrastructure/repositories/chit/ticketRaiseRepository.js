@@ -19,12 +19,11 @@ class TicketRaiseRepository {
 
   async getTickets(filter, skip, limit) {
     try {
-        console.log("filter",filter)
         return await TicketRaiseModel.aggregate([
-            { $match: filter }, // Apply filters
-            { $sort: { createdAt: -1 } }, // Sort by createdAt in descending order
-            { $skip: skip }, // Apply pagination
-            { $limit: limit }, // Limit results
+            { $match: filter }, 
+            { $sort: { createdAt: -1 } }, 
+            { $skip: skip }, 
+            { $limit: limit },
             {
                 $lookup: {
                     from: "s3bucketsettings",
@@ -47,7 +46,7 @@ class TicketRaiseRepository {
             { $project: { s3Details: 0 } } // Remove s3Details field
         ]).exec();
     } catch (err) {
-        console.log(err);
+        console.error(err);
         throw new Error("Database error occurred while getting tickets");
     }
 }

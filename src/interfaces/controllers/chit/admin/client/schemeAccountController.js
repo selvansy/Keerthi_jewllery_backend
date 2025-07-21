@@ -283,7 +283,6 @@ class SchemeAccountContorller{
         const {mobile} = req.query;
         const {state} = req?.query
         try {
-          console.log(branchId,mobile,state)
           if(!branchId){
             return res.status(400).json({message:'No branch id provided'})
           }

@@ -418,7 +418,6 @@ class CustomerUseCase {
       if (!existsData) {
         return { success: false, message: "No customer found" };
       }
-      console.log(existsData,"kd")
 
      if(existsData.mpin){
        existsData.mpinStatus = true
@@ -774,8 +773,6 @@ class CustomerUseCase {
       const referralCode = generateReferralCode(userData.mobile);
       userData.referral_code = `Cus-${referralCode}`;
       
-      console.log(userData)
-
       const savedUser = await this.customerRepository.addCustomer(userData);
       if (!savedUser) {
         return { success: false, message: "Failed to create user" };
@@ -809,7 +806,6 @@ class CustomerUseCase {
         return { success: false, message: "Otp not verified" };
       }
 
-      console.log(newPassword,user)
       const checkOldPassword = await this.hashingService.comparePassword(
         newPassword,
         user.password

@@ -36,7 +36,6 @@ class DashboardController {
   async account(req, res) {
     try {
       const result = await this.dashboardUseCase.account(req.body);
-      console.log(req.body)
       if (result.success) {
         return res.status(200).json({ message: result.message,data:result.data });
       }
@@ -51,7 +50,6 @@ class DashboardController {
   async getPaymentHistory(req, res) {
     try {
       const result = await this.dashboardUseCase.getPaymentHistory(req.body);
-      console.log(req.body)
       if (result.success) {
         return res.status(200).json({ message: result.message,data:result.data });
       }

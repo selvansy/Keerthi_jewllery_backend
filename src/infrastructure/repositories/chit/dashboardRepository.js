@@ -262,7 +262,7 @@ class DashboardRepository {
         closedAccount: schemeData[0].closed,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return null;
     }
   }
@@ -344,7 +344,7 @@ class DashboardRepository {
       
       return result[0]
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw new Error("Error fetching dashboard data");
     }
   }
@@ -401,7 +401,6 @@ class DashboardRepository {
           const currentPage = Math.floor(skip / pageSize) + 1;
       
           const paginatedData = mergedData.slice(skip, skip + pageSize);
-          console.log(paginatedData)
           return {
             data: paginatedData,
             totalDocuments,
@@ -436,7 +435,7 @@ class DashboardRepository {
         total,
       };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -447,7 +446,7 @@ class DashboardRepository {
       // const count = 
 
     }catch(err){
-      console.log(err)
+      console.error(err)
       throw err
     }
   }

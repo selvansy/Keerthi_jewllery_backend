@@ -168,8 +168,6 @@ class ContentUseCase {
         query.toCustomer=false
       }
 
-      console.log(query,"kd")
-
       const documentskip = (pageNum - 1) * pageSize;
       const documentlimit = pageSize;
 
@@ -219,7 +217,6 @@ class ContentUseCase {
       }
 
       const deletedContent = await this.ContentRepo.deleteContent(id);
-      console.log("deleted", deletedContent);
 
       if (!deletedContent) {
         return { success: false, message: "Failed to delete content" };

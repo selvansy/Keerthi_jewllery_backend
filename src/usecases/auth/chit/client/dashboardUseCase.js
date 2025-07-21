@@ -74,7 +74,7 @@ class DashboardUseCase {
   
       return { success: false, message: "Failed to fetch data" };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return { success: false, message: "Failed to get overall data" };
     }
   }
@@ -120,7 +120,7 @@ class DashboardUseCase {
   
       return { success: false, message: "Failed to fetch data" };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return { success: false, message: "Failed to get overall data" };
     }
   }
@@ -153,7 +153,7 @@ class DashboardUseCase {
   
       return { success: false, message: "Failed to fetch data" };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return { success: false, message: "Failed to get overall data" };
     }
   }
@@ -210,7 +210,7 @@ class DashboardUseCase {
   
       return { success: false, message: "Failed to fetch data" };
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return { success: false, message: "Failed to get Payment Mode data" };
     }
   }

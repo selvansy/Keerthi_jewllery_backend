@@ -92,7 +92,7 @@ class OtpRepository {
         const changeStatus = await otpModel.updateOne({mobile,type},{is_verified:true})
         return changeStatus
     } catch (err) {
-        console.log(err)
+        console.error(err)
     }
   }
 

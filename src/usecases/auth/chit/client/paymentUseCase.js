@@ -1543,7 +1543,6 @@ class PaymentUseCase {
 
       await this.completePayment(data.body);
 
-      // console.log("Webhook verified successfully:", data.body);
       return { status: true, message: "Webhook received successfully" };
     } catch (error) {
       console.error(error);
@@ -1697,7 +1696,6 @@ class PaymentUseCase {
   //!helper function for mobile
   async createOrder(data) {
     try {
-      console.log(data,"kd")
       const url = "https://sandbox.cashfree.com/pg/orders";
       const headers = {
         "Content-Type": "application/json",
@@ -1707,7 +1705,6 @@ class PaymentUseCase {
       };
       const response = await axios.post(url, data, { headers });
       
-      console.log(response.data,"respo")
       return response.data;
     } catch (error) {
       console.error(error);
@@ -1899,7 +1896,7 @@ class PaymentUseCase {
       ]);
 
       if (!customer) {
-        console.log('Customer not found');
+        console.error('Customer not found');
         return;
       }
 
@@ -1970,66 +1967,6 @@ class PaymentUseCase {
         this.paymentRepository.bulkWrite(paymentBulk),
       ]);
 
-
-      // if (customer?.referral_id) {
-      //   const referralScheme = schemeAccountDetails.find(a => a?.id_scheme?.referralPercentage !== null);
-      //   if (!referralScheme) return;
-
-      //   const paymentData = payments.find(p => p.id_scheme_account.toString() === referralScheme._id.toString());
-      //   if (!paymentData) return;
-
-      //   const referral = {
-      //     id_scheme_account: referralScheme._id,
-      //     reference_no: customer.referral_code, 
-      //     reward_mode: 1,
-      //     created_by: data?.token?.id_employee || null,
-      //     modified_by: data?.token?.id_employee || null,
-      //   };
-
-      //   // Get the referrer details based on referral_id
-      //   let referrer = null;
-      //   if (customer.referral_type === "Customer") {
-      //     referral.id_customer = customer.referral_id;
-      //     referral.referred_by = "Customer";
-      //     referrer = await this.customerRepo.findById(customer.referral_id);
-      //   } else if (customer.referral_type === "Employee") {
-      //     referral.id_employee = customer.referral_id;
-      //     referral.referred_by = "Employee";
-      //     referrer = await this.employeeRepo.findById(customer.referral_id);
-      //   }
-
-      //   if (!referrer) {
-      //     console.log('Referrer not found');
-      //     return;
-      //   }
-
-      //   const mobile = referrer.mobile;
-      //   let wallet = await this.walletRepo.findWallet({ mobile });
-      //   const paymentAmount = Number(paymentData.payment_amount) || 0;
-      //   const referralPercentage = Number(referralScheme?.id_scheme?.referralPercentage) || 0;
-      //   const creditedAmount = (paymentAmount * referralPercentage) / 100;
-      //   console.log(paymentAmount,referralPercentage,"kd")
-      //   if (creditedAmount > 0 && !isNaN(creditedAmount)) {
-      //     referral.credited_amount = creditedAmount;
-
-      //     if (!wallet) {
-      //       const walletData = {
-      //         mobile,
-      //         balance_amt: creditedAmount,
-      //         total_reward_amt: creditedAmount,
-      //         created_by: data?.token?.id_employee || null,
-      //         ...(customer.referral_type === "Customer" 
-      //           ? { id_customer: referrer._id } 
-      //           : { id_employee: referrer._id })
-      //         };
-
-      //       await this.walletRepo.addWallet(walletData);
-      //     } else {
-      //       await this.walletRepo.creditAmount(wallet.id, creditedAmount);
-      //     }
-      //     await this.paymentRepository.addReferralPoint(referral);
-      //   }
-      // }
       if (customer?.referral_id) {
         const referralScheme = schemeAccountDetails.find(a =>
           a?.id_scheme?.referralPercentage !== null &&
@@ -2065,7 +2002,7 @@ class PaymentUseCase {
         }
       
         if (!referrer) {
-          console.log('Referrer not found');
+          console.error('Referrer not found');
           return;
         }
       

@@ -102,7 +102,6 @@ class NewArrivalRepository {
 
   async editNewArrivals(id, newArrivalData) {
     try {
-      console.log(newArrivalData)
       const updateNewArrivals = await newArrivalsModel.updateOne(
         { _id: id },
         { $set: newArrivalData }
@@ -113,7 +112,7 @@ class NewArrivalRepository {
         return null;
       }
     } catch (err) {
-      console.log(err)
+      console.error(err)
       throw new Error("Database error occurred while editing new arrivals");
     }
   }

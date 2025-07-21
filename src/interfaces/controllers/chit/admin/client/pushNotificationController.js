@@ -39,7 +39,6 @@ class PushNotificationController {
               }
 
             const result = await this.pushnotificationUseCase.pushnotificationTable(req.body);
-            console.log("res",result)
 
             if(!result.success){
                 return res.status(200).json({success:false,message:result.message,data:[]})

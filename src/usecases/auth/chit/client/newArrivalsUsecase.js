@@ -86,7 +86,7 @@ class NewArrivalUseCase {
       }
   
       const existingNewArrival = await this.newArrivalRepository.findById(id);
-      console.log(existingNewArrival);
+
       if (!existingNewArrival) {
         return { success: false, message: "New Arrivals not found" };
       }
@@ -206,7 +206,6 @@ class NewArrivalUseCase {
       if (!checkNewArrivals) {
         return { success: false, message: "New arrivals not found" };
       }
-      console.log(checkNewArrivals)
       const changeStatus = await this.newArrivalRepository.changeStatus(
         id,
         checkNewArrivals.active
@@ -330,7 +329,6 @@ class NewArrivalUseCase {
           pageSize,
           customerId
         );
-        console.log(newArrivals)
         if (!newArrivals.length >= 1) {
           return { success: false, message: "No new arrivals found" };
         }

@@ -52,8 +52,6 @@ class StaffUserController{
           return res.status(400).json({ message: "ID required" });
         }
 
-        console.log(req.body)
-    
         const requiredFields = [
           // { field: 'id_project', message: 'Project ID is required' },
           { field: 'id_client', message: 'Client ID is required' },
@@ -159,7 +157,6 @@ class StaffUserController{
         if (!result || !result.success) {
           return res.status(404).json({ message: result.message });
         }
-        console.log(result)
         res.status(200).json({
           message: result.message,
           data: result,

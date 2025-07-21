@@ -58,7 +58,6 @@ export const sendWhatsApp = async ({
                 responseData = response.data;
                 httpStatus = response.status;
 
-                console.log(`WhatsApp sent to ${number}:`, response.data);
             } catch (error) {
                 httpStatus = error.response ? error.response.status : null;
                 errorMessage = error.message;

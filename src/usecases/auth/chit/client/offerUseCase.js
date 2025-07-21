@@ -52,7 +52,7 @@ class OfferUseCase {
         offerData.type == 'Popup'
       ) {
         const s3configs= await this.s3Helper(offerData.id_branch)
-        console.log(s3configs)
+
         const uploadPromises = offer_image.map((image) =>
           this.s3service
             .uploadToS3(image, "offers",s3configs)
@@ -110,7 +110,6 @@ class OfferUseCase {
           );
           const uploadedImages = await Promise.all(uploadPromises);
           offerData.offer_image = uploadedImages;
-          console.log(uploadedImages)
         }
       }
 

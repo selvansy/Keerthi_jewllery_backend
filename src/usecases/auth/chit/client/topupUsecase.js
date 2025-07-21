@@ -10,8 +10,6 @@ class topupUsecase {
     addOneDay(dateStr) {
       const date = new Date(dateStr);
       date.setDate(date.getDate() + 1);
-      console.log("in",dateStr)
-      console.log("out",date.toISOString())
       return date.toISOString();
     }
 

@@ -32,7 +32,6 @@ class ProjectAccessRepository {
     async projectAccessTable(filter,skip, limit) {
         try {
             const documnetCount = projectAccessModel.countDocuments(filter);
-            console.log("doc",documnetCount)
             const data = projectAccessModel.find(filter)
             .populate(
                 [
