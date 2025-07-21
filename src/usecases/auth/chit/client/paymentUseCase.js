@@ -369,12 +369,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
-          }
+          // if (todatPaidorNot) {
+          //   return {
+          //     status: false,
+          //     message: "Already completed today's payment",
+          //   };
+          // }
         }
 
         const totalInstallments =
@@ -382,12 +382,12 @@ class PaymentUseCase {
             data.id_scheme_account
           );
 
-        if (
-          Number(totalInstallments) + Number(data.installments) >
-          Number(schemeData.total_installments)
-        ) {
-          return { status: false, message: "Scheme installment limit reached" };
-        }
+        // if (
+        //   Number(totalInstallments) + Number(data.installments) >
+        //   Number(schemeData.total_installments)
+        // ) {
+        //   return { status: false, message: "Scheme installment limit reached" };
+        // }
 
         const monthlyPaiments = await this.paymentRepository.getMonthlyPayments(
           {
