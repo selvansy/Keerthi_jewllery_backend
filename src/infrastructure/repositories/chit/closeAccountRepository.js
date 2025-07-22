@@ -48,7 +48,7 @@ class ClosAccRepository{
     //helper function schameAccount
     async getCloseaccount(id){
         try {
-            const newData = await closeAccModel.findOne({ id_scheme_account:id })
+            const newData = await closeAccModel.findOne({ id_scheme_account:id,active:1})
             .sort({ closebill_id: -1 })
             .limit(1)
             .exec();

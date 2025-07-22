@@ -9,6 +9,7 @@ import schemeModel from "../../models/chit/schemeModel.js";
 
 class ReportRepository {
   async overAllReport(filter, skip, pageSize, sort = {}, dateFilter) {
+
     const sortField = Object.keys(sort)[0] || "createdAt";
     const sortOrder = sort[sortField] === "asc" ? 1 : -1;
   
@@ -17,7 +18,7 @@ class ReportRepository {
         { 
           $match: {
             ...filter,
-            ...dateFilter 
+            // ...dateFilter 
           } 
         },
   
@@ -245,6 +246,7 @@ class ReportRepository {
           },
         },
       ]);
+      console.dir(result,"kd")
   
       const data = result[0].paginatedData;
       const totalDocs = result[0].totalCount[0]?.count || 0;
@@ -2412,9 +2414,11 @@ class ReportRepository {
       if (type === "weight") {
         filter["scheme_type"] = { $in: [12, 3, 4, 2, 5, 6, 10, 14] };
       }
-      else{
+      else {
         filter["scheme_type"] = { $nin: [12, 3, 4, 2, 5, 6, 10, 14] };
       }
+
+      delete filter.createdAt;
 
       const schemes = await schemeModel.aggregate([
         { $match: { ...filter } },
@@ -2431,11 +2435,7 @@ class ReportRepository {
         return { success: false, message: "No schemes found" };
       }
 
-      // const fieldToSum =
-      //   type === "weight"
-      //     ? "$Payments.metal_weight"
-      //     : "$Payments.payment_amount";
-      const fieldToSum = type === 'weight' ? "$weight" : "$amount";
+      const fieldToSum = type === 'weight' ? "metal_weight" : "payment_amount";
 
       const result = await schemeAccountModel.aggregate([
         {
@@ -2453,8 +2453,15 @@ class ReportRepository {
         },
         {
           $addFields: {
-            totalCollectedAmount: { $sum: fieldToSum },
+            totalCollectedAmount: {
+              $sum: `$Payments.${fieldToSum}`
+            }
           },
+        },
+        {
+          $match: {
+            totalCollectedAmount: { $gt: 0 }
+          }
         },
         {
           $lookup: {
@@ -2490,15 +2497,41 @@ class ReportRepository {
             totalCollectedAmount: { $sum: "$totalCollectedAmount" },
           },
         },
+        {
+          $match: {
+            totalCollectedAmount: { $gt: 0 }
+          }
+        },
         { $skip: skip },
         { $limit: limit },
       ]);
 
+      // For total count aggregation
       const totalCountAgg = await schemeAccountModel.aggregate([
         {
           $match: {
             id_scheme: { $in: schemes.map((scheme) => scheme._id) },
           },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            localField: "_id",
+            foreignField: "id_scheme_account",
+            as: "Payments",
+          },
+        },
+        {
+          $addFields: {
+            totalCollectedAmount: {
+              $sum: `$Payments.${fieldToSum}`
+            }
+          },
+        },
+        {
+          $match: {
+            totalCollectedAmount: { $gt: 0 }
+          }
         },
         {
           $count: "totalCount",
@@ -2785,94 +2818,187 @@ class ReportRepository {
     }
   }
 
-  async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId,type) {
+  // async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId,type) {
+  //   try { console.log(filter)
+  //     const totalCountAgg = await schemeAccountModel.aggregate([
+  //       {
+  //         $match: {
+  //           id_scheme: new mongoose.Types.ObjectId(schemeId),
+  //           ...filter,
+  //         },
+  //       },
+  //       {
+  //         $count: "totalCount",
+  //       },
+  //     ]);
+
+  //     const totalCount = totalCountAgg[0]?.totalCount || 0;
+  //     const totalPages = Math.ceil(totalCount / limit);
+  //     const currentPage = Math.floor(skip / limit) + 1;
+
+  //     const fieldToSum = type === 'weight' ? "$metal_weight" : "$payment_amount";
+  
+  //     const schemeDetails = await schemeAccountModel.aggregate([
+  //       {
+  //         $match: {
+  //           id_scheme: new mongoose.Types.ObjectId(schemeId),
+  //           ...filter,
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "customers",
+  //           localField: "id_customer",
+  //           foreignField: "_id",
+  //           as: "Customer",
+  //         },
+  //       },
+  //       { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "payments",
+  //           localField: "_id",
+  //           foreignField: "id_scheme_account",
+  //           pipeline: [
+  //             { 
+  //               $group: {
+  //                 _id: null,
+  //                 totalValue: { $sum: fieldToSum }
+  //               }
+  //             }
+  //           ],
+  //           as: "PaymentSummary",
+  //         },
+  //       },
+  //       {
+  //         $addFields: {
+  //           totalValue: { 
+  //             $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0] 
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           _id: 0,
+  //           customer: "$account_name",
+  //           mobile: "$Customer.mobile",
+  //           accounter_fname: "$Customer.firstname",
+  //           accounter_lname: "$Customer.lastname",
+  //           schemeAccNumber: "$scheme_acc_number",
+  //           joinedDate: "$start_date",
+  //           maturityDate: "$maturity_date",
+  //           paidInstallments: "$paid_installments",
+  //           totalValue:1 ,
+  //         },
+  //       },
+  //       { $skip: skip },
+  //       { $limit: limit },
+  //     ]);
+  
+  //     return {
+  //       data: schemeDetails,
+  //       totalPages,
+  //       totalCount,
+  //       currentPage,
+  //     };
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw err;
+  //   }
+  // }
+  async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId, type,from_date,to_date) {
     try {
-      const totalCountAgg = await schemeAccountModel.aggregate([
-        {
-          $match: {
-            id_scheme: new mongoose.Types.ObjectId(schemeId),
-            ...filter,
-          },
-        },
-        {
-          $count: "totalCount",
-        },
-      ]);
+        const paymentMatch = {};
+        if (from_date) paymentMatch.createdAt = { $gte: from_date};
+        if (to_date) paymentMatch.createdAt = { ...paymentMatch.createdAt, $lte: to_date };
 
-      const totalCount = totalCountAgg[0]?.totalCount || 0;
-      const totalPages = Math.ceil(totalCount / limit);
-      const currentPage = Math.floor(skip / limit) + 1;
+        const fieldToSum = type === 'weight' ? "metal_weight" : "payment_amount";
 
-      const fieldToSum = type === 'weight' ? "$metal_weight" : "$payment_amount";
-  
-      const schemeDetails = await schemeAccountModel.aggregate([
-        {
-          $match: {
-            id_scheme: new mongoose.Types.ObjectId(schemeId),
-            ...filter,
-          },
-        },
-        {
-          $lookup: {
-            from: "customers",
-            localField: "id_customer",
-            foreignField: "_id",
-            as: "Customer",
-          },
-        },
-        { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "payments",
-            localField: "_id",
-            foreignField: "id_scheme_account",
-            pipeline: [
-              { 
-                $group: {
-                  _id: null,
-                  totalValue: { $sum: fieldToSum }
+        const aggregationPipeline = [
+            {
+                $match: {
+                    id_scheme: new mongoose.Types.ObjectId(schemeId),
+                    ...filter
                 }
-              }
-            ],
-            as: "PaymentSummary",
-          },
-        },
-        {
-          $addFields: {
-            totalValue: { 
-              $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0] 
             },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            customer: "$account_name",
-            mobile: "$Customer.mobile",
-            accounter_fname: "$Customer.firstname",
-            accounter_lname: "$Customer.lastname",
-            schemeAccNumber: "$scheme_acc_number",
-            joinedDate: "$start_date",
-            maturityDate: "$maturity_date",
-            paidInstallments: "$paid_installments",
-            totalValue:1 ,
-          },
-        },
-        { $skip: skip },
-        { $limit: limit },
-      ]);
-  
-      return {
-        data: schemeDetails,
-        totalPages,
-        totalCount,
-        currentPage,
-      };
+            {
+                $lookup: {
+                    from: "customers",
+                    localField: "id_customer",
+                    foreignField: "_id",
+                    as: "Customer"
+                }
+            },
+            { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
+            {
+                $lookup: {
+                    from: "payments",
+                    let: { schemeAccountId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
+                                ...paymentMatch
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                totalValue: { $sum: `$${fieldToSum}` }
+                            }
+                        }
+                    ],
+                    as: "PaymentSummary"
+                }
+            },
+            {
+                $addFields: {
+                    totalValue: { $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0] }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    customer: "$account_name",
+                    mobile: "$Customer.mobile",
+                    accounter_fname: "$Customer.firstname",
+                    accounter_lname: "$Customer.lastname",
+                    schemeAccNumber: "$scheme_acc_number",
+                    joinedDate: "$start_date",
+                    maturityDate: "$maturity_date",
+                    paidInstallments: "$paid_installments",
+                    totalValue: 1,
+                    customerId:"$Customer._id"
+                }
+            },
+            { $skip: skip },
+            { $limit: limit }
+        ];
+
+        // Get paginated results
+        const schemeDetails = await schemeAccountModel.aggregate(aggregationPipeline);
+        console.log(schemeDetails,"d")
+
+        // Get total count (without the payment calculations for better performance)
+        const totalCount = await schemeAccountModel.countDocuments({
+            id_scheme: new mongoose.Types.ObjectId(schemeId),
+            filter
+        });
+
+        const totalPages = Math.ceil(totalCount / limit);
+        const currentPage = Math.floor(skip / limit) + 1;
+
+        return {
+            data: schemeDetails,
+            totalPages,
+            totalCount,
+            currentPage
+        };
     } catch (err) {
-      console.error(err);
-      throw err;
+        console.error(err);
+        throw err;
     }
-  }
+}
 
   async getActiveAccounts(filter, skip = 0, limit = 4) {
     try {

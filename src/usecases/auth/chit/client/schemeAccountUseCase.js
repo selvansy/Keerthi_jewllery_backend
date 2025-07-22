@@ -6,6 +6,8 @@ import WalletRepository from "../../../../infrastructure/repositories/chit/walle
 import isNotificationEnabled from "../../../../utils/notificationEnableChecket.js";
 import SaveNotificationUsecase from "./saveNotificationUsecase.js";
 import SaveNotificationRepo from "../../../../infrastructure/repositories/chit/saveNotificationRepo.js";
+import EmployeeRepository from "../../../../infrastructure/repositories/chit/EmployeeRepository.js";
+
 
 const customerRepo = new CustomerRepository();
 class SchemeAccountUseCase {
@@ -1071,11 +1073,15 @@ class SchemeAccountUseCase {
         return { success: false, message: "Failed to delete close account" };
       }
 
+      if(deletedData.previousStatus == 2){
+        return {success:false,message:"Operation not allowed"}
+      }
+
       const createdBy = tokenData.id_employee;
 
       const updateData = {
         closebill_id: 0,
-        status: 2,
+        status: deletedData.previousStatus,
         revert_date: new Date(),
         revert_by: createdBy,
         closed_date: null,
@@ -1118,6 +1124,18 @@ class SchemeAccountUseCase {
         };
       }
 
+      const employee = await this.employeeRepository.findOne({_id:tokenData?.id_employee,active:true,is_deleted:false})
+
+      if(!employee){
+        return {success:false,message:"Operation not permitted"}
+      }
+
+      const schemeAccount= await this.schemeAccountRepository.findById(id)
+
+      if(!schemeAccount){
+        return {success:false,message:"No scheme account found"}
+      }
+
       const {
         status,
         id_scheme_account,
@@ -1140,6 +1158,7 @@ class SchemeAccountUseCase {
         status,
         return_amount: total_paidamount,
         refund_paymenttype,
+        previousStatus:schemeAccount?.status
       };
 
       let newClosedAccount = "";
@@ -1183,7 +1202,7 @@ class SchemeAccountUseCase {
 
         const input = {
           recipients: [data.id_customer],
-          title: "Scheme Account Created",
+          title: "Scheme Account Closed",
           message: `Your ${schemeData.scheme_name} Scheme Account with KEERTHI JWELLERS has been successfully closed. We appreciate your association with us`,
           channel: "push",
         }
@@ -1671,12 +1690,6 @@ class SchemeAccountUseCase {
         let otp = await this.generateOtp();
         smsContent = smsContent.replace(/{{otp}}/g, otp);
 
-        // const urlToSend = await this.urlConstructor(
-        //   smsurl,
-        //   smsContent,
-        //   replacements
-        // );
-
         const saveData = {
           mobile: mobile,
           send_otptime: new Date(),
@@ -1700,7 +1713,8 @@ class SchemeAccountUseCase {
           customUrl: smsurl,
         };
 
-        const otpSent = await smsService._sendSMS(data.numbers, data.message, null, data.type, data.customUrl);
+        // const otpSent = await smsService._sendSMS(data.numbers, data.message, null, data.type, data.customUrl);
+        let otpSent =true
 
         if (otpSent) {
           return {
@@ -1711,7 +1725,7 @@ class SchemeAccountUseCase {
       } else {
         return { success: false, message: "Otp congfiguration is not enabled" };
       }
-      return { success: true, message: "Scheme account added successfully" };
+      // return { success: true, message: "" };
     } catch (error) {
       console.error(error);
     }

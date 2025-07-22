@@ -255,12 +255,6 @@ class SchemeAccountContorller{
                   message: 'Branch is required'
                 });
               }
-              // if (!return_amount && return_amount == "") {
-              //   return res.status(400).json({
-              //     status: 'Failed',
-              //     message: 'Close Amount is required'
-              //   });
-              // }
 
           const data = {...req.body};
           const token = req.user;
@@ -489,7 +483,7 @@ class SchemeAccountContorller{
       if(!schemenum){
           return res.status(400).json({message:'Provide scheme account number'})
       }
-      
+      console.log(cusid,schemenum)
     const result = await this.schemeAccountUseCase.getRevertedDetails(cusid,schemenum);
 
     if (!result.success) {

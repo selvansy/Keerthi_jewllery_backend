@@ -10,8 +10,6 @@ class ReportUseCase {
   addOneDay(dateStr) {
     const date = new Date(dateStr);
     date.setDate(date.getDate() + 1);
-    console.log("in",dateStr)
-    console.log("out",date.toISOString())
     return date.toISOString();
   }
 
@@ -31,22 +29,43 @@ class ReportUseCase {
     const pageNum = page ? parseInt(page) : 1;
     const pageSize = limit ? parseInt(limit) : 10;
     const skip = (pageNum - 1) * pageSize;
-    const filter = { is_deleted: false };
+    const filter = { is_deleted: false,active:true};
 
     let dateFilter = {};
   
+    // if (from_date && to_date) {
+    //   const startDate = new Date(from_date);
+    //   const endDate = new Date(to_date);
+  
+    //   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    //     throw new Error("Invalid date format.");
+    //   }
+  
+    //   startDate.setDate(startDate.getDate() + 1);
+    //   dateFilter.createdAt = {
+    //     $gte: this.addOneDay(startDate),
+    //     $lte: endDate,
+    //   };
+    // }
     if (from_date && to_date) {
-      const startDate = new Date(from_date);
-      const endDate = new Date(to_date);
-  
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        throw new Error("Invalid date format.");
+      if (new Date(to_date) < new Date(from_date)) {
+        throw new Error("End date cannot be before start date");
       }
-  
-      startDate.setDate(startDate.getDate() + 1);
+
+      const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+      const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
+
       dateFilter.createdAt = {
-        $gte: this.addOneDay(startDate),
+        $gte: startDate,
         $lte: endDate,
+      };
+    } else {
+      const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
+      const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
+
+      dateFilter.createdAt = {
+        $gte: startOfToday,
+        $lte: endOfToday,
       };
     }
 
@@ -520,26 +539,23 @@ class ReportUseCase {
     const query = { active: true,status:1};
 
     if (from_date && to_date) {
-      const startDate = new Date(from_date);
-      const endDate = new Date(to_date);
-
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        throw new Error("Invalid date format.");
+      if (new Date(to_date) < new Date(from_date)) {
+        throw new Error("End date cannot be before start date");
       }
 
-      query.createdAt = {
+      const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+      const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
+
+      query.updatedAt = {
         $gte: startDate,
         $lte: endDate,
       };
     } else {
-      const startOfToday = new Date();
-      startOfToday.setHours(0, 0, 0, 0);
-
-      const endOfToday = new Date();
-      endOfToday.setHours(23, 59, 59, 999);
+      const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
+      const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
 
       query.updatedAt = {
-        $gte: this.addOneDay(startOfToday),
+        $gte: startOfToday,
         $lte: endOfToday,
       };
     }
@@ -1013,26 +1029,30 @@ async getCustomerRefferal(bodyData) {
         is_deleted: false,
         paid_installments: { $gte: 1 },
       };
-  
+
+      let startDate= "";
+      let endDate= "";
+      let startOfToday="";
+      let endOfToday="";
       if (from_date && to_date) {
         if (new Date(to_date) < new Date(from_date)) {
           throw new Error("End date cannot be before start date");
         }
-        const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
-        const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
+         startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+         endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
   
-        query.createdAt = {
-          $gte: startDate,
-          $lte: endDate,
-        };
+        // query.createdAt = {
+        //   $gte: startDate,
+        //   $lte: endDate,
+        // };
       } else {
-        const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
-        const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
+         startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
+         endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
   
-        query.createdAt = {
-          $gte: startOfToday,
-          $lte: endOfToday,
-        };
+        // query.createdAt = {
+        //   $gte: startOfToday,
+        //   $lte: endOfToday,
+        // };
       }
   
       const documentSkip = (pageNum - 1) * pageSize;
@@ -1043,7 +1063,9 @@ async getCustomerRefferal(bodyData) {
         documentSkip, 
         documentLimit,
         id,
-        type
+        type,
+        startDate || startOfToday,
+        endDate ||  endOfToday
       );
 
       if (!Data) {

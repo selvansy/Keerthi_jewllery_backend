@@ -12,6 +12,10 @@ const closeaccbillSchema = new mongoose.Schema(
     //   ref: "PaymentMode",
     //   default:null
     // },
+    otpVerified:{
+      type:Boolean,
+      default:false
+    },
     comments: {
       type: String,
     },
@@ -35,6 +39,9 @@ const closeaccbillSchema = new mongoose.Schema(
     status: {
       type: Number,
       required: true,
+    },
+    previousStatus: {
+      type: Number
     },
     closed_by: {
       type: mongoose.Schema.Types.ObjectId,
