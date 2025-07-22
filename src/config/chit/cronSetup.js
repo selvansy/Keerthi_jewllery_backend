@@ -9,7 +9,7 @@ import smsService from './smsService.js';
 dotenv.config();
 
 const TIMEZONE = 'Asia/Kolkata';
-const PREPARATION_TIME = '05 11 * * *';
+const PREPARATION_TIME = '02 23 * * *';
 const NOTIFICATION_TIME = '06 11 * * *';
 
 class NotificationScheduler {
