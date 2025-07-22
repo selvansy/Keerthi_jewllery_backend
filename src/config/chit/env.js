@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const config = {
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT || 3000,
   MONGODB_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
@@ -22,6 +22,7 @@ const config = {
   API_VERSION:process.env.API_VERSION,
   ONE_SIGNAL_APP_ID: process.env.API_ID,
   ONE_SIGNAL_API_KEY: process.env.API_KEY,
+  CASH_FREE_URL:process.env.CASH_FREE_URL
 };
 
 export default config; 

@@ -47,7 +47,10 @@ class PaymentUseCase {
     this.notificationconfig = notificationconfig;
     this.saveNotificationRepo = new SaveNotificationRepo()
     this.saveNotificationUsecase = new SaveNotificationUsecase(this.saveNotificationRepo);
+    this.baseUrl = config.CASH_FREE_URL || "https://sandbox.cashfree.com";
+    this.url = `${this.baseUrl}/pg/orders`;
   }
+
 
   getDifferenceInMonths = (startDate, endDate) => {
     return moment(endDate).diff(moment(startDate), "months");
@@ -1696,7 +1699,7 @@ class PaymentUseCase {
   //!helper function for mobile
   async createOrder(data) {
     try {
-      const url = "https://sandbox.cashfree.com/pg/orders";
+      const url = `${this.url}`;
       const headers = {
         "Content-Type": "application/json",
         "x-client-id": config.CASHFREE_CLIENT_ID,
@@ -1711,26 +1714,9 @@ class PaymentUseCase {
     }
   }
 
-  // async getOrderStatus(orderid) {
-  //   try {
-  //     const url = `https://sandbox.cashfree.com/pg/orders/${orderid}/payments`;
-  //     const headers = {
-  //       "Content-Type": "application/json",
-  //       "x-client-id": config.CASHFREE_CLIENT_ID,
-  //       "x-client-secret": config.CASHFREE_SECRET,
-  //       "x-api-version": config.API_VERSION,
-  //     };
-
-  //     const response = await axios.get(url, { headers });
-
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
   async getOrderStatus(orderid) {
     try {
-      const url = `https://sandbox.cashfree.com/pg/orders/${orderid}`;
+      const url = `${this.url}/pg/orders/${orderid}`;
       const headers = {
         "Content-Type": "application/json",
         "x-client-id": config.CASHFREE_CLIENT_ID,
@@ -1748,7 +1734,7 @@ class PaymentUseCase {
 
   async terminateOrder(orderid) {
     try {
-      const url = `https://sandbox.cashfree.com/pg/orders/${orderid}`;
+      const url = `${this.url}/pg/orders/${orderid}`;
       const headers = {
         "Content-Type": "application/json",
         "x-client-id": config.CASHFREE_CLIENT_ID,

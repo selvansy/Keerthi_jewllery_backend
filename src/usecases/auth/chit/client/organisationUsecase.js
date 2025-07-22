@@ -7,18 +7,18 @@ class OrganisationUsecase {
 
     async s3Helper(clientId){
         try {
-          const s3settings = await this.s3Repo.getSettingByClient(clientId);
+          const s3settings = await this.s3Repo.getSetting();
     
-          if (!s3settings && s3settings.length < 0) {
+          if (!s3settings) {
             return { success: false, message: "S3 configuration not found" };
           }
 
           const configuration = {
-            s3key: s3settings[0].s3key,
-            s3secret: s3settings[0].s3secret,
-            s3bucket_name: s3settings[0].s3bucket_name,
-            s3display_url: s3settings[0].s3display_url,
-            region: s3settings[0].region,
+            s3key: s3settings.s3key,
+            s3secret: s3settings.s3secret,
+            s3bucket_name: s3settings.s3bucket_name,
+            s3display_url: s3settings.s3display_url,
+            region: s3settings.region,
           };
     
           return configuration

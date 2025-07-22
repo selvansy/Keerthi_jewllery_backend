@@ -88,6 +88,15 @@ const OrganisationSchema = new mongoose.Schema(
     background_color:{
       type:String
   },
+  longitude:{
+    type:String
+  },
+  latitude:{
+    type:String
+  },
+  mapUrl:{
+    type:String
+  }
   },
   {
     timestamps: true,
