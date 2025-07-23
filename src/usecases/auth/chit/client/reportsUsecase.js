@@ -1094,7 +1094,8 @@ async getCustomerRefferal(bodyData) {
       const pageSize = limit ? parseInt(limit) : 4;
 
       const query = {
-        status:0
+        status:0,
+        active:true
       };
 
       if (from_date && to_date) {
