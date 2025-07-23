@@ -7,13 +7,6 @@ class Validator {
       'string.empty': 'First name cannot be empty.',
       'string.base': 'First name must be a valid string.',
     }),
-
-    // lastname: Joi.string().trim().required().messages({
-    //   'any.required': 'Last name is required.',
-    //   'string.empty': 'Last name cannot be empty.',
-    //   'string.base': 'Last name must be a valid string.',
-    // }),
-
     address: Joi.string().trim().optional().messages({
       'any.required': 'Address is required.',
       'string.empty': 'Address cannot be empty.',
@@ -96,11 +89,6 @@ class Validator {
         'string.pattern.base':
           'Branch ID must be a valid 24-character MongoDB ObjectId.',
       }),
-
-    // date_of_birth: Joi.date().optional().max('now').messages({
-    //   'date.base': 'Date of birth must be a valid date.',
-    //   'date.max': 'Date of birth cannot be in the future.',
-    // }),
 
     mpin: Joi.string()
       .trim()

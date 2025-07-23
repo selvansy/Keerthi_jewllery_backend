@@ -1713,8 +1713,7 @@ class SchemeAccountUseCase {
           customUrl: smsurl,
         };
 
-        // const otpSent = await smsService._sendSMS(data.numbers, data.message, null, data.type, data.customUrl);
-        let otpSent =true
+        const otpSent = await smsService._sendSMS(data.numbers, data.message, null, data.type, data.customUrl);
 
         if (otpSent) {
           return {
@@ -1723,7 +1722,7 @@ class SchemeAccountUseCase {
           };
         }
       } else {
-        return { success: false, message: "Otp congfiguration is not enabled" };
+        return { success: false, message: "Otp congfiguration is not enabled,Failed to send otp" };
       }
       // return { success: true, message: "" };
     } catch (error) {

@@ -1191,6 +1191,7 @@ class PaymentUseCase {
 
   async processPayment(paymentArray, token = null, extraData = null) {
     try {
+      console.log(extraData)
       if (!Array.isArray(paymentArray) || paymentArray.length === 0) {
         return {
           success: false,
@@ -1242,14 +1243,16 @@ class PaymentUseCase {
 
         const lastPaid = lastPaidData ? new Date(lastPaidData.createdAt) : null;
 
-        if (
-          lastPaid &&
-          this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
-        ) {
-          return {
-            success: false,
-            message: "Already completed today's payment for one of the schemes",
-          };
+        if(extraData?.digigold && extraData?.digigold == false){
+          if (
+            lastPaid &&
+            this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
+          ) {
+            return {
+              success: false,
+              message: "Already completed today's payment for one of the schemes",
+            };
+          }
         }
 
         const totalInstallments =
@@ -1259,7 +1262,7 @@ class PaymentUseCase {
           
         if (
           Number(totalInstallments) + Number(data.installments) >
-          Number(schemeData.total_installments)
+          Number(schemeData.total_installments) && extraData.digigold == false
         ) {
           return {
             success: false,
@@ -1273,7 +1276,7 @@ class PaymentUseCase {
 
         if (
           Number(monthlyPayments) + Number(data.installments) >
-          Number(schemeData.limit_installment)
+          Number(schemeData.limit_installment) && extraData.digigold == false
         ) {
           return { success: false, message: "Monthly payment limit reached" };
         }
@@ -1285,7 +1288,7 @@ class PaymentUseCase {
           diffMonth = this.getDifferenceInMonths(lastDate, currentDate);
         }
 
-        if (schemeData.limit_notpaid > 0 && diffMonth > 5) {
+        if (schemeData.limit_notpaid > 0 && diffMonth > 5 && extraData.digigold == false) {
           return {
             success: false,
             message:
@@ -1569,11 +1572,12 @@ class PaymentUseCase {
         convenienceFee,
         amount,
         weight,
-        metalRate,
+        metal_rate,
         grandTotal,
         platform,
         schemeType,
       } = data;
+      console.log(data)
 
       const schemeAccount = await this.schemeAccountRepository.findOne({
         id_customer: customerId,
@@ -1649,6 +1653,8 @@ class PaymentUseCase {
       await this.schemeAccountRepository.updateSchemNumber(newSchemeAcc._id, {
         scheme_acc_number: schemeAccNumber,
       });
+     
+      const metalWeightSaved= Number(amount)/Number(metal_rate)
 
       const paymentData = {
         schemes: [
@@ -1656,8 +1662,8 @@ class PaymentUseCase {
             id_scheme_account: newSchemeAcc._id || schemeAccount._id,
             amount: amount,
             convenience_fee: convenienceFee,
-            weight: weight,
-            metal_rate: metalRate,
+            weight: Number(metalWeightSaved.toFixed(3)),
+            metal_rate: metal_rate,
           },
         ],
         grandTotal: grandTotal,
@@ -1671,8 +1677,8 @@ class PaymentUseCase {
           id_scheme_account: newSchemeAcc._id || schemeAccount._id,
           amount: amount,
           convenience_fee: convenienceFee,
-          weight: weight,
-          metal_rate: metalRate,
+          weight: Number(metalWeightSaved.toFixed(3)),
+          metal_rate: metal_rate,
         },
       ];
 
@@ -1699,6 +1705,7 @@ class PaymentUseCase {
   //!helper function for mobile
   async createOrder(data) {
     try {
+      console.log(this.url)
       const url = `${this.url}`;
       const headers = {
         "Content-Type": "application/json",
@@ -1716,7 +1723,7 @@ class PaymentUseCase {
 
   async getOrderStatus(orderid) {
     try {
-      const url = `${this.url}/pg/orders/${orderid}`;
+      const url = `${this.url}/${orderid}`;
       const headers = {
         "Content-Type": "application/json",
         "x-client-id": config.CASHFREE_CLIENT_ID,
@@ -1734,7 +1741,7 @@ class PaymentUseCase {
 
   async terminateOrder(orderid) {
     try {
-      const url = `${this.url}/pg/orders/${orderid}`;
+      const url = `${this.url}/${orderid}`;
       const headers = {
         "Content-Type": "application/json",
         "x-client-id": config.CASHFREE_CLIENT_ID,

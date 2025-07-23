@@ -105,12 +105,10 @@ const customerSchema = new mongoose.Schema({
   },
   pan: { 
     type: String,
-    required: false,
     default:null
   },
   aadharNumber: {
     type: String,
-    required: false,
     default:null
   },
   username: {
