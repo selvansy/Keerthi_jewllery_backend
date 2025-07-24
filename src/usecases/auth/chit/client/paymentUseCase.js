@@ -479,6 +479,7 @@ class PaymentUseCase {
           total_amt: totalAmount,
           paymentModeName: paymentMode.mode_name,
           metal_weight: metalWeight,
+          installment:Number(schemeAccData.paid_installments) + Number(data.installments)
         };
 
         const savedPayment = await this.paymentRepository.addPayment(
@@ -1191,7 +1192,6 @@ class PaymentUseCase {
 
   async processPayment(paymentArray, token = null, extraData = null) {
     try {
-      console.log(extraData)
       if (!Array.isArray(paymentArray) || paymentArray.length === 0) {
         return {
           success: false,
@@ -1363,7 +1363,9 @@ class PaymentUseCase {
           id_scheme: schemeAccData.id_scheme,
           payment_amount: data.amount,
           metal_weight: data.weight || 0,
+          installment: Number(schemeAccData.paid_installments) + Number(data?.paid_installments)
         };
+
 
         const savedPayment = await this.paymentRepository.addPayment(
           paymentData
@@ -1852,6 +1854,7 @@ class PaymentUseCase {
   //     throw error;
   //   }
   // }
+  
   async completePayment(data) {
     try {
       const orderId = data?.data?.order?.order_id;

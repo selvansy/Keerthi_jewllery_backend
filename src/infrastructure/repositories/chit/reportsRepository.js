@@ -1198,7 +1198,7 @@ class ReportRepository {
                   id_transaction: 1,
                   payment_receipt: 1,
                   createdAt: 1,
-                  totalPaidInstallment: "$SchemeAccount.paid_installments",
+                  totalPaidInstallment: "$installment",
                 },
               },
             ],
@@ -1533,9 +1533,9 @@ class ReportRepository {
                   customer_mobile: "$Customer.mobile",
                   classification_name: "$Classification.name",
                   scheme_name: "$Scheme.scheme_name",
-                  total_paid_installments: 1,
-                  totalPaidAmount: 1,
-                  totalPaidWeight: 1,
+                  total_paid_installments: "$paid_installments",
+                  totalPaidAmount: "$amount",
+                  totalPaidWeight: "$weight",
                   closed_date: "$CloseBill.createdAt",
                   close_amount: "$CloseBill.amount",
                   bill_no: "$CloseBill.bill_no",
@@ -2437,6 +2437,7 @@ class ReportRepository {
 
       const fieldToSum = type === 'weight' ? "metal_weight" : "payment_amount";
 
+      // Main aggregation pipeline
       const result = await schemeAccountModel.aggregate([
         {
           $match: {
@@ -2506,7 +2507,7 @@ class ReportRepository {
         { $limit: limit },
       ]);
 
-      // For total count aggregation
+      // For total count aggregation - modified to match the same criteria as the main query
       const totalCountAgg = await schemeAccountModel.aggregate([
         {
           $match: {
@@ -2534,8 +2535,13 @@ class ReportRepository {
           }
         },
         {
-          $count: "totalCount",
+          $group: {
+            _id: "$id_scheme"
+          }
         },
+        {
+          $count: "totalCount"
+        }
       ]);
 
       const totalCount = totalCountAgg[0]?.totalCount || 0;
@@ -2908,6 +2914,7 @@ class ReportRepository {
   // }
   async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId, type,from_date,to_date) {
     try {
+      console.log(from_date,to_date)
         const paymentMatch = {};
         if (from_date) paymentMatch.createdAt = { $gte: from_date};
         if (to_date) paymentMatch.createdAt = { ...paymentMatch.createdAt, $lte: to_date };
@@ -2979,11 +2986,12 @@ class ReportRepository {
         const schemeDetails = await schemeAccountModel.aggregate(aggregationPipeline);
         console.log(schemeDetails,"d")
 
-        // Get total count (without the payment calculations for better performance)
+       
         const totalCount = await schemeAccountModel.countDocuments({
             id_scheme: new mongoose.Types.ObjectId(schemeId),
             filter
         });
+        console.log(totalCount)
 
         const totalPages = Math.ceil(totalCount / limit);
         const currentPage = Math.floor(skip / limit) + 1;

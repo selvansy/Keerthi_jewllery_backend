@@ -149,6 +149,10 @@ const paymentSchema = new Schema({
         creditedBonus:{
             type:Number,
             default:0
+        },
+        installment:{
+            type:Number,
+            default:1
         }
     },
     {
