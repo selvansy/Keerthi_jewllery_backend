@@ -201,7 +201,7 @@ class DashboardRepository {
         totalCustomers,
         totalGoldSave: payment[0]?.totalMetalWeight,
         totalAmount: payment[0]?.totalAmount,
-        overDues: overDues[0]?.overdueCount,
+        // overDues: overDues[0]?.overdueCount,
       };
       return data;
     } catch (err) {
@@ -209,6 +209,112 @@ class DashboardRepository {
       throw new Error("Error fetching dashboard data");
     }
   }
+
+  async overdueCalculation() {
+    try {
+      const result = await schemeAccountModel.aggregate([
+        {
+          $match: {
+            status: 0,
+            active: true,
+            is_deleted: false
+          }
+        },
+        {
+          $lookup: {
+            from: "schemes",
+            localField: "id_scheme",
+            foreignField: "_id",
+            as: "scheme"
+          }
+        },
+        { $unwind: "$scheme" },
+        {
+          $addFields: {
+            currentDate: new Date(),
+            startDateObj: "$start_date",
+            schemeInstallmentType: "$scheme.installment_type"
+          }
+        },
+        {
+          $addFields: {
+            expectedDueDates: {
+              $let: {
+                vars: {
+                  startDate: "$startDateObj",
+                  totalInstallments: "$total_installments",
+                  installmentType: "$schemeInstallmentType"
+                },
+                in: {
+                  $map: {
+                    input: { $range: [0, "$$totalInstallments"] },
+                    as: "i",
+                    in: {
+                      $dateAdd: {
+                        startDate: "$$startDate",
+                        unit: {
+                          $switch: {
+                            branches: [
+                              { case: { $eq: ["$$installmentType", 1] }, then: "month" },
+                              { case: { $eq: ["$$installmentType", 2] }, then: "week" },
+                              { case: { $eq: ["$$installmentType", 3] }, then: "day" },
+                              { case: { $eq: ["$$installmentType", 4] }, then: "year" }
+                            ],
+                            default: "month"
+                          }
+                        },
+                        amount: "$$i"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            expectedInstallmentCount: {
+              $size: {
+                $filter: {
+                  input: "$expectedDueDates",
+                  as: "dueDate",
+                  cond: { $lte: ["$$dueDate", "$currentDate"] }
+                }
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            overdueInstallments: {
+              $cond: {
+                if: { $gt: ["$expectedInstallmentCount", "$paid_installments"] },
+                then: { $subtract: ["$expectedInstallmentCount", "$paid_installments"] },
+                else: 0
+              }
+            }
+          }
+        },
+        {
+          $match: {
+            overdueInstallments: { $gt: 0 }
+          }
+        },
+        {
+          $count: "totalOverdueAccounts"
+        }
+      ]);
+  
+      const count = result.length > 0 ? result[0].totalOverdueAccounts : 0;
+      return { totalOverdueAccounts: count };
+  
+    } catch (error) {
+      console.error("Error in overdueCalculation:", error);
+      throw error;
+    }
+  }
+  
 
   async getAccountStat(customFilter) {
     try {

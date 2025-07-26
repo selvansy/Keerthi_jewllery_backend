@@ -1,9 +1,11 @@
 import mongoose, { isValidObjectId } from "mongoose";
+import SchemeAccountRepository from "../../../../infrastructure/repositories/chit/schemeAccountRepository.js";
 
 class DashboardUseCase {
   constructor(branchRepository, dashboardRepository) {
     this.branchRepository = branchRepository;
     this.dashboardRepository = dashboardRepository;
+    this.schemeaccRepo = new SchemeAccountRepository()
   }
 
   async getAllOver(data) {
@@ -23,9 +25,14 @@ class DashboardUseCase {
       }
 
       const overAllData = await this.dashboardRepository.getAllOver(filter);
+
       if(overAllData){
+        const overDueData = await this.dashboardRepository.overdueCalculation()
+        overAllData.overDues = overDueData.totalOverdueAccounts
+
         return {success:true,data:overAllData,message:"Dashboard Data fetched successfully"}
       }
+
       return {success:false,message:"Failed to fetch data"}
     } catch (err) {
       return { success: false, message: "Failed to get allover data" };

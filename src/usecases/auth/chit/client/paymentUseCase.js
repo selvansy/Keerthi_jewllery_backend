@@ -324,17 +324,6 @@ class PaymentUseCase {
 
       return lastPayment ?  lastPayment.payment_receipt + 1 : 1
 
-      // if (generalSetting.display_receiptno) {
-      //   return lastPayment
-      //     ? lastPayment.payment_receipt + 1
-      //     : scheme.payment_receipt;
-      // } else if (generalSetting.display_receiptno === 4) {
-      //   return recieptNumber;
-      // } else {
-      //   return lastPayment
-      //     ? lastPayment.payment_receipt + 1
-      //     : scheme.payment_receipt;
-      // }
     } catch (error) {
       console.error("Error updating payment receipt:", error.message);
       throw error;
@@ -372,12 +361,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          // if (todatPaidorNot) {
-          //   return {
-          //     status: false,
-          //     message: "Already completed today's payment",
-          //   };
-          // }
+          if (todatPaidorNot) {
+            return {
+              status: false,
+              message: "Already completed today's payment",
+            };
+          }
         }
 
         const totalInstallments =
@@ -385,12 +374,12 @@ class PaymentUseCase {
             data.id_scheme_account
           );
 
-        // if (
-        //   Number(totalInstallments) + Number(data.installments) >
-        //   Number(schemeData.total_installments)
-        // ) {
-        //   return { status: false, message: "Scheme installment limit reached" };
-        // }
+        if (
+          Number(totalInstallments) + Number(data.installments) >
+          Number(schemeData.total_installments)
+        ) {
+          return { status: false, message: "Scheme installment limit reached" };
+        }
 
         const monthlyPaiments = await this.paymentRepository.getMonthlyPayments(
           {

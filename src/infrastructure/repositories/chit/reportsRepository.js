@@ -1218,9 +1218,163 @@ class ReportRepository {
     }
   }
 
+  // async getPaymentLedger(query = {}, skip = 0, limit = 10) {
+  //   try {
+  //     const basePipeline = [
+  //       { $match: query },
+  //       {
+  //         $lookup: {
+  //           from: "schemes",
+  //           localField: "id_scheme",
+  //           foreignField: "_id",
+  //           as: "Scheme",
+  //         },
+  //       },
+  //       { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "paymentmodes",
+  //           foreignField: "_id",
+  //           localField: "payment_mode",
+  //           as: "PaymentMode",
+  //         },
+  //       },
+  //       { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
+  //     ];
+
+  //     // Create data pipeline
+  //     const dataPipeline = [...basePipeline];
+      
+  //     if (query.payment_mode) {
+  //       dataPipeline.push(
+  //         {
+  //           $group: {
+  //             _id: {
+  //               schemeId: "$id_scheme",
+  //               schemeName: "$Scheme.scheme_name",
+  //             },
+  //             totalAmount: { $sum: "$payment_amount" },
+  //             paymentCount: { $sum: 1 },
+  //             paymentMode: { $first: "$PaymentMode" },
+  //           },
+  //         },
+  //         {
+  //           $project: {
+  //             _id: 0,
+  //             schemeId: "$_id.schemeId",
+  //             schemeName: "$_id.schemeName",
+  //             totalAmount: 1,
+  //             paymentCount: 1,
+  //             paymentMode: {
+  //               modeId: "$paymentMode._id",
+  //               modeName: "$paymentMode.mode_name",
+  //             },
+  //           },
+  //         },
+  //         { $sort: { totalAmount: -1 } },
+  //         { $skip: skip },
+  //         { $limit: limit }
+  //       );
+  //     } else {
+  //       dataPipeline.push(
+  //         {
+  //           $group: {
+  //             _id: {
+  //               schemeId: "$id_scheme",
+  //               schemeName: "$Scheme.scheme_name",
+  //               paymentModeId: "$payment_mode",
+  //               paymentModeName: "$PaymentMode.mode_name",
+  //             },
+  //             totalAmount: { $sum: "$payment_amount" },
+  //             paymentCount: { $sum: 1 },
+  //           },
+  //         },
+  //         {
+  //           $group: {
+  //             _id: {
+  //               schemeId: "$_id.schemeId",
+  //               schemeName: "$_id.schemeName",
+  //             },
+  //             paymentModes: {
+  //               $push: {
+  //                 modeId: "$_id.paymentModeId",
+  //                 modeName: "$_id.paymentModeName",
+  //                 totalAmount: "$totalAmount",
+  //                 paymentCount: "$paymentCount",
+  //               },
+  //             },
+  //             grandTotal: { $sum: "$totalAmount" },
+  //           },
+  //         },
+  //         {
+  //           $project: {
+  //             _id: 0,
+  //             schemeId: "$_id.schemeId",
+  //             schemeName: "$_id.schemeName",
+  //             paymentModes: 1,
+  //             grandTotal: 1,
+  //           },
+  //         },
+  //         { $sort: { grandTotal: -1 } },
+  //         { $skip: skip },
+  //         { $limit: limit }
+  //       );
+  //     }
+
+  //     // Create count pipeline that matches the final grouped structure
+  //     const countPipeline = [...basePipeline];
+  //     if (query.payment_mode) {
+  //       countPipeline.push(
+  //         {
+  //           $group: {
+  //             _id: {
+  //               schemeId: "$id_scheme",
+  //               schemeName: "$Scheme.scheme_name",
+  //             },
+  //           },
+  //         },
+  //         { $count: "totalDocuments" }
+  //       );
+  //     } else {
+  //       countPipeline.push(
+  //         {
+  //           $group: {
+  //             _id: {
+  //               schemeId: "$id_scheme",
+  //               schemeName: "$Scheme.scheme_name",
+  //             },
+  //           },
+  //         },
+  //         { $count: "totalDocuments" }
+  //       );
+  //     }
+
+  //     const [data, countResult] = await Promise.all([
+  //       SchemePayment.aggregate(dataPipeline),
+  //       SchemePayment.aggregate(countPipeline)
+  //     ]);
+
+  //     const totalDocuments = countResult[0]?.totalDocuments || 0;
+  //     const totalPages = Math.ceil(totalDocuments / limit);
+  //     const currentPage = Math.floor(skip / limit) + 1;
+  //     console.log(data)
+
+  //     return {
+  //       data,
+  //       totalDocuments,
+  //       totalPages,
+  //       currentPage,
+  //       limit,
+  //       hasMore: skip + limit < totalDocuments,
+  //     };
+  //   } catch (err) {
+  //     console.error(err)
+  //     throw err;
+  //   }
+  // }
   async getPaymentLedger(query = {}, skip = 0, limit = 10) {
     try {
-      const pipeline = [
+      const basePipeline = [
         { $match: query },
         {
           $lookup: {
@@ -1242,24 +1396,27 @@ class ReportRepository {
         { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
       ];
 
-      const countPipeline = [...pipeline];
-      countPipeline.push({ $count: "totalDocuments" });
-      const countResult = await SchemePayment.aggregate(countPipeline);
-      const totalDocuments = countResult[0]?.totalDocuments || 0;
-      const totalPages = Math.ceil(totalDocuments / limit);
-      const currentPage = Math.floor(skip / limit) + 1;
-
+      // Create data pipeline
+      const dataPipeline = [...basePipeline];
+      
       if (query.payment_mode) {
-        pipeline.push(
+        dataPipeline.push(
           {
             $group: {
               _id: {
                 schemeId: "$id_scheme",
                 schemeName: "$Scheme.scheme_name",
               },
-              totalAmount: { $sum: "$payment_amount" },
+              grandTotal: { $sum: "$payment_amount" },
+              paymentModes: {
+                $push: {
+                  modeId: "$payment_mode",
+                  modeName: "$PaymentMode.mode_name",
+                  totalAmount: "$payment_amount",
+                  paymentCount: 1,
+                }
+              },
               paymentCount: { $sum: 1 },
-              paymentMode: { $first: "$PaymentMode" },
             },
           },
           {
@@ -1267,20 +1424,16 @@ class ReportRepository {
               _id: 0,
               schemeId: "$_id.schemeId",
               schemeName: "$_id.schemeName",
-              totalAmount: 1,
-              paymentCount: 1,
-              paymentMode: {
-                modeId: "$paymentMode._id",
-                modeName: "$paymentMode.mode_name",
-              },
+              paymentModes: 1,
+              grandTotal: 1,
             },
           },
-          { $sort: { totalAmount: -1 } },
+          { $sort: { grandTotal: -1 } },
           { $skip: skip },
           { $limit: limit }
         );
       } else {
-        pipeline.push(
+        dataPipeline.push(
           {
             $group: {
               _id: {
@@ -1325,7 +1478,42 @@ class ReportRepository {
         );
       }
 
-      const data = await SchemePayment.aggregate(pipeline);
+      // Create count pipeline that matches the final grouped structure
+      const countPipeline = [...basePipeline];
+      if (query.payment_mode) {
+        countPipeline.push(
+          {
+            $group: {
+              _id: {
+                schemeId: "$id_scheme",
+                schemeName: "$Scheme.scheme_name",
+              },
+            },
+          },
+          { $count: "totalDocuments" }
+        );
+      } else {
+        countPipeline.push(
+          {
+            $group: {
+              _id: {
+                schemeId: "$id_scheme",
+                schemeName: "$Scheme.scheme_name",
+              },
+            },
+          },
+          { $count: "totalDocuments" }
+        );
+      }
+
+      const [data, countResult] = await Promise.all([
+        SchemePayment.aggregate(dataPipeline),
+        SchemePayment.aggregate(countPipeline)
+      ]);
+
+      const totalDocuments = countResult[0]?.totalDocuments || 0;
+      const totalPages = Math.ceil(totalDocuments / limit);
+      const currentPage = Math.floor(skip / limit) + 1;
 
       return {
         data,
@@ -1336,6 +1524,7 @@ class ReportRepository {
         hasMore: skip + limit < totalDocuments,
       };
     } catch (err) {
+      console.error(err)
       throw err;
     }
   }
@@ -2348,39 +2537,42 @@ class ReportRepository {
                   },
                   customerMobile: "$Customer.mobile",
                   referredDate: "$SchemeAccount.createdAt",
-                  ReferralBonuses: {
-                    $map: {
-                      input: "$Payments",
-                      as: "payment",
-                      in: {
-                        amount: {
-                          $round: [
-                            { $multiply: ["$$payment.payment_amount", 0.05] },
-                            2,
-                          ],
-                        },
-                        payment_date: "$$payment.createdAt",
-                        payment_id: "$$payment._id",
-                      },
-                    },
-                  },
-                  totalBonus: {
-                    $round: [
-                      {
-                        $reduce: {
-                          input: "$Payments",
-                          initialValue: 0,
-                          in: {
-                            $add: [
-                              "$$value",
-                              { $multiply: ["$$this.payment_amount", 0.05] },
-                            ],
-                          },
-                        },
-                      },
-                      2,
-                    ],
-                  },
+                  ReferralBonuses:"$credited_amount"
+                  //  {
+                  //   $map: {
+                  //     input: "$Payments",
+                  //     as: "payment",
+                  //     in: {
+                  //       amount: {
+                  //         $round: [
+                  //           { $multiply: ["$$payment.payment_amount", 0.05] },
+                  //           2,
+                  //         ],
+                  //       },
+                  //       payment_date: "$$payment.createdAt",
+                  //       payment_id: "$$payment._id",
+                  //     },
+                  //   },
+                  // }
+                  ,
+                  totalBonus:"$credited_amount",
+                  //  {
+                  //   $round: [
+                  //     {
+                  //       $reduce: {
+                  //         input: "$Payments",
+                  //         initialValue: 0,
+                  //         in: {
+                  //           $add: [
+                  //             "$$value",
+                  //             { $multiply: ["$$this.payment_amount", 0.05] },
+                  //           ],
+                  //         },
+                  //       },
+                  //     },
+                  //     2,
+                  //   ],
+                  // },
                 },
               },
               { $skip: skip || 0 },
