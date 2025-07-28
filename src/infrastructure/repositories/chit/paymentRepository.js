@@ -338,8 +338,8 @@ class PaymentRepository {
 
   async getMonthlyPayments(data) {
     try {
-      const objectId = new mongoose.Types.ObjectId(data.id_scheme_account);
-      const inputDate = new Date(data.date);
+      const objectId = new mongoose.Types.ObjectId(data.id);
+      const inputDate = data.date
 
       const startOfMonth = new Date(
         inputDate.getFullYear(),
@@ -358,7 +358,7 @@ class PaymentRepository {
             active: true,
             payment_status: 1,
             id_scheme_account: objectId,
-            createdAt: { $gte: startOfMonth, $lt: endOfMonth },
+            date_payment: { $gte: startOfMonth, $lt: endOfMonth },
           },
         },
         {

@@ -361,17 +361,17 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
-          }
+          // if (todatPaidorNot) {
+          //   return {
+          //     status: false,
+          //     message: "Already completed today's payment",
+          //   };
+          // }
         }
 
         const totalInstallments =
           await this.paymentRepository.totalInstallments(
-            data.id_scheme_account
+            data.id_scheme_account 
           );
 
         if (
