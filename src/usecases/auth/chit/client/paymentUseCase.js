@@ -1232,14 +1232,23 @@ class PaymentUseCase {
 
         const lastPaid = lastPaidData ? new Date(lastPaidData.createdAt) : null;
 
-        if(extraData?.digigold && extraData?.digigold == false){
+        if(extraData?.digigold !== true){
           if (
             lastPaid &&
             this.toDateOnlyString(lastPaid) === this.toDateOnlyString(todayDate)
           ) {
+            const schemeLength = paymentArray.length
+           
+            let message =""
+            if(schemeLength == 1){
+              message = "Aleady completed today's payment"
+            }else{
+              message = "Already completed today's payment for one of the schemes"
+            }
+
             return {
               success: false,
-              message: "Already completed today's payment for one of the schemes",
+              message:message,
             };
           }
         }
@@ -1251,7 +1260,7 @@ class PaymentUseCase {
           
         if (
           Number(totalInstallments) + Number(data.installments) >
-          Number(schemeData.total_installments) && extraData.digigold == false
+          Number(schemeData.total_installments) &&  extraData?.digigold !== true
         ) {
           return {
             success: false,
@@ -1265,7 +1274,7 @@ class PaymentUseCase {
 
         if (
           Number(monthlyPayments) + Number(data.installments) >
-          Number(schemeData.limit_installment) && extraData.digigold == false
+          Number(schemeData.limit_installment) &&  extraData?.digigold !== true
         ) {
           return { success: false, message: "Monthly payment limit reached" };
         }
@@ -1277,7 +1286,7 @@ class PaymentUseCase {
           diffMonth = this.getDifferenceInMonths(lastDate, currentDate);
         }
 
-        if (schemeData.limit_notpaid > 0 && diffMonth > 5 && extraData.digigold == false) {
+        if (schemeData.limit_notpaid > 0 && diffMonth > 5 &&  extraData?.digigold !== true) {
           return {
             success: false,
             message:
@@ -1295,7 +1304,6 @@ class PaymentUseCase {
         platform: extraData.platform,
         total_amount: extraData.grandTotal,
         trans_date: new Date(),
-        // payment_mode: firstPayment.payment_mode,
         mobile: token.mobile || "",
         payment_status: 1,
       };

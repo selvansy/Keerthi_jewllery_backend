@@ -78,27 +78,7 @@ const customerSchema = new mongoose.Schema({
     required: false,
     default:null
   },
-  // nominee_name: {
-  //   type: String,
-  //   required: false,
-  //   default:null
-  // },
-  // nominee_relationship: {
-  //   type: String,
-  //   required: false,
-  //   default:null
-  // },
-  // nominee_mobile: {
-  //   type: String,
-  //   required: false,
-  //   default:''
-  // },
   cus_img: {
-    type: String,
-    required: false,
-    default:null
-  },
-  id_proof: {
     type: String,
     required: false,
     default:null
@@ -147,39 +127,10 @@ const customerSchema = new mongoose.Schema({
     enum: [0, 1, 2],
     default:0
   },
-  notification: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
-  // bank_accountname: {
-  //   type: String,
-  //   required: false,
-  //   default:null
-  // },
-  // bank_accno: { 
-  //   type: String,
-  //   required: false,
-  //   default:null
-  // },
-  // bank_ifsccode: {
-  //   type: String,
-  //   required: false,
-  //   default:null
-  // },
-  // bank_branchname: {
-  //   type: String,
-  //   required: false,
-  //   default:null
-  // },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
     ref:'Employee',
   },
-  // subscription_id: {
-  //   type: String,
-  //   default:null
-  // },
   referral_id: {
     type: mongoose.Schema.Types.ObjectId,
     default: null,
@@ -200,10 +151,6 @@ const customerSchema = new mongoose.Schema({
     type:Boolean,
     default:false
   },
-  // fcmToken:{
-  //   type:String,
-  //   default:null
-  // }
 },{
   timestamps:true
 });
