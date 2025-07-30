@@ -128,11 +128,19 @@ class SchemeAccountRepository {
         {
           $lookup: {
             from: "metalrates",
-            let: { metalId: "$id_scheme.id_metal" },
+            let: {
+              metalId: "$id_scheme.id_metal",
+              purityId: "$id_scheme.id_purity"
+            },
             pipeline: [
               {
                 $match: {
-                  $expr: { $eq: ["$material_type_id", "$$metalId"] }
+                  $expr: {
+                    $and: [
+                      { $eq: ["$material_type_id", "$$metalId"] },
+                      { $eq: ["$purity_id", "$$purityId"] }
+                    ]
+                  }
                 }
               },
               { $sort: { createdAt: -1 } },
@@ -186,6 +194,7 @@ class SchemeAccountRepository {
           }
         }
       ]);
+      console.log(data,"kd")
   
       return data;
   
