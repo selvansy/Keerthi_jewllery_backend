@@ -106,7 +106,7 @@ export const getPaymentTypeData = () => {
 export const getFundTypeData = () => {
   return [
     { id: 1, name: "Normal Scheme" },
-    { id: 2, name: "Fund Scheme" },
+    // { id: 2, name: "Fund Scheme" },
   ];
 };
 

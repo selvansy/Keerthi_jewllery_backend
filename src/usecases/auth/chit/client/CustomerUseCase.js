@@ -1068,7 +1068,7 @@ class CustomerUseCase {
       const existingCustomer = await this.customerRepository.getCustomerDataLess(idCustomer)
 
       if(existingCustomer.is_deleted){
-        return {success:false,message:"Deleted customer operation not allowed"}
+        return {success:false,message:"Deleted customer,operation not allowed"}
       }
 
       if(!existingCustomer.active){
