@@ -13,7 +13,7 @@ class DashboardRepository {
           customerModel.find(filter).countDocuments(),
 
           await paymentModel.aggregate([
-            { $match: filter },
+           { $match: { ...filter, payment_status: 1 } },
             {
               $lookup: {
                 from: "schemes",
@@ -321,7 +321,7 @@ class DashboardRepository {
       const [newCustomer, paymentData, schemeData] = await Promise.all([
         await customerModel.countDocuments(customFilter),
         await paymentModel.aggregate([
-          { $match: customFilter },
+          { $match: {...customFilter,payment_status:1} },
           {
             $group: {
               _id: null,
@@ -521,7 +521,7 @@ class DashboardRepository {
   async getPaymentHistory(skip, pageSize,filter) {
     try {
       const paymentData = await paymentModel
-        .find(filter)
+        .find({...filter,payment_status:1})
         .populate({
           path: 'id_customer',
           select: 'firstname lastname'  
@@ -561,7 +561,7 @@ class DashboardRepository {
   async paymentModeData(filter){
     try{
       const Data = await paymentModel.aggregate([
-        { $match: filter },
+        { $match: {...filter,payment_status:1} },
       
         {
           $lookup: {
