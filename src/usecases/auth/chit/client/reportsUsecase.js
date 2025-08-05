@@ -288,7 +288,7 @@ class ReportUseCase {
     search,
   }) {
     try {
-      const query = { active: true, is_deleted: false };
+      const query = { active: true, is_deleted: false,payment_status:1};
   
       // Date range handling with timezone adjustment
       if (from_date && to_date) {
