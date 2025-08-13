@@ -258,15 +258,245 @@ class ReportRepository {
     }
   }
 
+  // async pendingDuePayment(page, limit, query, sort = {}) {
+  //   try {
+  //     console.log(query
+        
+  //     )
+  //     const sortField = Object.keys(sort)[0] || "_id";
+  //     const sortOrder = sort[sortField] === "desc" ? -1 : 1;
+  //     const currentDate = new Date();
+
+  //     const dueData = await schemeAccountModel.aggregate([
+  //       { $match: query },
+
+  //       {
+  //         $lookup: {
+  //           from: "schemes",
+  //           localField: "id_scheme",
+  //           foreignField: "_id",
+  //           as: "Scheme",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "schemeclassifications",
+  //           localField: "id_classification",
+  //           foreignField: "_id",
+  //           as: "Classification",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "customers",
+  //           localField: "id_customer",
+  //           foreignField: "_id",
+  //           as: "Customer",
+  //         },
+  //       },
+  //       { $unwind: "$Scheme" },
+  //       { $unwind: "$Classification" },
+  //       { $unwind: "$Customer" },
+  //       {
+  //         $addFields: {
+  //           schemeAccountIdStr: { $toString: "$_id" },
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "payments",
+  //           let: { schemeAccountId: "$schemeAccountIdStr" },
+  //           pipeline: [
+  //             {
+  //               $match: {
+  //                 $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
+  //               },
+  //             },
+  //             { $sort: { createdAt: -1 } },
+  //           ],
+  //           as: "paymentsData",
+  //         },
+  //       },
+  //       {
+  //         $addFields: {
+  //           totalPaidAmount: { $sum: "$paymentsData.payment_amount" },
+  //           totalPaidWeight: { $sum: "$paymentsData.metal_weight" },
+  //           // totalPaidInstallment: {
+  //           //   $sum: "$paymentsData.paid_installments"
+  //           // },
+  //           lastPaymentCreatedAt: { $first: "$paymentsData.createdAt" },
+  //         },
+  //       },
+  //       {
+  //         $addFields: {
+  //           referenceDate: {
+  //             $ifNull: ["$lastPaymentCreatedAt", "$start_date"],
+  //           },
+  //           daysSinceLastPayment: {
+  //             $dateDiff: {
+  //               startDate: {
+  //                 $ifNull: ["$lastPaymentCreatedAt", "$start_date"],
+  //               },
+  //               endDate: currentDate,
+  //               unit: "day",
+  //             },
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $addFields: {
+  //           expectedInstallmentsSinceLastPayment: {
+  //             $switch: {
+  //               branches: [
+  //                 {
+  //                   case: { $eq: ["$Scheme.installment_type", 1] },
+  //                   then: {
+  //                     $dateDiff: {
+  //                       startDate: "$referenceDate",
+  //                       endDate: currentDate,
+  //                       unit: "month",
+  //                     },
+  //                   },
+  //                 },
+  //                 {
+  //                   case: { $eq: ["$Scheme.installment_type", 2] },
+  //                   then: {
+  //                     $floor: {
+  //                       $divide: [
+  //                         {
+  //                           $dateDiff: {
+  //                             startDate: "$referenceDate",
+  //                             endDate: currentDate,
+  //                             unit: "day",
+  //                           },
+  //                         },
+  //                         7,
+  //                       ],
+  //                     },
+  //                   },
+  //                 },
+  //                 {
+  //                   case: { $eq: ["$Scheme.installment_type", 3] }, // Daily
+  //                   then: {
+  //                     $dateDiff: {
+  //                       startDate: "$referenceDate",
+  //                       endDate: currentDate,
+  //                       unit: "day",
+  //                     },
+  //                   },
+  //                 },
+  //                 {
+  //                   case: { $eq: ["$Scheme.installment_type", 4] }, // Yearly
+  //                   then: {
+  //                     $dateDiff: {
+  //                       startDate: "$referenceDate",
+  //                       endDate: currentDate,
+  //                       unit: "year",
+  //                     },
+  //                   },
+  //                 },
+  //               ],
+  //               default: 0,
+  //             },
+  //           },
+  //         },
+  //       },
+
+  //       // Overdue calculation
+  //       {
+  //         $addFields: {
+  //           installmentDue: {
+  //             $max: [
+  //               {
+  //                 $subtract: [
+  //                   "$expectedInstallmentsSinceLastPayment",
+  //                   {
+  //                     $cond: [{ $eq: ["$lastPaymentCreatedAt", null] }, 0, 1],
+  //                   },
+  //                 ],
+  //               },
+  //               0,
+  //             ],
+  //           },
+  //           isOverdue: {
+  //             $gt: [
+  //               {
+  //                 $subtract: [
+  //                   "$expectedInstallmentsSinceLastPayment",
+  //                   {
+  //                     $cond: [{ $eq: ["$lastPaymentCreatedAt", null] }, 0, 1],
+  //                   },
+  //                 ],
+  //               },
+  //               0,
+  //             ],
+  //           },
+  //         },
+  //       },
+
+  //       // Filter only overdue
+  //       { $match: { isOverdue: true } },
+
+  //       // Pagination and output
+  //       {
+  //         $facet: {
+  //           metadata: [{ $count: "total" }],
+  //           data: [
+  //             { $skip: (page - 1) * limit },
+  //             { $limit: limit },
+  //             { $sort: { [sortField]: sortOrder } },
+  //             {
+  //               $project: {
+  //                 _id: 1,
+  //                 scheme_name: "$Scheme.scheme_name",
+  //                 classification_name: "$Classification.name",
+  //                 customer_name: {
+  //                   $concat: ["$Customer.firstname", " ", "$Customer.lastname"],
+  //                 },
+  //                 customer_mobile: "$Customer.mobile",
+  //                 lastPaidDate: "$lastPaymentCreatedAt",
+  //                 daysSinceLastPayment: 1,
+  //                 installmentDue: 1,
+  //                 paid_installments: 1,
+  //                 total_installments: 1,
+  //                 scheme_acc_number: 1,
+  //                 account_name: 1,
+  //                 maturity_date: 1,
+  //                 createdAt: 1,
+  //                 totalPaidAmount: 1,
+  //                 totalPaidWeight: 1,
+  //                 isOverdue: 1,
+  //                 amount: 1,
+  //                 weight: 1,
+  //               },
+  //             },
+  //           ],
+  //         },
+  //       },
+  //     ]);
+
+  //     const totalDocuments = dueData[0]?.metadata[0]?.total || 0;
+  //     const data = dueData[0]?.data || [];
+  //     return { totalDocuments, data };
+  //   } catch (error) {
+  //     console.error("Error in pendingDuePayment:", error);
+  //     throw error;
+  //   }
+  // }
   async pendingDuePayment(page, limit, query, sort = {}) {
     try {
       const sortField = Object.keys(sort)[0] || "_id";
       const sortOrder = sort[sortField] === "desc" ? -1 : 1;
       const currentDate = new Date();
 
-      const dueData = await schemeAccountModel.aggregate([
-        { $match: query },
+      const modifiedQuery = {
+        ...query,
+        status: 0,
+        active: true
+      };
 
+      const dueData = await schemeAccountModel.aggregate([
+        { $match: modifiedQuery },
         {
           $lookup: {
             from: "schemes",
@@ -275,6 +505,8 @@ class ReportRepository {
             as: "Scheme",
           },
         },
+        { $unwind: "$Scheme" },
+        { $match: { "Scheme.scheme_type": { $nin: [10, 14] } } },
         {
           $lookup: {
             from: "schemeclassifications",
@@ -291,18 +523,13 @@ class ReportRepository {
             as: "Customer",
           },
         },
-        { $unwind: "$Scheme" },
         { $unwind: "$Classification" },
         { $unwind: "$Customer" },
-
-        // Cast _id to string for payments lookup
         {
           $addFields: {
             schemeAccountIdStr: { $toString: "$_id" },
           },
         },
-
-        // Payments lookup
         {
           $lookup: {
             from: "payments",
@@ -313,25 +540,19 @@ class ReportRepository {
                   $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
                 },
               },
-              { $sort: { createdAt: -1 } }, // sort by latest
+              { $sort: { createdAt: -1 } },
             ],
             as: "paymentsData",
           },
         },
-
-        // Extract totals and lastPaidDate from latest payment's createdAt
         {
           $addFields: {
             totalPaidAmount: { $sum: "$paymentsData.payment_amount" },
             totalPaidWeight: { $sum: "$paymentsData.metal_weight" },
-            // totalPaidInstallment: {
-            //   $sum: "$paymentsData.paid_installments"
-            // },
             lastPaymentCreatedAt: { $first: "$paymentsData.createdAt" },
+            hasPayments: { $gt: [{ $size: "$paymentsData" }, 0] },
           },
         },
-
-        // Calculate expected installments based on last payment createdAt
         {
           $addFields: {
             referenceDate: {
@@ -348,8 +569,6 @@ class ReportRepository {
             },
           },
         },
-
-        // Determine expected installments
         {
           $addFields: {
             expectedInstallmentsSinceLastPayment: {
@@ -408,8 +627,6 @@ class ReportRepository {
             },
           },
         },
-
-        // Overdue calculation
         {
           $addFields: {
             installmentDue: {
@@ -417,34 +634,31 @@ class ReportRepository {
                 {
                   $subtract: [
                     "$expectedInstallmentsSinceLastPayment",
-                    {
-                      $cond: [{ $eq: ["$lastPaymentCreatedAt", null] }, 0, 1],
-                    },
+                    { $cond: ["$hasPayments", 1, 0] }
                   ],
                 },
                 0,
               ],
             },
             isOverdue: {
-              $gt: [
+              $or: [
+                { $eq: ["$hasPayments", false] },
                 {
-                  $subtract: [
-                    "$expectedInstallmentsSinceLastPayment",
+                  $gt: [
                     {
-                      $cond: [{ $eq: ["$lastPaymentCreatedAt", null] }, 0, 1],
+                      $subtract: [
+                        "$expectedInstallmentsSinceLastPayment",
+                        { $cond: ["$hasPayments", 1, 0] }
+                      ],
                     },
+                    0,
                   ],
                 },
-                0,
               ],
             },
           },
         },
-
-        // Filter only overdue
         { $match: { isOverdue: true } },
-
-        // Pagination and output
         {
           $facet: {
             metadata: [{ $count: "total" }],
@@ -475,6 +689,7 @@ class ReportRepository {
                   isOverdue: 1,
                   amount: 1,
                   weight: 1,
+                  hasPayments: 1,
                 },
               },
             ],
@@ -484,7 +699,10 @@ class ReportRepository {
 
       const totalDocuments = dueData[0]?.metadata[0]?.total || 0;
       const data = dueData[0]?.data || [];
-      return { totalDocuments, data };
+     const  totalPages= Math.ceil(totalDocuments / limit)
+      const currentPage= page
+      
+      return { totalDocuments,totalPages,currentPage, data };
     } catch (error) {
       console.error("Error in pendingDuePayment:", error);
       throw error;

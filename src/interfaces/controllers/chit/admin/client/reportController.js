@@ -19,6 +19,7 @@ class ReportController {
     try {
       const body = {...req.body}
       const result = await this.reportUsecase.overduesummary(body);
+ 
       return res.status(200).json(result);
     } catch (error) {
       console.error(error);

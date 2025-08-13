@@ -33,20 +33,6 @@ class ReportUseCase {
 
     let dateFilter = {};
   
-    // if (from_date && to_date) {
-    //   const startDate = new Date(from_date);
-    //   const endDate = new Date(to_date);
-  
-    //   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    //     throw new Error("Invalid date format.");
-    //   }
-  
-    //   startDate.setDate(startDate.getDate() + 1);
-    //   dateFilter.createdAt = {
-    //     $gte: this.addOneDay(startDate),
-    //     $lte: endDate,
-    //   };
-    // }
     if (from_date && to_date) {
       if (new Date(to_date) < new Date(from_date)) {
         throw new Error("End date cannot be before start date");
@@ -132,34 +118,11 @@ class ReportUseCase {
         query._id = new mongoose.Types.ObjectId(id_scheme);
       }
 
-      // if (from_date && to_date) {
-      //   const startDate = new Date(from_date);
-      //   const endDate = new Date(to_date);
-
-
-      //   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      //     throw new Error("Invalid date format.");
-      //   }
-
-      //   query.createdAt = {
-      //     $gte: this.addOneDay(startDate),
-      //     $lte: endDate,
-      //   };
-      // } else {
-      //   const oneYearAgo = new Date();
-      //   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-      //   query.createdAt = {
-      //     $gte: oneYearAgo,
-      //     $lte: new Date(),
-      //   };
-      // }
       if (from_date && to_date) {
         if (new Date(to_date) < new Date(from_date)) {
           throw new Error("End date cannot be before start date");
         }
-  
-        // Convert to UTC with timezone adjustment (Asia/Kolkata - UTC+5:30)
+
         const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
         const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
   
@@ -168,7 +131,6 @@ class ReportUseCase {
           $lte: endDate,
         };
       } else {
-        // Default to today's date in local timezone
         const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
         const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
   
@@ -190,10 +152,7 @@ class ReportUseCase {
       }
       return {
         message: "Pending due data fetched successfully",
-        data: dueData,
-        totalDocuments: dueData.totalDocuments,
-        totalPages: Math.ceil(dueData.totalDocuments / pageSize),
-        currentPage: pageNum,
+        data: dueData
       };
     } catch (error) {
       console.error(error);
