@@ -11,7 +11,7 @@ class DashboardUseCase {
   async getAllOver(data) {
     try {
       const { branchId } = data;
-      const filter = { is_deleted: false };
+      const filter = { is_deleted: false,active:true};
       if (branchId) {
         if (isValidObjectId(branchId)) {
           const isValidBranch = await this.branchRepository.findById(branchId);
