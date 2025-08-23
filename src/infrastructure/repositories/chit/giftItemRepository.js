@@ -61,7 +61,7 @@ class GiftItemRepository{
                     // pathurl: {
                     //     $concat: [
                     //         { $arrayElemAt: ['$s3data.s3display_url', 0] },
-                    //         'aupay/webadmin/assets/giftItem/'
+                    //         'keerthijewellery/webadmin/assets/giftItem/'
                     //     ]
                     // }
                 }
@@ -203,7 +203,7 @@ class GiftItemRepository{
 //                     pathurl: {
 //                         $concat: [
 //                             { $arrayElemAt: ['$s3data.s3display_url', 0] },
-//                             'aupay/webadmin/assets/giftItem/'
+//                             'keerthijewellery/webadmin/assets/giftItem/'
 //                         ]
 //                     }
 //                 } 
@@ -264,7 +264,7 @@ async getAllActiveGiftItems({ query, documentskip, documentlimit }) {
                     // pathurl: {
                     //     $concat: [
                     //         { $arrayElemAt: ['$s3data.s3display_url', 0] },
-                    //         'aupay/webadmin/assets/giftItem/'
+                    //         'keerthijewellery/webadmin/assets/giftItem/'
                     //     ]
                     // }
                 } 

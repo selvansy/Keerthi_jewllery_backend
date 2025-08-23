@@ -127,8 +127,8 @@ class ClassificationUseCase {
       return { success: false, message: "No classification found" };
     }
     const s3Configs =await this.s3Helper(result.id_branch)
-    result.pathUrl = `${s3Configs.s3display_url}aupay/webadmin/assets/classification/`
-    // result.pathUrl = `https://${config.AWS_S3_BUCKET}.s3.${config.AWS_REGION}.amazonaws.com/aupay/webadmin/assets/img/classification/`;
+    result.pathUrl = `${s3Configs.s3display_url}keerthijewellery/webadmin/assets/classification/`
+    // result.pathUrl = `https://${config.AWS_S3_BUCKET}.s3.${config.AWS_REGION}.amazonaws.com/keerthijewellery/webadmin/assets/img/classification/`;
     return {
       success: true,
       message: "Classification retrieved successfully",
@@ -310,7 +310,7 @@ class ClassificationUseCase {
         return { success: false, message: "No classification found" };
       }
 
-      result.pathUrl = `https://${config.AWS_S3_BUCKET}.s3.${config.AWS_REGION}.amazonaws.com/aupay/webadmin/assets/img/classification/`;
+      result.pathUrl = `https://${config.AWS_S3_BUCKET}.s3.${config.AWS_REGION}.amazonaws.com/keerthijewellery/webadmin/assets/img/classification/`;
       return {
         success: true,
         message: "Classification retrieved successfully",

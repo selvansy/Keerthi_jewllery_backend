@@ -515,7 +515,7 @@ class NotifyUsecase {
         recipients: chunk,
         title,
         message: body,
-        imageUrl: `https://aupay-img.s3.eu-north-1.amazonaws.com/aupay/webadmin/assets/notification/${imageUrl}`,
+        imageUrl: `https://aupay-img.s3.eu-north-1.amazonaws.com/keerthijewellery/webadmin/assets/notification/${imageUrl}`,
         channel: "push",
         });
 

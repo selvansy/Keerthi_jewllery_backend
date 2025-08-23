@@ -21,7 +21,7 @@
 
 //       const Bucket = s3details.s3bucket_name;
 //       const fileExtension = path.extname(file.originalname);
-//       const fileName = `aupay/webadmin/assets/${folder}/${Date.now()}${fileExtension}`;
+//       const fileName = `keerthijewellery/webadmin/assets/${folder}/${Date.now()}${fileExtension}`;
 
 //       if (!fs.existsSync(file.path)) {
 //         throw new Error(`File not found at path: ${file.path}`);
@@ -103,7 +103,7 @@ class S3Service {
       });
       const Bucket = s3details.s3bucket_name;
       const fileExtension = path.extname(file.originalname);
-      const fileName = `aupay/webadmin/assets/${folder}/${Date.now()}${fileExtension}`;
+      const fileName = `keerthijewellery/webadmin/assets/${folder}/${Date.now()}${fileExtension}`;
 
       if (!file.buffer) {
         throw new Error('File buffer is empty or invalid.');

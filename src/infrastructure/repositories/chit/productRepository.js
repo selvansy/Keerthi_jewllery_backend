@@ -188,7 +188,7 @@ class ProductRepository {
             id_branch: 1,
             categoryName: "$category.category_name",
             pathurl: {
-              $concat: ["$s3Details.s3display_url", "aupay/webadmin/assets/products/"]
+              $concat: ["$s3Details.s3display_url", "keerthijewellery/webadmin/assets/products/"]
             },
             isWishlisted: 1,
             purityRate: 1,
@@ -407,7 +407,7 @@ class ProductRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "aupay/webadmin/assets/products/",
+                "keerthijewellery/webadmin/assets/products/",
               ],
             },
           },

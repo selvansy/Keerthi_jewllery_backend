@@ -991,7 +991,7 @@ class CustomerUseCase {
 
       if(customerData){
         const s3Configs = await this.s3Helper();
-        customerData.customerDetails.pathUrl = `${s3Configs.s3display_url}aupay/webadmin/assets/customer/`;
+        customerData.customerDetails.pathUrl = `${s3Configs.s3display_url}keerthijewellery/webadmin/assets/customer/`;
       }
       
       if(!customerData){

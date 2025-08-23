@@ -125,7 +125,7 @@ class WishlistRepository{
                   }
                 },
                 pathUrl: {
-                  $concat: ["$s3Details.s3display_url", "aupay/webadmin/assets/products/"]
+                  $concat: ["$s3Details.s3display_url", "keerthijewellery/webadmin/assets/products/"]
                 }
               }
             },

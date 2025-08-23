@@ -83,7 +83,7 @@ class OrganisationUsecase {
             const existsing  = await this.organisationRepo.findOne()
 
             if(existsing){
-               existsing.pathurl = 'https://aupay-img.s3.eu-north-1.amazonaws.com/aupay/webadmin/assets/organisation/'
+               existsing.pathurl = 'https://aupay-img.s3.eu-north-1.amazonaws.com/keerthijewellery/webadmin/assets/organisation/'
                return {success:true,message:"Organisation detials fetched successfully",data:existsing}
             }
 

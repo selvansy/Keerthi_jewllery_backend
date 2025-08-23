@@ -127,7 +127,7 @@ class EmployeeRepository {
                 pathurl: {
                     $concat: [
                         "$s3Details.s3display_url",
-                        "aupay/webadmin/assets/employee/",
+                        "keerthijewellery/webadmin/assets/employee/",
                     ],
                 },
             },

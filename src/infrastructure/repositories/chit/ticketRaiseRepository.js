@@ -38,7 +38,7 @@ class TicketRaiseRepository {
                     pathUrl: {
                         $concat: [
                             { $ifNull: ["$s3Details.s3display_url", ""] },
-                            "aupay/webadmin/assets/Ticket_Raise"
+                            "keerthijewellery/webadmin/assets/Ticket_Raise"
                         ]
                     }
                 }

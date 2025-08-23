@@ -48,7 +48,7 @@ class OfferRepository {
             pathurl: {
               $concat: [
                   "$s3Details.s3display_url",
-                  "aupay/webadmin/assets/offers/"
+                  "keerthijewellery/webadmin/assets/offers/"
               ]
           }
           },
@@ -183,7 +183,7 @@ class OfferRepository {
           pathurl: {
             $concat: [
                 "$s3Details.s3display_url",
-                "aupay/webadmin/assets/offers/"
+                "keerthijewellery/webadmin/assets/offers/"
             ]
         }
         }}

@@ -69,7 +69,7 @@ class NewArrivalRepository {
             pathurl: {
               $concat: [
                   "$s3Details.s3display_url",
-                  "aupay/webadmin/assets/newarrivals/"
+                  "keerthijewellery/webadmin/assets/newarrivals/"
               ]
           }
           },
@@ -229,7 +229,7 @@ class NewArrivalRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "aupay/webadmin/assets/products/"
+                "keerthijewellery/webadmin/assets/products/"
               ]
             }
           }

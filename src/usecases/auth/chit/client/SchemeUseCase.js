@@ -230,7 +230,7 @@ class SchemeUseCase {
     }
 
     const s3Configs = await this.s3Helper(result.id_branch);
-    result.pathUrl = `${s3Configs.s3display_url}aupay/webadmin/assets/classification/`;
+    result.pathUrl = `${s3Configs.s3display_url}keerthijewellery/webadmin/assets/classification/`;
 
     return {
       success: true,
@@ -368,7 +368,7 @@ class SchemeUseCase {
 
   async getSchemeByclassificationId(id) {
     const s3Configs = await this.s3Helper()
-    const pathurl= `${s3Configs.s3display_url}aupay/webadmin/assets/classification/`
+    const pathurl= `${s3Configs.s3display_url}keerthijewellery/webadmin/assets/classification/`
 
     let result = await this.schemeRepository.getSchemeByclassificationId(id);
 

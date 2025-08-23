@@ -63,7 +63,7 @@ class OrganisationRepository{
                 createdAt: 1,
                 updatedAt: 1,
                 pathurl: {
-                  $literal: "https://aupay-img.s3.eu-north-1.amazonaws.com/aupay/webadmin/assets/organisation/"
+                  $literal: "https://aupay-img.s3.eu-north-1.amazonaws.com/keerthijewellery/webadmin/assets/organisation/"
                 },
                 id_city: "$id_city._id",
                 id_state: "$id_state._id",

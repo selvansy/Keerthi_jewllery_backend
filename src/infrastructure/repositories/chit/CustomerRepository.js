@@ -107,7 +107,7 @@ class CustomerRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "aupay/webadmin/assets/customer/",
+                "keerthijewellery/webadmin/assets/customer/",
               ],
             },
           },
