@@ -1290,12 +1290,158 @@ class ReportRepository {
     }
   }
 
-  async getPaymentReport(query = {}, skip, limit, sort = {}) {
+  // async getPaymentReport(query = {}, skip, limit, sort = {}) {
+  //   try {
+  //     const sortField = (sort && Object.keys(sort)[0]) || "createdAt";
+  //     const sortOrder = sort && sort[sortField] === "asc" ? 1 : -1;
+
+  //     const paymentReport = await SchemePayment.aggregate([
+  //       { $match: query },
+  //       {
+  //         $lookup: {
+  //           from: "schemes",
+  //           localField: "id_scheme",
+  //           foreignField: "_id",
+  //           as: "Scheme",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "customers",
+  //           localField: "id_customer",
+  //           foreignField: "_id",
+  //           as: "Customer",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "paymentmodes",
+  //           foreignField: "_id",
+  //           localField: "payment_mode",
+  //           as: "PaymentMode",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "paymentorders",
+  //           foreignField: "orderId",
+  //           localField: "id_transaction",
+  //           as: "paymentOrders",
+  //         },
+  //       },
+  //       { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
+  //       { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
+  //       { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
+  //       { $unwind: { path: "$paymentOrders", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "schemeclassifications",
+  //           localField: "Scheme.id_classification",
+  //           foreignField: "_id",
+  //           as: "Classification",
+  //         },
+  //       },
+  //       {
+  //         $unwind: {
+  //           path: "$Classification",
+  //           preserveNullAndEmptyArrays: true,
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "schemeaccounts",
+  //           localField: "id_scheme_account",
+  //           foreignField: "_id",
+  //           as: "SchemeAccount",
+  //         },
+  //       },
+  //       {
+  //         $unwind: {
+  //           path: "$SchemeAccount",
+  //           preserveNullAndEmptyArrays: true,
+  //         },
+  //       },
+  //       // Add this new stage to handle the id_transaction logic
+  //       {
+  //         $addFields: {
+  //           id_transaction: {
+  //             $cond: {
+  //               if: { $ifNull: ["$paymentOrders.cf_payment_id", false] },
+  //               then: "$paymentOrders.cf_payment_id",
+  //               else: "$id_transaction"
+  //             }
+  //           },
+  //           totalPaidInstallment: "$paid_installments", // just aliasing for consistency
+  //         },
+  //       },
+  //       {
+  //         $facet: {
+  //           metadata: [
+  //             {
+  //               $group: {
+  //                 _id: null,
+  //                 total: { $sum: 1 },
+  //                 totalPaidInstallments: { $sum: "$paid_installments" },
+  //               },
+  //             },
+  //           ],
+  //           data: [
+  //             { $sort: { [sortField]: sortOrder } },
+  //             { $skip: skip },
+  //             { $limit: limit },
+  //             {
+  //               $project: {
+  //                 scheme_name: "$Scheme.scheme_name",
+  //                 schemeType:"$Scheme.scheme_type",
+  //                 classification_name: "$Classification.name",
+  //                 customer_name: {
+  //                   $cond: {
+  //                     if: { $ne: ["$Customer.lastname", null] },
+  //                     then: {
+  //                       $concat: [
+  //                         "$Customer.firstname",
+  //                         " ",
+  //                         "$Customer.lastname",
+  //                       ],
+  //                     },
+  //                     else: "$Customer.firstname",
+  //                   },
+  //                 },
+  //                 customer_mobile: "$Customer.mobile",
+  //                 payment_mode: "$PaymentMode.mode_name",
+  //                 accounter_name: "$SchemeAccount.account_name",
+  //                 total_installments: "$SchemeAccount.total_installments",
+  //                 schemeAccNo: "$SchemeAccount.scheme_acc_number",
+  //                 payment_amount: 1,
+  //                 id_transaction: 1,
+  //                 payment_receipt: 1,
+  //                 createdAt: 1,
+  //                 totalPaidInstallment: "$installment",
+  //               },
+  //             },
+  //           ],
+  //         },
+  //       },
+  //     ]);
+
+  //     const meta = paymentReport[0]?.metadata[0] || {};
+  //     const totalDocuments = meta.total || 0;
+  //     const totalPaidInstallments = meta.totalPaidInstallments || 0;
+  //     const totalPages = Math.ceil(totalDocuments / limit);
+  //     const data = paymentReport[0]?.data || [];
+
+  //     return { totalDocuments, totalPages, totalPaidInstallments, data };
+  //   } catch (err) {
+  //     throw err;
+  //   }
+  // }
+  async getPaymentReport(query = {}, skip, limit, sort = {}, search = "", customerIdForSearch = null) {
     try {
       const sortField = (sort && Object.keys(sort)[0]) || "createdAt";
       const sortOrder = sort && sort[sortField] === "asc" ? 1 : -1;
-
-      const paymentReport = await SchemePayment.aggregate([
+  
+      // Build the aggregation pipeline
+      const pipeline = [
         { $match: query },
         {
           $lookup: {
@@ -1371,225 +1517,104 @@ class ReportRepository {
                 else: "$id_transaction"
               }
             },
-            totalPaidInstallment: "$paid_installments", // just aliasing for consistency
+            totalPaidInstallment: "$paid_installments",
           },
-        },
-        {
-          $facet: {
-            metadata: [
-              {
-                $group: {
-                  _id: null,
-                  total: { $sum: 1 },
-                  totalPaidInstallments: { $sum: "$paid_installments" },
-                },
+        }
+      ];
+  
+      // Add search filter after all lookups
+      if (search) {
+        const searchRegex = new RegExp(search, "i");
+        
+        if (customerIdForSearch) {
+          // If we have a customer ID from mobile search, filter by customer ID
+          pipeline.push({
+            $match: {
+              id_customer: customerIdForSearch
+            }
+          });
+        } else {
+          // Regular text search
+          pipeline.push({
+            $match: {
+              $or: [
+                { id_transaction: { $regex: searchRegex } },
+                { remark: { $regex: searchRegex } },
+                { itr_utr: { $regex: searchRegex } },
+                { "SchemeAccount.account_name": { $regex: searchRegex } },
+                { "SchemeAccount.scheme_acc_number": { $regex: searchRegex } },
+                { "Customer.firstname": { $regex: searchRegex } },
+                { "Customer.lastname": { $regex: searchRegex } }
+              ]
+            }
+          });
+        }
+      }
+  
+      // Add the facet stage for pagination and metadata
+      pipeline.push({
+        $facet: {
+          metadata: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+                totalPaidInstallments: { $sum: "$paid_installments" },
               },
-            ],
-            data: [
-              { $sort: { [sortField]: sortOrder } },
-              { $skip: skip },
-              { $limit: limit },
-              {
-                $project: {
-                  scheme_name: "$Scheme.scheme_name",
-                  schemeType:"$Scheme.scheme_type",
-                  classification_name: "$Classification.name",
-                  customer_name: {
-                    $cond: {
-                      if: { $ne: ["$Customer.lastname", null] },
-                      then: {
-                        $concat: [
-                          "$Customer.firstname",
-                          " ",
-                          "$Customer.lastname",
-                        ],
-                      },
-                      else: "$Customer.firstname",
+            },
+          ],
+          data: [
+            { $sort: { [sortField]: sortOrder } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $project: {
+                scheme_name: "$Scheme.scheme_name",
+                schemeType: "$Scheme.scheme_type",
+                classification_name: "$Classification.name",
+                customer_name: {
+                  $cond: {
+                    if: { $ne: ["$Customer.lastname", null] },
+                    then: {
+                      $concat: [
+                        "$Customer.firstname",
+                        " ",
+                        "$Customer.lastname",
+                      ],
                     },
+                    else: "$Customer.firstname",
                   },
-                  customer_mobile: "$Customer.mobile",
-                  payment_mode: "$PaymentMode.mode_name",
-                  accounter_name: "$SchemeAccount.account_name",
-                  total_installments: "$SchemeAccount.total_installments",
-                  schemeAccNo: "$SchemeAccount.scheme_acc_number",
-                  payment_amount: 1,
-                  id_transaction: 1,
-                  payment_receipt: 1,
-                  createdAt: 1,
-                  totalPaidInstallment: "$installment",
                 },
+                customer_mobile: "$Customer.mobile",
+                payment_mode: "$PaymentMode.mode_name",
+                accounter_name: "$SchemeAccount.account_name",
+                total_installments: "$SchemeAccount.total_installments",
+                schemeAccNo: "$SchemeAccount.scheme_acc_number",
+                payment_amount: 1,
+                id_transaction: 1,
+                payment_receipt: 1,
+                createdAt: 1,
+                totalPaidInstallment: "$installment",
               },
-            ],
-          },
+            },
+          ],
         },
-      ]);
-
+      });
+  
+      const paymentReport = await SchemePayment.aggregate(pipeline);
+  
       const meta = paymentReport[0]?.metadata[0] || {};
       const totalDocuments = meta.total || 0;
       const totalPaidInstallments = meta.totalPaidInstallments || 0;
       const totalPages = Math.ceil(totalDocuments / limit);
       const data = paymentReport[0]?.data || [];
-
+  
       return { totalDocuments, totalPages, totalPaidInstallments, data };
     } catch (err) {
       throw err;
     }
   }
 
-  // async getPaymentLedger(query = {}, skip = 0, limit = 10) {
-  //   try {
-  //     const basePipeline = [
-  //       { $match: query },
-  //       {
-  //         $lookup: {
-  //           from: "schemes",
-  //           localField: "id_scheme",
-  //           foreignField: "_id",
-  //           as: "Scheme",
-  //         },
-  //       },
-  //       { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
-  //       {
-  //         $lookup: {
-  //           from: "paymentmodes",
-  //           foreignField: "_id",
-  //           localField: "payment_mode",
-  //           as: "PaymentMode",
-  //         },
-  //       },
-  //       { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
-  //     ];
-
-  //     // Create data pipeline
-  //     const dataPipeline = [...basePipeline];
-      
-  //     if (query.payment_mode) {
-  //       dataPipeline.push(
-  //         {
-  //           $group: {
-  //             _id: {
-  //               schemeId: "$id_scheme",
-  //               schemeName: "$Scheme.scheme_name",
-  //             },
-  //             totalAmount: { $sum: "$payment_amount" },
-  //             paymentCount: { $sum: 1 },
-  //             paymentMode: { $first: "$PaymentMode" },
-  //           },
-  //         },
-  //         {
-  //           $project: {
-  //             _id: 0,
-  //             schemeId: "$_id.schemeId",
-  //             schemeName: "$_id.schemeName",
-  //             totalAmount: 1,
-  //             paymentCount: 1,
-  //             paymentMode: {
-  //               modeId: "$paymentMode._id",
-  //               modeName: "$paymentMode.mode_name",
-  //             },
-  //           },
-  //         },
-  //         { $sort: { totalAmount: -1 } },
-  //         { $skip: skip },
-  //         { $limit: limit }
-  //       );
-  //     } else {
-  //       dataPipeline.push(
-  //         {
-  //           $group: {
-  //             _id: {
-  //               schemeId: "$id_scheme",
-  //               schemeName: "$Scheme.scheme_name",
-  //               paymentModeId: "$payment_mode",
-  //               paymentModeName: "$PaymentMode.mode_name",
-  //             },
-  //             totalAmount: { $sum: "$payment_amount" },
-  //             paymentCount: { $sum: 1 },
-  //           },
-  //         },
-  //         {
-  //           $group: {
-  //             _id: {
-  //               schemeId: "$_id.schemeId",
-  //               schemeName: "$_id.schemeName",
-  //             },
-  //             paymentModes: {
-  //               $push: {
-  //                 modeId: "$_id.paymentModeId",
-  //                 modeName: "$_id.paymentModeName",
-  //                 totalAmount: "$totalAmount",
-  //                 paymentCount: "$paymentCount",
-  //               },
-  //             },
-  //             grandTotal: { $sum: "$totalAmount" },
-  //           },
-  //         },
-  //         {
-  //           $project: {
-  //             _id: 0,
-  //             schemeId: "$_id.schemeId",
-  //             schemeName: "$_id.schemeName",
-  //             paymentModes: 1,
-  //             grandTotal: 1,
-  //           },
-  //         },
-  //         { $sort: { grandTotal: -1 } },
-  //         { $skip: skip },
-  //         { $limit: limit }
-  //       );
-  //     }
-
-  //     // Create count pipeline that matches the final grouped structure
-  //     const countPipeline = [...basePipeline];
-  //     if (query.payment_mode) {
-  //       countPipeline.push(
-  //         {
-  //           $group: {
-  //             _id: {
-  //               schemeId: "$id_scheme",
-  //               schemeName: "$Scheme.scheme_name",
-  //             },
-  //           },
-  //         },
-  //         { $count: "totalDocuments" }
-  //       );
-  //     } else {
-  //       countPipeline.push(
-  //         {
-  //           $group: {
-  //             _id: {
-  //               schemeId: "$id_scheme",
-  //               schemeName: "$Scheme.scheme_name",
-  //             },
-  //           },
-  //         },
-  //         { $count: "totalDocuments" }
-  //       );
-  //     }
-
-  //     const [data, countResult] = await Promise.all([
-  //       SchemePayment.aggregate(dataPipeline),
-  //       SchemePayment.aggregate(countPipeline)
-  //     ]);
-
-  //     const totalDocuments = countResult[0]?.totalDocuments || 0;
-  //     const totalPages = Math.ceil(totalDocuments / limit);
-  //     const currentPage = Math.floor(skip / limit) + 1;
-  //     console.log(data)
-
-  //     return {
-  //       data,
-  //       totalDocuments,
-  //       totalPages,
-  //       currentPage,
-  //       limit,
-  //       hasMore: skip + limit < totalDocuments,
-  //     };
-  //   } catch (err) {
-  //     console.error(err)
-  //     throw err;
-  //   }
-  // }
   async getPaymentLedger(query = {}, skip = 0, limit = 10) {
     try {
       const basePipeline = [

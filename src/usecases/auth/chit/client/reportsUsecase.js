@@ -1,10 +1,13 @@
 import { isValidObjectId, Types } from "mongoose";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
+import CustomerRepository from "../../../../infrastructure/repositories/chit/CustomerRepository.js";
+
 class ReportUseCase {
   constructor(reportRepo, branchRepo) {
-    this.reportRepo = reportRepo;
+    this.reportRepo = reportRepo; 
     this.branchRepo = branchRepo;
+    this.customerRepo =  new CustomerRepository();
   }
 
   addOneDay(dateStr) {
@@ -236,6 +239,110 @@ class ReportUseCase {
     };
   }
 
+  // async getPaymentSummary({
+  //   page = 1,
+  //   limit = 10,
+  //   id_scheme,
+  //   id_branch,
+  //   payment_mode,
+  //   from_date,
+  //   to_date,
+  //   search,
+  // }) {
+  //   try {
+  //     const query = { active: true, is_deleted: false,payment_status:1};
+  
+  //     // Date range handling with timezone adjustment
+  //     if (from_date && to_date) {
+  //       if (new Date(to_date) < new Date(from_date)) {
+  //         throw new Error("End date cannot be before start date");
+  //       }
+  
+  //       // Convert to UTC with timezone adjustment (Asia/Kolkata - UTC+5:30)
+  //       const startDate = moment.tz(from_date, 'Asia/Kolkata').startOf('day').toDate();
+  //       const endDate = moment.tz(to_date, 'Asia/Kolkata').endOf('day').toDate();
+  
+  //       query.date_payment = {
+  //         $gte: startDate,
+  //         $lte: endDate,
+  //       };
+  //     } else {
+  //       // Default to today's date in local timezone
+  //       const startOfToday = moment.tz('Asia/Kolkata').startOf('day').toDate();
+  //       const endOfToday = moment.tz('Asia/Kolkata').endOf('day').toDate();
+  
+  //       query.date_payment = {
+  //         $gte: startOfToday,
+  //         $lte: endOfToday,
+  //       };
+  //     }
+  
+  //     // Branch filter
+  //     if (id_branch) {
+  //       if (!isValidObjectId(id_branch)) {
+  //         return { success: false, message: "Provide a valid Branch Id" };
+  //       }
+  //       query.id_branch = new mongoose.Types.ObjectId(id_branch);
+  //     }
+  
+  //     // Scheme filter
+  //     if (id_scheme) {
+  //       if (!isValidObjectId(id_scheme)) {
+  //         return { success: false, message: "Provide a valid id_scheme" };
+  //       }
+  //       query.id_scheme = new mongoose.Types.ObjectId(id_scheme);
+  //     }
+  
+  //     // Payment mode filter
+  //     if (payment_mode) {
+  //       if (!isValidObjectId(payment_mode)) {
+  //         return { success: false, message: "Provide a valid payment_mode" };
+  //       }
+  //       query.payment_mode = new mongoose.Types.ObjectId(payment_mode);
+  //     }
+  
+  //     // Search functionality
+  //     if (search) {
+  //       const searchRegex = new RegExp(search, "i");
+  //       query.$or = [
+  //         { id_transaction: { $regex: searchRegex } },
+  //         { remark: { $regex: searchRegex } },
+  //         { itr_utr: { $regex: searchRegex } },
+  //         { account_name: { $regex: searchTerm, $options: "i" } },
+  //         { scheme_acc_number: { $regex: searchTerm, $options: "i" } },
+  //       ];
+  //     }
+  
+  //     // Pagination
+  //     const pageNum = parseInt(page) || 1;
+  //     const perPage = parseInt(limit) || 10;
+  //     const skip = (pageNum - 1) * perPage;
+  
+  //     // Get data from repository
+  //     const { totalDocuments, totalPages, data } = await this.reportRepo.getPaymentReport(
+  //       query,
+  //       skip,
+  //       perPage
+  //     );
+
+  //     console.log(data,"data")
+  
+  //     return {
+  //       success: true,
+  //       message: "Payment data retrieved successfully",
+  //       totalDocuments,
+  //       totalPages,
+  //       currentPage: pageNum,
+  //       data,
+  //     };
+  //   } catch (error) {
+  //     console.error("Error in getPaymentSummary:", error);
+  //     return {
+  //       success: false,
+  //       message: error.message || "Failed to retrieve payment data",
+  //     };
+  //   }
+  // }
   async getPaymentSummary({
     page = 1,
     limit = 10,
@@ -247,7 +354,7 @@ class ReportUseCase {
     search,
   }) {
     try {
-      const query = { active: true, is_deleted: false,payment_status:1};
+      const query = { active: true, is_deleted: false, payment_status: 1 };
   
       // Date range handling with timezone adjustment
       if (from_date && to_date) {
@@ -298,16 +405,29 @@ class ReportUseCase {
         query.payment_mode = new mongoose.Types.ObjectId(payment_mode);
       }
   
-      // Search functionality
+      // Handle mobile number search - find customer first
+      let customerIdForSearch = null;
       if (search) {
-        const searchRegex = new RegExp(search, "i");
-        query.$or = [
-          { id_transaction: { $regex: searchRegex } },
-          { remark: { $regex: searchRegex } },
-          { itr_utr: { $regex: searchRegex } },
-          { account_name: { $regex: searchTerm, $options: "i" } },
-          { scheme_acc_number: { $regex: searchTerm, $options: "i" } },
-        ];
+        // Check if search is a mobile number (10 digits)
+        const isMobileNumber = /^\d{10}$/.test(search);
+        
+        if (isMobileNumber) {
+          // Find customer by mobile number
+          const customer = await this.customerRepo.findOne({ mobile: Number(search) });
+          if (customer) {
+            customerIdForSearch = customer._id;
+          } else {
+            // If no customer found with this mobile, return empty results
+            return {
+              success: true,
+              message: "Payment data retrieved successfully",
+              totalDocuments: 0,
+              totalPages: 0,
+              currentPage: parseInt(page) || 1,
+              data: [],
+            };
+          }
+        }
       }
   
       // Pagination
@@ -315,14 +435,16 @@ class ReportUseCase {
       const perPage = parseInt(limit) || 10;
       const skip = (pageNum - 1) * perPage;
   
-      // Get data from repository
+      console.log(customerIdForSearch)
+      // Get data from repository - pass search term and customer ID if mobile search
       const { totalDocuments, totalPages, data } = await this.reportRepo.getPaymentReport(
         query,
         skip,
-        perPage
+        perPage,
+        {},
+        search,
+        customerIdForSearch // Pass the customer ID for mobile search
       );
-
-      console.log(data,"data")
   
       return {
         success: true,
