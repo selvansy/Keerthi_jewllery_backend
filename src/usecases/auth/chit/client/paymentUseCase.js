@@ -361,12 +361,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
-          }
+          // if (todatPaidorNot) {
+          //   return {
+          //     status: false,
+          //     message: "Already completed today's payment",
+          //   };
+          // }
         }
 
         const totalInstallments =
@@ -1240,11 +1240,11 @@ class PaymentUseCase {
             const schemeLength = paymentArray.length
            
             let message =""
-            if(schemeLength == 1){
-              message = "Aleady completed today's payment"
-            }else{
-              message = "Already completed today's payment for one of the schemes"
-            }
+            // if(schemeLength == 1){
+            //   message = "Aleady completed today's payment"
+            // }else{
+            //   message = "Already completed today's payment for one of the schemes"
+            // }
 
             return {
               success: false,
