@@ -22,7 +22,9 @@ const config = {
   API_VERSION:process.env.API_VERSION,
   ONE_SIGNAL_APP_ID: process.env.API_ID,
   ONE_SIGNAL_API_KEY: process.env.API_KEY,
-  CASH_FREE_URL:process.env.CASH_FREE_URL
+  CASH_FREE_URL:process.env.CASH_FREE_URL,
+  AWS_DISPLAY_URL:process.env.AWS_DISPLAY_URL,
+  DISPLAY_IMG_URL:`${process.env.AWS_DISPLAY_URL}${process.env.AWS_LOCAL_PATH}`,
 };
 
 export default config; 

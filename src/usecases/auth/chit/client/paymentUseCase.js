@@ -72,6 +72,36 @@ class PaymentUseCase {
     return otp;
   }
 
+  generateReceiptNumber(objid, start = "REC", end) {
+    const last4 = objid.toString().slice(-4);
+
+    if (!end) {
+      end = `${start}/${last4}/a01`;
+    }
+
+    const match = end.match(/([a-z])(\d{2})$/);
+    if (!match) {
+      return `${start}/${last4}/a01`;
+    }
+
+    const [currentLetter, currentNumStr] = match.slice(1);
+    let nextLetter = currentLetter;
+    let nextNum = parseInt(currentNumStr, 10) + 1;
+
+    if (nextNum > 99) {
+      nextNum = 1;
+      if (currentLetter === "z") {
+        nextLetter = "a";
+      } else {
+        nextLetter = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
+      }
+    }
+
+    const newEnd = `${nextLetter}${String(nextNum).padStart(2, "0")}`;
+    return `${start}/${last4}/${newEnd}`;
+  }
+
+
   async sendPaymentNotifications(
     data,
     token,
@@ -437,12 +467,20 @@ class PaymentUseCase {
           };
         }
 
-        const paymentReceipt = await this.updatePaymentReceipt(
-          generalSettings,
-          schemeData,
-          data.payment_receipt,
-          data.id_scheme
+        // const paymentReceipt = await this.updatePaymentReceipt(
+        //   generalSettings,
+        //   schemeData,
+        //   data.payment_receipt,
+        //   data.id_scheme
+        // );
+        let Lastpayment = await this.paymentRepository.lastPaymentReciept();
+
+        const paymentReceipt = this.generateReceiptNumber(
+          data.id_scheme_account,
+          "REC",
+          Lastpayment?.payment_receipt || "REC/0001/a01"
         );
+
 
         let metalWeight = 0;
         if (!data?.metal_weight) {
@@ -759,12 +797,20 @@ class PaymentUseCase {
           message: "No general settings found for this branch",
         };
 
-      const paymentReceipt = await this.updatePaymentReceipt(
-        generalSettings,
-        scheme,
-        data.payment_receipt,
-        data.id_scheme
-      );
+      // const paymentReceipt = await this.updatePaymentReceipt(
+      //   generalSettings,
+      //   scheme,
+      //   data.payment_receipt,
+      //   data.id_scheme
+      // );
+
+      let Lastpayment = await this.paymentRepository.lastPaymentReciept();
+
+      const paymentReceipt = this.generateReceiptNumber(
+          data.id_scheme_account,
+          "REC",
+          Lastpayment?.payment_receipt || "REC/0001/a01"
+        );
 
       const totalAmount =
         (Number(lastPaidData?.total_amt) || 0) + Number(data.payment_amount);
@@ -1332,12 +1378,20 @@ class PaymentUseCase {
           data.id_scheme_account
         );
 
-        const paymentReceipt = await this.updatePaymentReceipt(
-          generalSettings,
-          schemeData,
-          data.payment_receipt,
-          data.id_scheme
+        let Lastpayment = await this.paymentRepository.lastPaymentReciept();
+
+        const paymentReceipt = this.generateReceiptNumber(
+          data.id_scheme_account,
+          "REC",
+          Lastpayment?.payment_receipt || "REC/0001/a01"
         );
+
+        // const paymentReceipt = await this.updatePaymentReceipt(
+        //   generalSettings,
+        //   schemeData,
+        //   data.payment_receipt,
+        //   data.id_scheme
+        // );
         const runningTotalAmount =
           (Number(lastPaidData?.total_amt) || 0) + Number(data.amount);
 

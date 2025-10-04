@@ -407,6 +407,20 @@ class PaymentRepository {
       console.error(error);
     }
   }
+
+   async lastPaymentReciept() {
+  try {
+    const lastPayment = await paymentModel
+      .findOne()
+      .sort({ createdAt: -1 })
+      .select("payment_receipt");
+
+    return lastPayment || null;
+  } catch (error) {
+    console.error("Error fetching last payment:", error);
+    throw error;
+  }
+}
 }
 
 export default PaymentRepository;

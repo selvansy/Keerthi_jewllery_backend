@@ -23,27 +23,27 @@ class WalletRepository {
         }
     }
 
-    // async findLatestActiveWalletRate() {
-    //     try {
-    //         const exists = await walletRateModel.findOne(
-    //             { is_deleted: false, active: true }
-    //         ).sort({ createdAt: -1 });
+    async findLatestActiveWalletRate() {
+        try {
+            const exists = await walletRateModel.findOne(
+                { is_deleted: false, active: true }
+            ).sort({ createdAt: -1 });
 
-    //         if (!exists) {
-    //             return null;
-    //         }
+            if (!exists) {
+                return null;
+            }
 
-    //         return exists;
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
+            return exists;
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
 
 
-    // async addWalletRate(data) {
-    //     return await walletRateModel.create(data);
-    // }
+    async addWalletRate(data) {
+        return await walletRateModel.create(data);
+    }
 
     async addWalletHistory(data) {
         try {

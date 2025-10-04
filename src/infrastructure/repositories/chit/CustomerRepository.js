@@ -3,6 +3,7 @@ import schemeAccountModel from "../../models/chit/schemeAccountModel.js";
 import mongoose, { isValidObjectId } from "mongoose";
 import referralMessageMode from "../../models/chit/referralMessageMode.js";
 import bcrypt from "bcrypt";
+import config from "../../../config/chit/env.js";
 
 class CustomerRepository {
   async findById(id) {
@@ -107,7 +108,7 @@ class CustomerRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "keerthijewellery/webadmin/assets/customer/",
+                `${config.AWS_LOCAL_PATH}customer/`,
               ],
             },
           },

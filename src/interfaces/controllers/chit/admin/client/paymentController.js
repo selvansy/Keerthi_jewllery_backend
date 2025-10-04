@@ -138,8 +138,6 @@ class PaymentController {
             }
             // const schId = await this.schemeAccountUseCase.searchPaymentData(branchId, schAcc);
             const result = await this.paymentUseCase.getPaymentsBySchemeId({id:schAcc,page,isMobile, limit, from_date, to_date})
-            
-            console.log("qwertyu",result)
 
             // if (!result.success) {
             //     return res.status(400).json({ message: result.message })

@@ -19,7 +19,7 @@ const authMiddleware = new AuthMiddleware(tokenService);
 router.use(authMiddleware.protect);
 router.get('/history',(req,res)=>walletController.getWalletHistoryByWalletId(req,res));
 // router.post('/rate',(req,res)=>walletController.addWalletRate(req,res));
-// router.get('/get-rate',(req,res)=>walletController.getWalletRate(req,res));
+router.get('/get-rate',(req,res)=>walletController.getWalletRate(req,res));
 // router.patch('/:id/redeem',(req,res)=>walletController.redeemFromWallet(req,res));
 router.post('/table',(req,res)=>walletController.getAllWallets(req,res));
 router.post('/redeemtable',(req,res)=>walletController.getRedeem(req,res));

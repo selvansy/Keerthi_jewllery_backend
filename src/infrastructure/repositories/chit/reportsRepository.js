@@ -246,7 +246,6 @@ class ReportRepository {
           },
         },
       ]);
-      console.dir(result,"kd")
   
       const data = result[0].paginatedData;
       const totalDocs = result[0].totalCount[0]?.count || 0;
@@ -258,231 +257,6 @@ class ReportRepository {
     }
   }
 
-  // async pendingDuePayment(page, limit, query, sort = {}) {
-  //   try {
-  //     console.log(query
-        
-  //     )
-  //     const sortField = Object.keys(sort)[0] || "_id";
-  //     const sortOrder = sort[sortField] === "desc" ? -1 : 1;
-  //     const currentDate = new Date();
-
-  //     const dueData = await schemeAccountModel.aggregate([
-  //       { $match: query },
-
-  //       {
-  //         $lookup: {
-  //           from: "schemes",
-  //           localField: "id_scheme",
-  //           foreignField: "_id",
-  //           as: "Scheme",
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "schemeclassifications",
-  //           localField: "id_classification",
-  //           foreignField: "_id",
-  //           as: "Classification",
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "customers",
-  //           localField: "id_customer",
-  //           foreignField: "_id",
-  //           as: "Customer",
-  //         },
-  //       },
-  //       { $unwind: "$Scheme" },
-  //       { $unwind: "$Classification" },
-  //       { $unwind: "$Customer" },
-  //       {
-  //         $addFields: {
-  //           schemeAccountIdStr: { $toString: "$_id" },
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "payments",
-  //           let: { schemeAccountId: "$schemeAccountIdStr" },
-  //           pipeline: [
-  //             {
-  //               $match: {
-  //                 $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
-  //               },
-  //             },
-  //             { $sort: { createdAt: -1 } },
-  //           ],
-  //           as: "paymentsData",
-  //         },
-  //       },
-  //       {
-  //         $addFields: {
-  //           totalPaidAmount: { $sum: "$paymentsData.payment_amount" },
-  //           totalPaidWeight: { $sum: "$paymentsData.metal_weight" },
-  //           // totalPaidInstallment: {
-  //           //   $sum: "$paymentsData.paid_installments"
-  //           // },
-  //           lastPaymentCreatedAt: { $first: "$paymentsData.createdAt" },
-  //         },
-  //       },
-  //       {
-  //         $addFields: {
-  //           referenceDate: {
-  //             $ifNull: ["$lastPaymentCreatedAt", "$start_date"],
-  //           },
-  //           daysSinceLastPayment: {
-  //             $dateDiff: {
-  //               startDate: {
-  //                 $ifNull: ["$lastPaymentCreatedAt", "$start_date"],
-  //               },
-  //               endDate: currentDate,
-  //               unit: "day",
-  //             },
-  //           },
-  //         },
-  //       },
-  //       {
-  //         $addFields: {
-  //           expectedInstallmentsSinceLastPayment: {
-  //             $switch: {
-  //               branches: [
-  //                 {
-  //                   case: { $eq: ["$Scheme.installment_type", 1] },
-  //                   then: {
-  //                     $dateDiff: {
-  //                       startDate: "$referenceDate",
-  //                       endDate: currentDate,
-  //                       unit: "month",
-  //                     },
-  //                   },
-  //                 },
-  //                 {
-  //                   case: { $eq: ["$Scheme.installment_type", 2] },
-  //                   then: {
-  //                     $floor: {
-  //                       $divide: [
-  //                         {
-  //                           $dateDiff: {
-  //                             startDate: "$referenceDate",
-  //                             endDate: currentDate,
-  //                             unit: "day",
-  //                           },
-  //                         },
-  //                         7,
-  //                       ],
-  //                     },
-  //                   },
-  //                 },
-  //                 {
-  //                   case: { $eq: ["$Scheme.installment_type", 3] }, // Daily
-  //                   then: {
-  //                     $dateDiff: {
-  //                       startDate: "$referenceDate",
-  //                       endDate: currentDate,
-  //                       unit: "day",
-  //                     },
-  //                   },
-  //                 },
-  //                 {
-  //                   case: { $eq: ["$Scheme.installment_type", 4] }, // Yearly
-  //                   then: {
-  //                     $dateDiff: {
-  //                       startDate: "$referenceDate",
-  //                       endDate: currentDate,
-  //                       unit: "year",
-  //                     },
-  //                   },
-  //                 },
-  //               ],
-  //               default: 0,
-  //             },
-  //           },
-  //         },
-  //       },
-
-  //       // Overdue calculation
-  //       {
-  //         $addFields: {
-  //           installmentDue: {
-  //             $max: [
-  //               {
-  //                 $subtract: [
-  //                   "$expectedInstallmentsSinceLastPayment",
-  //                   {
-  //                     $cond: [{ $eq: ["$lastPaymentCreatedAt", null] }, 0, 1],
-  //                   },
-  //                 ],
-  //               },
-  //               0,
-  //             ],
-  //           },
-  //           isOverdue: {
-  //             $gt: [
-  //               {
-  //                 $subtract: [
-  //                   "$expectedInstallmentsSinceLastPayment",
-  //                   {
-  //                     $cond: [{ $eq: ["$lastPaymentCreatedAt", null] }, 0, 1],
-  //                   },
-  //                 ],
-  //               },
-  //               0,
-  //             ],
-  //           },
-  //         },
-  //       },
-
-  //       // Filter only overdue
-  //       { $match: { isOverdue: true } },
-
-  //       // Pagination and output
-  //       {
-  //         $facet: {
-  //           metadata: [{ $count: "total" }],
-  //           data: [
-  //             { $skip: (page - 1) * limit },
-  //             { $limit: limit },
-  //             { $sort: { [sortField]: sortOrder } },
-  //             {
-  //               $project: {
-  //                 _id: 1,
-  //                 scheme_name: "$Scheme.scheme_name",
-  //                 classification_name: "$Classification.name",
-  //                 customer_name: {
-  //                   $concat: ["$Customer.firstname", " ", "$Customer.lastname"],
-  //                 },
-  //                 customer_mobile: "$Customer.mobile",
-  //                 lastPaidDate: "$lastPaymentCreatedAt",
-  //                 daysSinceLastPayment: 1,
-  //                 installmentDue: 1,
-  //                 paid_installments: 1,
-  //                 total_installments: 1,
-  //                 scheme_acc_number: 1,
-  //                 account_name: 1,
-  //                 maturity_date: 1,
-  //                 createdAt: 1,
-  //                 totalPaidAmount: 1,
-  //                 totalPaidWeight: 1,
-  //                 isOverdue: 1,
-  //                 amount: 1,
-  //                 weight: 1,
-  //               },
-  //             },
-  //           ],
-  //         },
-  //       },
-  //     ]);
-
-  //     const totalDocuments = dueData[0]?.metadata[0]?.total || 0;
-  //     const data = dueData[0]?.data || [];
-  //     return { totalDocuments, data };
-  //   } catch (error) {
-  //     console.error("Error in pendingDuePayment:", error);
-  //     throw error;
-  //   }
-  // }
   async pendingDuePayment(page, limit, query, sort = {}) {
     try {
       const sortField = Object.keys(sort)[0] || "_id";
@@ -533,7 +307,7 @@ class ReportRepository {
         {
           $lookup: {
             from: "payments",
-            let: { schemeAccountId: "$schemeAccountIdStr" },
+            let: { schemeAccountId: "$_id" },
             pipeline: [
               {
                 $match: {
@@ -1615,162 +1389,103 @@ class ReportRepository {
     }
   }
 
-  async getPaymentLedger(query = {}, skip = 0, limit = 10) {
-    try {
-      const basePipeline = [
-        { $match: query },
-        {
-          $lookup: {
-            from: "schemes",
-            localField: "id_scheme",
-            foreignField: "_id",
-            as: "Scheme",
+
+async getPaymentLedger(query = {}, skip = 0, limit = 10) {
+  try {
+    const basePipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "id_scheme",
+          foreignField: "_id",
+          as: "Scheme",
+        },
+      },
+      { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "paymentmodes",
+          foreignField: "_id",
+          localField: "payment_mode",
+          as: "PaymentMode",
+        },
+      },
+      { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
+    ];
+
+    const dataPipeline = [...basePipeline];
+
+    dataPipeline.push(
+      {
+        $group: {
+          _id: {
+            schemeId: "$id_scheme",
+            schemeName: "$Scheme.scheme_name",
+            modeId: "$payment_mode",
+            modeName: "$PaymentMode.mode_name",
+          },
+          totalAmount: { $sum: "$payment_amount" },
+          paymentCount: { $sum: 1 },
+          latestPayment: { $max: "$createdAt" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          schemeId: "$_id.schemeId",
+          schemeName: "$_id.schemeName",
+          modeId: "$_id.modeId",
+          modeName: "$_id.modeName",
+          totalAmount: 1,
+          paymentCount: 1,
+          latestPayment: 1,
+        },
+      },
+      { $sort: { latestPayment: -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    );
+
+    const countPipeline = [...basePipeline];
+    countPipeline.push(
+      {
+        $group: {
+          _id: {
+            schemeId: "$id_scheme",
+            schemeName: "$Scheme.scheme_name",
+            modeId: "$payment_mode",
+            modeName: "$PaymentMode.mode_name",
           },
         },
-        { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "paymentmodes",
-            foreignField: "_id",
-            localField: "payment_mode",
-            as: "PaymentMode",
-          },
-        },
-        { $unwind: { path: "$PaymentMode", preserveNullAndEmptyArrays: true } },
-      ];
+      },
+      { $count: "totalDocuments" }
+    );
 
-      // Create data pipeline
-      const dataPipeline = [...basePipeline];
-      
-      if (query.payment_mode) {
-        dataPipeline.push(
-          {
-            $group: {
-              _id: {
-                schemeId: "$id_scheme",
-                schemeName: "$Scheme.scheme_name",
-              },
-              grandTotal: { $sum: "$payment_amount" },
-              paymentModes: {
-                $push: {
-                  modeId: "$payment_mode",
-                  modeName: "$PaymentMode.mode_name",
-                  totalAmount: "$payment_amount",
-                  paymentCount: 1,
-                }
-              },
-              paymentCount: { $sum: 1 },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              schemeId: "$_id.schemeId",
-              schemeName: "$_id.schemeName",
-              paymentModes: 1,
-              grandTotal: 1,
-            },
-          },
-          { $sort: { grandTotal: -1 } },
-          { $skip: skip },
-          { $limit: limit }
-        );
-      } else {
-        dataPipeline.push(
-          {
-            $group: {
-              _id: {
-                schemeId: "$id_scheme",
-                schemeName: "$Scheme.scheme_name",
-                paymentModeId: "$payment_mode",
-                paymentModeName: "$PaymentMode.mode_name",
-              },
-              totalAmount: { $sum: "$payment_amount" },
-              paymentCount: { $sum: 1 },
-            },
-          },
-          {
-            $group: {
-              _id: {
-                schemeId: "$_id.schemeId",
-                schemeName: "$_id.schemeName",
-              },
-              paymentModes: {
-                $push: {
-                  modeId: "$_id.paymentModeId",
-                  modeName: "$_id.paymentModeName",
-                  totalAmount: "$totalAmount",
-                  paymentCount: "$paymentCount",
-                },
-              },
-              grandTotal: { $sum: "$totalAmount" },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              schemeId: "$_id.schemeId",
-              schemeName: "$_id.schemeName",
-              paymentModes: 1,
-              grandTotal: 1,
-            },
-          },
-          { $sort: { grandTotal: -1 } },
-          { $skip: skip },
-          { $limit: limit }
-        );
-      }
+    const [data, countResult] = await Promise.all([
+      SchemePayment.aggregate(dataPipeline),
+      SchemePayment.aggregate(countPipeline),
+    ]);
 
-      // Create count pipeline that matches the final grouped structure
-      const countPipeline = [...basePipeline];
-      if (query.payment_mode) {
-        countPipeline.push(
-          {
-            $group: {
-              _id: {
-                schemeId: "$id_scheme",
-                schemeName: "$Scheme.scheme_name",
-              },
-            },
-          },
-          { $count: "totalDocuments" }
-        );
-      } else {
-        countPipeline.push(
-          {
-            $group: {
-              _id: {
-                schemeId: "$id_scheme",
-                schemeName: "$Scheme.scheme_name",
-              },
-            },
-          },
-          { $count: "totalDocuments" }
-        );
-      }
+    const totalDocuments = countResult[0]?.totalDocuments || 0;
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const currentPage = Math.floor(skip / limit) + 1;
 
-      const [data, countResult] = await Promise.all([
-        SchemePayment.aggregate(dataPipeline),
-        SchemePayment.aggregate(countPipeline)
-      ]);
-
-      const totalDocuments = countResult[0]?.totalDocuments || 0;
-      const totalPages = Math.ceil(totalDocuments / limit);
-      const currentPage = Math.floor(skip / limit) + 1;
-
-      return {
-        data,
-        totalDocuments,
-        totalPages,
-        currentPage,
-        limit,
-        hasMore: skip + limit < totalDocuments,
-      };
-    } catch (err) {
-      console.error(err)
-      throw err;
-    }
+    return {
+      data,
+      totalDocuments,
+      totalPages,
+      currentPage,
+      limit,
+      hasMore: skip + limit < totalDocuments,
+    };
+  } catch (err) {
+    console.error(err);
+    throw err;
   }
+}
+
+
 
   async getCompletedAccount(skip, limit, query = {}, sort = {}) {
     try {
@@ -3347,9 +3062,9 @@ class ReportRepository {
   //     throw err;
   //   }
   // }
+  
   async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId, type,from_date,to_date) {
     try {
-      console.log(from_date,to_date)
         const paymentMatch = {};
         if (from_date) paymentMatch.createdAt = { $gte: from_date};
         if (to_date) paymentMatch.createdAt = { ...paymentMatch.createdAt, $lte: to_date };
@@ -3419,13 +3134,41 @@ class ReportRepository {
 
         // Get paginated results
         const schemeDetails = await schemeAccountModel.aggregate(aggregationPipeline);
-        console.log(schemeDetails,"d")
 
        
-        const totalCount = await schemeAccountModel.countDocuments({
+        // const totalCount = await schemeAccountModel.countDocuments({
+        //     id_scheme: new mongoose.Types.ObjectId(schemeId),
+        //     filter
+        // });
+      const totalCountAgg = await schemeAccountModel.aggregate([
+        {
+          $match: {
             id_scheme: new mongoose.Types.ObjectId(schemeId),
-            filter
-        });
+            ...filter
+          }
+        },
+        {
+          $lookup: {
+            from: "payments",
+            let: { schemeAccountId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
+                  ...paymentMatch
+                }
+              }
+            ],
+            as: "PaymentSummary"
+          }
+        },
+        {
+          $count: "totalCount"
+        }
+      ]);
+
+
+        const totalCount = totalCountAgg[0]?.totalCount || 0;
         console.log(totalCount)
 
         const totalPages = Math.ceil(totalCount / limit);

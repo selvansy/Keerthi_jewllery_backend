@@ -936,16 +936,19 @@ class SchemeAccountUseCase {
         weight:account?.weight,
         total_installments:account?.id_scheme?.total_installments,
         paid_installments:account?.paid_installments,
-        gift_issues:account?.gift_issues
+        gift_issues:account?.gift_issues,
+        status:account?.status
       };
 
+      console.log(arrobject.status)
+
       const scheme = account.id_scheme;
-      if ([0, 1, 2, 5, 6, 7, 8, 9, 10, 11, 13, 14].includes(scheme.scheme_type)) {
+      if ([0, 1, 2, 5, 6, 7, 8, 9, 10, 11, 13, 14].includes(scheme?.scheme_type)) {
         arrobject.scheme_name = `${scheme.scheme_name} (Rs. ${scheme.min_amount} - ${scheme.max_amount})`;
-      } else if ([12, 3, 4].includes(scheme.scheme_type)) {
+      } else if ([12, 3, 4].includes(scheme?.scheme_type)) {
         arrobject.scheme_name = `${scheme.scheme_name} (Gm ${scheme?.min_weight} - ${scheme?.max_weight})`;
       } else {
-        arrobject.scheme_name = `${scheme.scheme_name} (Rs. ${scheme.amount})`;
+        arrobject.scheme_name = `${scheme?.scheme_name} (Rs. ${scheme?.amount})`;
       }
 
       const [

@@ -30,25 +30,52 @@ class metalRateUseCase {
   
       process.nextTick(async () => {
         try {
-          const messageLines = data.map(item => {
-            const metal = item.metal_name || "Unknown Metal";
-            const purity = item.purity_name || "Unknown Purity";
-            const rate = typeof item.rate === "number" ? item.rate.toFixed(2) : "-";
-            return `${metal} (${purity}): ₹${rate}/g`;
+          const sortedData = data.slice().sort((a, b) => {
+            const order = (metal) => {
+              if (metal.toLowerCase().includes("gold")) return 1;
+              if (metal.toLowerCase().includes("silver")) return 2;
+              return 3;
+            };
+            return order(a.metal_name) - order(b.metal_name);
           });
-  
-          const messageContent = messageLines.join(" | ");
+
+          const grouped = sortedData.reduce((acc, item) => {
+            const metal = item.metal_name || "Unknown Metal";
+            if (!acc[metal]) acc[metal] = [];
+            acc[metal].push(item);
+            return acc;
+          }, {});
+
+          const messageLines = Object.entries(grouped).map(([metal, items], index) => {
+            const parts = items.map((item, i) => {
+              const purity = item.purity_name || "Unknown Purity";
+              const rate = typeof item.rate === "number" ? item.rate.toFixed(2) : "-";
+              if (i === 0) {
+                return `Rs.${rate.toLocaleString("en-IN")} (${purity})`;
+              } else {
+                return `(${purity}) : Rs.${rate.toLocaleString("en-IN")}`;
+              }
+            });
+
+            if (index === 0) {
+              return `Today’s ${metal} Rate : ${parts.join(" , ")}`;
+            } else {
+              return `${metal} Rate : ${parts.join(" , ")}`;
+            }
+          });
+
+          const messageContent = messageLines.join(" ; ");
+
           const subscribers = await this.customerRepo.getExternal();
-  
+
           const input = {
             recipients: subscribers || [],
             title: "Metal Rate Updated",
             message: messageContent,
             channel: "push",
             type: "Notification",
-            sendToAllSubscribed:true
+            sendToAllSubscribed: true
           };
-  
           await smsService.sendNotification(input);
         } catch (err) {
           console.error("Push notification failed:", err.message);

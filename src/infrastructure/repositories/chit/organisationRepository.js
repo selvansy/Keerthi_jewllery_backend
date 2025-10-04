@@ -1,3 +1,4 @@
+import config from "../../../config/chit/env.js";
 import organisationModel from "../../models/chit/organisationModel.js";
 
 class OrganisationRepository{
@@ -63,7 +64,7 @@ class OrganisationRepository{
                 createdAt: 1,
                 updatedAt: 1,
                 pathurl: {
-                  $literal: "https://aupay-img.s3.eu-north-1.amazonaws.com/keerthijewellery/webadmin/assets/organisation/"
+                  $literal: `https://aupay-img.s3.eu-north-1.amazonaws.com/${config.AWS_LOCAL_PATH}organisation/`
                 },
                 id_city: "$id_city._id",
                 id_state: "$id_state._id",

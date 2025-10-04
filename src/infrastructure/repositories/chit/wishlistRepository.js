@@ -1,3 +1,4 @@
+import config from "../../../config/chit/env.js";
 import wishlistModel from "../../models/chit/wishlistModel.js"
 import mongoose from "mongoose";
 
@@ -125,7 +126,7 @@ class WishlistRepository{
                   }
                 },
                 pathUrl: {
-                  $concat: ["$s3Details.s3display_url", "keerthijewellery/webadmin/assets/products/"]
+                  $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}products/`]
                 }
               }
             },

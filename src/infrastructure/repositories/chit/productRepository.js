@@ -1,6 +1,7 @@
 import ProductModel from "../../models/chit/productModel.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import config from "../../../config/chit/env.js";
 class ProductRepository {
   async findByName(product_name, id_branch, id) {
     try {
@@ -188,7 +189,7 @@ class ProductRepository {
             id_branch: 1,
             categoryName: "$category.category_name",
             pathurl: {
-              $concat: ["$s3Details.s3display_url", "keerthijewellery/webadmin/assets/products/"]
+              $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}products/`]
             },
             isWishlisted: 1,
             purityRate: 1,
@@ -407,7 +408,7 @@ class ProductRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "keerthijewellery/webadmin/assets/products/",
+                `${config.AWS_LOCAL_PATH}products/`,
               ],
             },
           },

@@ -1,3 +1,4 @@
+import config from "../../../config/chit/env.js";
 import employeeModel from "../../models/chit/employeeModel.js";
 import mongoose from "mongoose";
 
@@ -127,7 +128,7 @@ class EmployeeRepository {
                 pathurl: {
                     $concat: [
                         "$s3Details.s3display_url",
-                        "keerthijewellery/webadmin/assets/employee/",
+                        `${config.AWS_LOCAL_PATH}employee/`,
                     ],
                 },
             },

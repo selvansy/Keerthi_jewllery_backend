@@ -1029,6 +1029,8 @@ async getCustomerRefferal(bodyData) {
     try {
       const {schemeid,page,limit,search,from_date,to_date} = bodyData;
 
+      console.log("ertyu",from_date,to_date)
+
       const pageNum = page ? parseInt(page) : 1;
       const pageSize = limit ? parseInt(limit) : 10;
       const searchTerm = search || "";

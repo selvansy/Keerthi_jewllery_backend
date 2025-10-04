@@ -636,6 +636,7 @@ class WalletUsecase {
       const query = {
         is_deleted: false,
         active: true,
+        payment_status:1,
         id_scheme_account:new mongoose.Types.ObjectId(id)
       };
  

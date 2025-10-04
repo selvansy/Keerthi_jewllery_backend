@@ -1,3 +1,4 @@
+import config from "../../../config/chit/env.js";
 import newArrivalsModel from "../../models/chit/newArrivalsModel.js";
 import mongoose, { isValidObjectId } from "mongoose";
 
@@ -69,7 +70,7 @@ class NewArrivalRepository {
             pathurl: {
               $concat: [
                   "$s3Details.s3display_url",
-                  "keerthijewellery/webadmin/assets/newarrivals/"
+                  `${config.AWS_LOCAL_PATH}newarrivals/`
               ]
           }
           },
@@ -229,8 +230,8 @@ class NewArrivalRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                "keerthijewellery/webadmin/assets/products/"
-              ]
+                `${config.AWS_LOCAL_PATH}products/`
+                            ]
             }
           }
         },

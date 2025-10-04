@@ -2,8 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const paymentSchema = new Schema({
         payment_receipt: {
-            type: Number,
-            default: 1
+            type: String,
         },
         id_transaction: {
             type: String,

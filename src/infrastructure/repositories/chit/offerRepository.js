@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import OffersModel from "../../models/chit/offersModel.js";
+import config from "../../../config/chit/env.js";
 
 class OfferRepository {
   async addOffer(offerData) {
@@ -48,7 +49,7 @@ class OfferRepository {
             pathurl: {
               $concat: [
                   "$s3Details.s3display_url",
-                  "keerthijewellery/webadmin/assets/offers/"
+                  `${config.AWS_LOCAL_PATH}}offers/`
               ]
           }
           },
@@ -183,7 +184,7 @@ class OfferRepository {
           pathurl: {
             $concat: [
                 "$s3Details.s3display_url",
-                "keerthijewellery/webadmin/assets/offers/"
+                `${config.AWS_LOCAL_PATH}}offers/`
             ]
         }
         }}
