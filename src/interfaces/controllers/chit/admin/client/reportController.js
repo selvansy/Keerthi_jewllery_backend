@@ -151,6 +151,7 @@ class ReportController {
       return res.status(500).json({ message: 'Internal server error' });
     }
   }
+  
   async getCustomerRefferal(req, res) {
     try {
      
@@ -166,19 +167,19 @@ class ReportController {
     }
   }
 
-  async getCustomerRefferal(req, res) {
-    try {
-      const result = await this.reportUsecase.getCustomerRefferal(req.body);
+  // async getCustomerRefferal(req, res) {
+  //   try {
+  //     const result = await this.reportUsecase.getCustomerRefferal(req.body);
 
-      if(!result.success){
-        return res.status(400).json(result)
-      }
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  }
+  //     if(!result.success){
+  //       return res.status(400).json(result)
+  //     }
+  //     return res.status(200).json(result);
+  //   } catch (error) {
+  //     console.error(error);
+  //     return res.status(500).json({ message: 'Internal server error' });
+  //   }
+  // }
 
   //!drill down controller // indipended api not directly related to report 
   async getSchemeDetailedView(req, res) {

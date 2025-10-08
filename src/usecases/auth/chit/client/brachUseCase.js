@@ -181,6 +181,7 @@ class BranchUsecase {
 
       const existingBranch = await this.brachRepository.findById(id);
       if (existingBranch) {
+         existingBranch.whatsapp_no = `+91${existingBranch?.whatsapp_no}` || ""
         return {
           success: true,
           message: "Branch retrieved successfully",

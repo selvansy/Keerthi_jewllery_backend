@@ -49,7 +49,7 @@ class OfferRepository {
             pathurl: {
               $concat: [
                   "$s3Details.s3display_url",
-                  `${config.AWS_LOCAL_PATH}}offers/`
+                  `${config.AWS_LOCAL_PATH}offers/`
               ]
           }
           },
@@ -184,7 +184,7 @@ class OfferRepository {
           pathurl: {
             $concat: [
                 "$s3Details.s3display_url",
-                `${config.AWS_LOCAL_PATH}}offers/`
+                `${config.AWS_LOCAL_PATH}offers/`
             ]
         }
         }}

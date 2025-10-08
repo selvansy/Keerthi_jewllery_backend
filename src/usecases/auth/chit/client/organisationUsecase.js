@@ -82,9 +82,10 @@ class OrganisationUsecase {
     
     async getDetails(){
         try {
-            const existsing  = await this.organisationRepo.findOne()
+            const existsing  = await this.organisationRepo.findOne();
 
             if(existsing){
+               existsing.whatsapp_no = `+91${existsing?.whatsapp_no}` || ""
                existsing.pathurl =  `https://aupay-img.s3.eu-north-1.amazonaws.com/${config.AWS_LOCAL_PATH}organisation/`
                return {success:true,message:"Organisation detials fetched successfully",data:existsing}
             }

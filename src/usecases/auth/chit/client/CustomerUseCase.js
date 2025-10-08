@@ -115,9 +115,9 @@ class CustomerUseCase {
       }
 
       if (uploads) {
-        if (uploads.cus_img) {
+        if (uploads?.cus_img) {
           try {
-            if (uploads.cus_img[0]) {
+            if (uploads?.cus_img[0]) {
               dataToSave.cus_img = await this.s3service.uploadToS3(
                 uploads.cus_img[0],
                 "customer",

@@ -972,64 +972,64 @@ class ReportUseCase {
     }
 }
 
-async getCustomerRefferal(bodyData) {
-  try {
-    const { page, limit, from_date, to_date,type} = bodyData;
-
-    const pageNum = page ? parseInt(page) : 1;
-    const pageSize = limit ? parseInt(limit) : 10;
-
-    const query = {
-      active: true,
-      is_deleted: false,
-    };
-
-    if (from_date && to_date) {
-      query.createdAt = {
-        $gte: new Date(from_date),
-        $lte: new Date(to_date), 
+  async getCustomerRefferal(bodyData) {
+    try {
+      const { page, limit, from_date, to_date,type,search} = bodyData;
+  
+      const pageNum = page ? parseInt(page) : 1;
+      const pageSize = limit ? parseInt(limit) : 10;
+  
+      const query = {
+        active: true,
+        is_deleted: false,
       };
-    } else if (from_date) {
-      query.createdAt = { $gte: new Date(from_date) };
-    } else if (to_date) {
-      query.createdAt = { $lte: new Date(to_date) }; 
+  
+      if (from_date && to_date) {
+        query.createdAt = {
+          $gte: new Date(from_date),
+          $lte: new Date(to_date), 
+        };
+      } else if (from_date) {
+        query.createdAt = { $gte: new Date(from_date) };
+      } else if (to_date) {
+        query.createdAt = { $lte: new Date(to_date) }; 
+      }
+  
+      const documentSkip = (pageNum - 1) * pageSize;
+      const documentLimit = pageSize;
+  
+      const Data = await this.reportRepo.getCustomerRefferal(
+        query, 
+        documentSkip, 
+        documentLimit,
+        type,
+        search
+      );
+  
+      if (!Data) {
+        return { success: true, message: "No data found", data: [] };
+      }
+
+      return {
+        success: true,
+        message: "Customer referral details fetched successfully",
+        data: Data.data,
+        totalCount: Data.totalCount.count || 0,
+        totalPages: Math.ceil((Data.totalCount.count || 1) / pageSize),
+        currentPage: pageNum,
+      };
+    } catch (error) {
+      console.error("Error in data:", error);
+      return { success: false, message: "Error while getting data" };
     }
-
-    const documentSkip = (pageNum - 1) * pageSize;
-    const documentLimit = pageSize;
-
-    const Data = await this.reportRepo.getCustomerRefferal(
-      query, 
-      documentSkip, 
-      documentLimit,
-      type
-    );
-
-    if (!Data) {
-      return { success: true, message: "No data found", data: [] };
-    }
-
-    return {
-      success: true,
-      message: "Employee referral details fetched successfully",
-      data: Data.data,
-      totalCount: Data.totalCount || 0,
-      totalPages: Math.ceil((Data.totalCount || 1) / pageSize),
-      currentPage: pageNum,
-    };
-  } catch (error) {
-    console.error("Error in data:", error);
-    return { success: false, message: "Error while getting data" };
   }
-}
+
 
   
   //!drill down api section 
   async getSchemeDetailedView(bodyData) {
     try {
       const {schemeid,page,limit,search,from_date,to_date} = bodyData;
-
-      console.log("ertyu",from_date,to_date)
 
       const pageNum = page ? parseInt(page) : 1;
       const pageSize = limit ? parseInt(limit) : 10;
@@ -1566,63 +1566,63 @@ console.log("first")
     }
   }
 
-  async getCustomerRefferal(query) {
-    try {
-      const { page, limit, from_date, to_date, id_branch } = query;
+  // async getCustomerRefferal(query) {
+  //   try {
+  //     const { page, limit, from_date, to_date, id_branch } = query;
 
-      const pageNum = page ? parseInt(page) : 1;
-      const perPage = limit ? parseInt(limit) : 10;
-      const skip = (pageNum - 1) * perPage;
+  //     const pageNum = page ? parseInt(page) : 1;
+  //     const perPage = limit ? parseInt(limit) : 10;
+  //     const skip = (pageNum - 1) * perPage;
 
-      const filter = { is_deleted: false };
+  //     const filter = { is_deleted: false };
 
-      if (from_date && to_date) {
-        const startDate = new Date(from_date);
-        const endDate = new Date(to_date);
+  //     if (from_date && to_date) {
+  //       const startDate = new Date(from_date);
+  //       const endDate = new Date(to_date);
 
-        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          throw new Error("Invalid date format.");
-        }
+  //       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  //         throw new Error("Invalid date format.");
+  //       }
 
-        filter.createdAt = {
-          $gte: startDate,
-          $lte: endDate,
-        };
-      } else {
-        const today = new Date();
-        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  //       filter.createdAt = {
+  //         $gte: startDate,
+  //         $lte: endDate,
+  //       };
+  //     } else {
+  //       const today = new Date();
+  //       const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  //       const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-        filter.createdAt = {
-          $gte: startOfDay,
-          $lte: endOfDay,
-        };
-      }
+  //       filter.createdAt = {
+  //         $gte: startOfDay,
+  //         $lte: endOfDay,
+  //       };
+  //     }
 
-      if (id_branch) {
-        if (!isValidObjectId(id_branch)) {
-          return "Provide valid branch id";
-        }
+  //     if (id_branch) {
+  //       if (!isValidObjectId(id_branch)) {
+  //         return "Provide valid branch id";
+  //       }
 
-        const findBranch = await this.branchRepo.findById(id_branch);
-        if (!findBranch) {
-          return "Branch not found";
-        }
+  //       const findBranch = await this.branchRepo.findById(id_branch);
+  //       if (!findBranch) {
+  //         return "Branch not found";
+  //       }
 
-        filter.id_branch = new mongoose.Types.ObjectId(id_branch);
-      }
+  //       filter.id_branch = new mongoose.Types.ObjectId(id_branch);
+  //     }
 
-      const data = await this.reportRepo.getCustomerRefferal(
-        filter,
-        skip,
-        limit
-      );
-      console.log(data);
-      return data;
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  //     const data = await this.reportRepo.getCustomerRefferal(
+  //       filter,
+  //       skip,
+  //       limit
+  //     );
+  //     console.log(data);
+  //     return data;
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
 }
 
 export default ReportUseCase;

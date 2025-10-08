@@ -937,10 +937,8 @@ class SchemeAccountUseCase {
         total_installments:account?.id_scheme?.total_installments,
         paid_installments:account?.paid_installments,
         gift_issues:account?.gift_issues,
-        status:account?.status
+        status:account?.status,
       };
-
-      console.log(arrobject.status)
 
       const scheme = account.id_scheme;
       if ([0, 1, 2, 5, 6, 7, 8, 9, 10, 11, 13, 14].includes(scheme?.scheme_type)) {
@@ -988,6 +986,9 @@ class SchemeAccountUseCase {
       arrobject.scheme_amount = scheme?.amount;
       arrobject.gift_percentage = scheme?.gift_percentage;
       arrobject.allocate_gift_amount = 0;
+
+      arrobject.bonus_amount = scheme?.bonus_amount || 0;
+      arrobject.bonus_percent = scheme?.bonus_percent || 0;
       
       let allocate_gift_amount = 0;
       let balance_gift_amount = 0;
