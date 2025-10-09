@@ -786,7 +786,7 @@ class CustomerUseCase {
     }
   }
 
-  async forgetPassword(mobile, newPassword) {
+    async forgetPassword(mobile, newPassword) {
     try {
       const user = await this.customerRepository.existingUser(mobile);
 
@@ -806,17 +806,20 @@ class CustomerUseCase {
         return { success: false, message: "Otp not verified" };
       }
 
-      const checkOldPassword = await this.hashingService.comparePassword(
-        newPassword,
-        user.password
-      );
+      let checkOldPassword = ""
+      if(user.password){
+        checkOldPassword=  await this.hashingService.comparePassword(
+          newPassword,
+          user.password
+        );
 
-      if (checkOldPassword) {
-        return {
-          success: false,
-          message:
-            "Your new password cannot be the same as your previous password.",
-        };
+        if (checkOldPassword) {
+          return {
+            success: false,
+            message:
+              "Your new password cannot be the same as your previous password.",
+          };
+        }
       }
 
       const password = await this.hashingService.hashPassword(newPassword);

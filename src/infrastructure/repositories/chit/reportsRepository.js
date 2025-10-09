@@ -152,6 +152,15 @@ class ReportRepository {
                 },
               },
             },
+              totalCompletedAccount: {
+              $size: {
+                $filter: {
+                  input: "$SchemeAccount",
+                  as: "account",
+                  cond: { $eq: ["$$account.status", 2] },
+                },
+              },
+            },
           },
         },
   
@@ -232,6 +241,7 @@ class ReportRepository {
                   totalPaidAccounts: 1,
                   closedWeight: 1,
                   totalCloseAccount: 1,
+                  totalCompletedAccount:1,
                   totalPreCloseAccount: 1,
                   totalRefundAccount: 1,
                   totalCloseAmount: 1,
