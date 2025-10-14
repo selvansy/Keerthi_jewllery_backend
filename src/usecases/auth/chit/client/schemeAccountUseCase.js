@@ -918,6 +918,7 @@ class SchemeAccountUseCase {
       if (!account) {
         return { success: false, message: "No scheme account found" };
       }
+      console.log(account)
 
       const arrobject = {
         _id: account._id,
