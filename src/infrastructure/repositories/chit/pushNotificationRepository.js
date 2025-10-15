@@ -209,12 +209,12 @@ class PushNotificationRepository {
           model: "Scheme",    
           select: "scheme_name",
         })
-        // .populate({
-        //   path: "customerId",   
-        //   model: "Customer",    
-        //   select: "firstname lastname mobile",
+        .populate({
+          path: "customerId",   
+          model: "Customer",    
+          select: "firstname lastname mobile",
           
-        // })
+        })
        
         .skip(skip)
         .limit(limit)

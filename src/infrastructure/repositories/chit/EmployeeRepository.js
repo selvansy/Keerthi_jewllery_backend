@@ -206,7 +206,7 @@ class EmployeeRepository {
           path: "id_branch",
           select: "branch_name _id mobile",
         })
-        .select("firstname lastname active _id Id_branch date_of_join");
+        .select("firstname lastname emp_code mobile active _id Id_branch date_of_join");
 
       if (!data || data.length === 0) return null;
 
