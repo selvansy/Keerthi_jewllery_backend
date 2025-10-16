@@ -141,21 +141,21 @@ class ProductUseCase {
     try {
       const idValidation = this.validateObjectId(id, "Product");
       if (idValidation) return idValidation;
-  
+
       const existingProduct = await this.productRepository.findById(id);
       if (!existingProduct) {
         return { success: false, message: "Product not found" };
       }
-  
+
       const objectIdValidationErrors = [
         this.validateObjectId(productData.id_branch, "Branch"),
         this.validateObjectId(productData.id_category, "Category"),
       ].filter(Boolean);
-  
+
       if (objectIdValidationErrors.length) {
         return { success: false, message: objectIdValidationErrors[0].message };
       }
-  
+
       const checkName = await this.productRepository.findByName(
         productData.product_name,
         productData.id_branch,
@@ -164,9 +164,62 @@ class ProductUseCase {
       if (checkName) {
         return { success: false, message: "Product already existing" };
       }
-  
+
+      if (
+        productData.availableSizes &&
+        typeof productData.availableSizes === "string"
+      ) {
+        productData.availableSizes = JSON.parse(productData.availableSizes);
+      }
+
+      if (
+        productData.makingCharges &&
+        typeof productData.makingCharges === "string"
+      ) {
+        productData.makingCharges = JSON.parse(productData.makingCharges);
+      }
+
+      if (
+        productData.wastageCharges &&
+        typeof productData.wastageCharges === "string"
+      ) {
+        productData.wastageCharges = JSON.parse(productData.wastageCharges);
+      }
+
+      if (
+        productData.collection &&
+        typeof productData.collection === "string"
+      ) {
+        try {
+          productData.collection = JSON.parse(productData.collection);
+        } catch (error) {
+          if (productData.collection.includes(",")) {
+            productData.collection = productData.collection
+              .split(",")
+              .map((id) => id.trim());
+          } else if (
+            productData.collection.startsWith("[") &&
+            productData.collection.endsWith("]")
+          ) {
+            const cleanedString = productData.collection
+              .replace(/'/g, '"')
+              .replace(/\[|\]/g, "");
+            productData.collection = JSON.parse(`[${cleanedString}]`);
+          } else {
+            productData.collection = [productData.collection];
+          }
+        }
+      }
+
+      if (Array.isArray(productData.collection)) {
+        productData.collection = productData.collection.filter((id) => {
+          const isValid = this.validateObjectId(id, "Collection item");
+          return isValid === null;
+        });
+      }
+
       const updateFields = {};
-  
+
       for (let key in productData) {
         if (key === "showprice" || key === "sell") {
           const newValue =
@@ -184,7 +237,7 @@ class ProductUseCase {
           updateFields[key] = productData[key];
         }
       }
-  
+
       if (
         updateFields.id_metal ||
         updateFields.id_branch ||
@@ -199,7 +252,7 @@ class ProductUseCase {
             ? this.categoryRepository.findById(updateFields.id_category)
             : null,
         ]);
-  
+
         if (updateFields.id_branch && !checkBranchId) {
           return { success: false, message: "Branch not found" };
         }
@@ -207,40 +260,36 @@ class ProductUseCase {
           return { success: false, message: "Category not found" };
         }
       }
-  
-      if (images.product_image) {
+
+      if (images.product_image || productData.existing_images) {
         const s3configs = await this.s3Helper(productData.id_branch);
-        const { product_image } = images;
-  
-        const existingImages = existingProduct.product_image || [];
 
-        const imagesToRemove = existingImages.filter(
-          (img) => !product_image.includes(img)
-        );
-  
-        const removePromises = imagesToRemove.map((img) =>
-          this.s3Service.deleteFromS3(
-            `${s3configs.s3display_url}${config.AWS_LOCAL_PATH}products/${img}`,
-            s3configs
-          )
-        );
-        await Promise.all(removePromises);
-  
-        const newImagesToUpload = product_image.filter(
-          (img) => !existingImages.includes(img)
-        );
-  
-        const uploadPromises = newImagesToUpload.map((image) =>
-          this.s3Service.uploadToS3(image, "products", s3configs)
-        );
-        const uploadedImages = await Promise.all(uploadPromises);
+        let existingImages = [];
+        if (productData.existing_images) {
+          try {
+            existingImages = JSON.parse(productData.existing_images);
+          } catch (error) {
+            existingImages = Array.isArray(productData.existing_images)
+              ? productData.existing_images
+              : [productData.existing_images];
+          }
+        }
 
-        productData.product_image = [
-          ...product_image.filter((img) => existingImages.includes(img)),
-          ...uploadedImages,
-        ];
+        const newImages = images.product_image || [];
+
+        const allImages = [...existingImages];
+
+        if (newImages.length > 0) {
+          const uploadPromises = newImages.map((image) =>
+            this.s3Service.uploadToS3(image, "products", s3configs)
+          );
+          const uploadedImages = await Promise.all(uploadPromises);
+          allImages.push(...uploadedImages);
+        }
+
+        productData.product_image = allImages;
       }
-  
+
       const updateProduct = await this.productRepository.editProduct(
         productData,
         id

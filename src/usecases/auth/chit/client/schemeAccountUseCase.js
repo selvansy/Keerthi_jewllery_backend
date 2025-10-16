@@ -2157,7 +2157,7 @@ class SchemeAccountUseCase {
 
       return {
         success: true,
-        message: "Customer shceme account fetched successfully",
+        message: "Customer scheme account fetched successfully",
         data: processedData,
         general: generalsetting,
       };

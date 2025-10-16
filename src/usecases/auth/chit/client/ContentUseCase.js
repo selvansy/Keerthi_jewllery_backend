@@ -160,13 +160,14 @@ class ContentUseCase {
         type: type,
       };
 
-      if(mobile){
-        query.toAdmin=false
-        query.toCustomer=true
-      }else{
-        query.toAdmin=true
-        query.toCustomer=false
-      }
+      // if(mobile){
+      //   query.toAdmin=false
+      //   query.toCustomer=true
+      // }else{
+      //   query.toAdmin=true
+      //   query.toCustomer=false
+      // }
+
 
       const documentskip = (pageNum - 1) * pageSize;
       const documentlimit = pageSize;

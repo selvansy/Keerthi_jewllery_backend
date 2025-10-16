@@ -2576,6 +2576,159 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
   }
 
   //amount payable
+  // async getAmountPayable(filter, skip = 0, limit = 10, type) {
+  //   try {
+  //     if (type === "weight") {
+  //       filter["scheme_type"] = { $in: [12, 3, 4, 2, 5, 6, 10, 14] };
+  //     }
+  //     else {
+  //       filter["scheme_type"] = { $nin: [12, 3, 4, 2, 5, 6, 10, 14] };
+  //     }
+
+  //     delete filter.createdAt;
+
+  //     const schemes = await schemeModel.aggregate([
+  //       { $match: { ...filter } },
+  //       {
+  //         $project: {
+  //           _id: 1,
+  //           schemeName: "$name",
+  //           classificationId: "$classification_id",
+  //         },
+  //       },
+  //     ]);
+
+  //     if (!schemes.length) {
+  //       return { success: false, message: "No schemes found" };
+  //     }
+
+  //     const fieldToSum = type === 'weight' ? "metal_weight" : "payment_amount";
+
+  //     // Main aggregation pipeline
+  //     const result = await schemeAccountModel.aggregate([
+  //       {
+  //         $match: {
+  //           id_scheme: { $in: schemes.map((scheme) => scheme._id) },
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "payments",
+  //           localField: "_id",
+  //           foreignField: "id_scheme_account",
+  //           as: "Payments",
+  //         },
+  //       },
+  //       {
+  //         $addFields: {
+  //           totalCollectedAmount: {
+  //             $sum: `$Payments.${fieldToSum}`
+  //           }
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           totalCollectedAmount: { $gt: 0 }
+  //         }
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "schemes",
+  //           localField: "id_scheme",
+  //           foreignField: "_id",
+  //           as: "scheme",
+  //         },
+  //       },
+  //       { $unwind: "$scheme" },
+  //       {
+  //         $lookup: {
+  //           from: "schemeclassifications",
+  //           localField: "scheme.id_classification",
+  //           foreignField: "_id",
+  //           as: "classification",
+  //         },
+  //       },
+  //       { $unwind: "$classification" },
+  //       {
+  //         $project: {
+  //           schemeId: "$scheme._id",
+  //           schemeName: "$scheme.scheme_name",
+  //           classificationName: "$classification.name",
+  //           totalCollectedAmount: 1,
+  //         },
+  //       },
+  //       {
+  //         $group: {
+  //           _id: "$schemeId",
+  //           schemeName: { $first: "$schemeName" },
+  //           classificationName: { $first: "$classificationName" },
+  //           totalCollectedAmount: { $sum: "$totalCollectedAmount" },
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           totalCollectedAmount: { $gt: 0 }
+  //         }
+  //       },
+  //       { $skip: skip },
+  //       { $limit: limit },
+  //     ]);
+
+  //     // For total count aggregation - modified to match the same criteria as the main query
+  //     const totalCountAgg = await schemeAccountModel.aggregate([
+  //       {
+  //         $match: {
+  //           id_scheme: { $in: schemes.map((scheme) => scheme._id) },
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "payments",
+  //           localField: "_id",
+  //           foreignField: "id_scheme_account",
+  //           as: "Payments",
+  //         },
+  //       },
+  //       {
+  //         $addFields: {
+  //           totalCollectedAmount: {
+  //             $sum: `$Payments.${fieldToSum}`
+  //           }
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           totalCollectedAmount: { $gt: 0 }
+  //         }
+  //       },
+  //       {
+  //         $group: {
+  //           _id: "$id_scheme"
+  //         }
+  //       },
+  //       {
+  //         $count: "totalCount"
+  //       }
+  //     ]);
+
+  //     const totalCount = totalCountAgg[0]?.totalCount || 0;
+  //     const totalPages = Math.ceil(totalCount / limit) || 1;
+  //     const currentPage = Math.floor(skip / limit) + 1;
+
+  //     return {
+  //       success: true,
+  //       data: result,
+  //       totalPages,
+  //       totalCount,
+  //       currentPage,
+  //     };
+  //   } catch (err) {
+  //     console.error("Error in getAmountPayable:", err);
+  //     throw err;
+  //   }
+  // }
+
+
   async getAmountPayable(filter, skip = 0, limit = 10, type) {
     try {
       if (type === "weight") {
@@ -2585,6 +2738,10 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
         filter["scheme_type"] = { $nin: [12, 3, 4, 2, 5, 6, 10, 14] };
       }
 
+      const dateFilter = {};
+      if (filter.createdAt) {
+        dateFilter.createdAt = filter.createdAt;
+      }
       delete filter.createdAt;
 
       const schemes = await schemeModel.aggregate([
@@ -2604,7 +2761,6 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
 
       const fieldToSum = type === 'weight' ? "metal_weight" : "payment_amount";
 
-      // Main aggregation pipeline
       const result = await schemeAccountModel.aggregate([
         {
           $match: {
@@ -2614,8 +2770,17 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
         {
           $lookup: {
             from: "payments",
-            localField: "_id",
-            foreignField: "id_scheme_account",
+            let: { schemeAccountId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
+                  ...(Object.keys(dateFilter).length > 0 && {
+                    createdAt: dateFilter.createdAt
+                  })
+                }
+              }
+            ],
             as: "Payments",
           },
         },
@@ -2674,7 +2839,6 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
         { $limit: limit },
       ]);
 
-      // For total count aggregation - modified to match the same criteria as the main query
       const totalCountAgg = await schemeAccountModel.aggregate([
         {
           $match: {
@@ -2684,8 +2848,17 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
         {
           $lookup: {
             from: "payments",
-            localField: "_id",
-            foreignField: "id_scheme_account",
+            let: { schemeAccountId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
+                  ...(Object.keys(dateFilter).length > 0 && {
+                    createdAt: dateFilter.createdAt
+                  })
+                }
+              }
+            ],
             as: "Payments",
           },
         },
