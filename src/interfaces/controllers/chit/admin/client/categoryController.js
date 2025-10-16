@@ -202,7 +202,7 @@ class CategoryController {
       if(branch){
         branchId = branch
       }else{
-        branchId = req.user.id_branch
+        branchId = req.user?.id_branch
       }
       
       const result = await this.categoryUsecase.getAllCategories(branchId)

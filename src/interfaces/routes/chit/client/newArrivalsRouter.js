@@ -26,12 +26,11 @@ const useCase=new NewArrivalUseCase(repository,brachRepository,s3service,s3repo)
 const controller=new NewArrivalsController(useCase,validator)
 
 
-router.use(authMiddleware.protect);
-
-//upload.handleUpload([{ name: 'new_arrivals_img', maxCount: 1 }])
 router.post('/table',(req,res)=>controller.getNewArrivals(req,res))
 router.get('/branch/:id',(req,res)=>controller.getNewArrivalsByBranch(req,res))
 router.get('/:id',(req,res)=>controller.getNewArrivalsById(req,res))
+router.use(authMiddleware.protect);
+//upload.handleUpload([{ name: 'new_arrivals_img', maxCount: 1 }])
 router.post('/',(req,res)=>controller.addNewArrivals(req,res))
 router.patch('/:id',(req,res)=>controller.editNewArrivals(req,res))
 router.patch('/:id/active',(req,res)=>controller.changeStatus(req,res))

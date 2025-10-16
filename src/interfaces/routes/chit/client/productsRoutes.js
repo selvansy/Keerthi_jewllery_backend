@@ -32,9 +32,9 @@ const usecase=new ProductUseCase(productRepository,brachRepository,metalReposito
 const controller=new ProductController(usecase,validator)
 
 
-router.use(authMiddleware.protect);
 router.post('/table',(req,res)=>controller.allProducts(req,res))
 router.get('/:id',(req,res)=>controller.ProductById(req,res))
+router.use(authMiddleware.protect);
 router.get('/branch/:id',(req,res)=>controller.ProductByBranchId(req,res))
 router.post('/',upload.handleUpload([{name:"product_image",maxCount:3}]),(req, res) => controller.addProduct(req, res));
 router.patch('/:id',upload.handleUpload([{name:"product_image",maxCount:3}]),(req, res) => controller.editProduct(req, res));

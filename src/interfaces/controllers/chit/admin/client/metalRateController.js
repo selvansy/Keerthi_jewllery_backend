@@ -295,9 +295,9 @@ class metalRateController {
         query.branchId = req.user.branch;
       }
 
-      if (!branchId) {
-        return res.status(400).json({ message: "Branch ID is required" });
-      }
+      // if (!branchId) {
+      //   return res.status(400).json({ message: "Branch ID is required" });
+      // }
 
       const result = await this.metalRateUseCase.getMetalRate(
         branchId

@@ -4,10 +4,11 @@ import smsService from "../../../../config/chit/smsService.js";
 import CustomerRepository from "../../../../infrastructure/repositories/chit/CustomerRepository.js";
 
 class metalRateUseCase { 
-  constructor(metalrateRepository,metalRepo) { 
+  constructor(metalrateRepository,metalRepo,branchRepo) { 
     this.metalRateRepository = metalrateRepository;
     this.metalRepo= metalRepo;
     this.customerRepo = new CustomerRepository()
+      this.branchRepo= branchRepo;
   }
 
   async addMetalRate(data) {
@@ -248,27 +249,62 @@ class metalRateUseCase {
     }
   }
 
-  async getMetalRate(branchId, date = null) {
-    try {
-      if (!isValidObjectId(branchId) && branchId !== "0") {
-        return { success: false, message: "Invalid Branch ID" };
-      }
+  // async getMetalRate(branchId, date = null) {
+  //   try {
+  //     if (!isValidObjectId(branchId) && branchId !== "0") {
+  //       return { success: false, message: "Invalid Branch ID" };
+  //     }
   
      
-      const metalRate = await this.metalRateRepository.getMetalRate(branchId, date);
+  //     const metalRate = await this.metalRateRepository.getMetalRate(branchId, date);
     
+  
+  //     if (!metalRate) {
+  //       return { success: false, message: "No metal rate found" };
+  //     }
+  
+  //     return { success: true, message: "Metal rate fetched successfully", data: metalRate };
+  
+  //   } catch (error) {
+  //     console.error("Error in Use Case:", error);
+  //     return { success: false, message: "An error occurred while fetching metal rate" };
+  //   }
+  // }
+
+
+  async getMetalRate(branchId, date = null) {
+    try {
+      if (!branchId || branchId == "null") {
+        const branchData = await this.branchRepo.findOne();
+        if (!branchData) {
+          return { success: false, message: "No default branch found" };
+        }
+  
+        branchId = branchData._id;
+      }
+
+      const metalRate = await this.metalRateRepository.getMetalRate(branchId, date);
   
       if (!metalRate) {
         return { success: false, message: "No metal rate found" };
       }
   
-      return { success: true, message: "Metal rate fetched successfully", data: metalRate };
+      return {
+        success: true,
+        message: "Metal rate fetched successfully",
+        data: metalRate,
+      };
   
     } catch (error) {
-      console.error("Error in Use Case:", error);
-      return { success: false, message: "An error occurred while fetching metal rate" };
+      console.error("❌ Error in getMetalRate Use Case:", error);
+      return {
+        success: false,
+        message: "An error occurred while fetching metal rate",
+        error: error.message,
+      };
     }
   }
+  
   
   async metalRateTable(page,limit,filter){
     try {

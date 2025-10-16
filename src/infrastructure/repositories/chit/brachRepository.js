@@ -14,6 +14,21 @@ class BranchRepository {
    }
   }
 
+
+   async findOne() {
+    try {
+     const data = await Branch.findOne({active:true})
+     .select('_id branch_name active mobile')
+ 
+     if (data.length === 0 ) return null;
+ 
+    return data
+    } catch (error) {
+     console.error(error);
+    }
+   }
+
+   
   async addBranch(branchData) {
     const createBranch = new Branch(branchData);
     await createBranch.save();

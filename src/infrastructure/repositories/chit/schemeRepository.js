@@ -535,7 +535,8 @@ class SchemeRepository {
             is_accounts: 1,
             createdAt: 1,
             active:1,
-            installment_type:1
+            installment_type:1,
+            scheme_type:1
           },
         },
         { $sort: { createdAt: -1 } },

@@ -23,10 +23,9 @@ const offerController = new OfferController(offerUseCase,offerValidator);
 const router = express.Router();
 
 
-router.use(authMiddleware.protect);
-
 router.post('/table',(req,res)=>offerController.getAllOffers(req,res));
 router.get('/:id',(req,res)=>offerController.getOfferById(req,res));
+router.use(authMiddleware.protect);
 router.get('/branch/:id',(req,res)=>offerController.getOfferByBranchId(req,res));
 router.post("/",upload.handleUpload([{ name: 'offer_image', maxCount: 3 }]), (req, res) => offerController.addoffer(req, res));
 router.patch("/:id",upload.handleUpload([{ name: 'offer_image', maxCount: 3 }]), (req, res) => offerController.editOffer(req, res));

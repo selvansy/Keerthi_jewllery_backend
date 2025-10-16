@@ -367,30 +367,43 @@ class CategoryUseCase {
     }
   }
 
-  async getAllCategories (branchId){
-    try{
-      const idValidation = this.validateObjectId(branchId, "id_branch");
-      if (idValidation) return idValidation;
-
-      const checkBranch= await this.branchRepository.findById(branchId)
-      if(!checkBranch){
-        return {success:false,message:"Branch not found"}
+  async getAllCategories(branchId) {
+    try {
+      if (branchId && branchId !== "null") {
+        const checkBranch = await this.branchRepository.findById(branchId);
+        if (!checkBranch) {
+          return { success: false, message: "Branch not found" };
+        }
+      } else {
+        const branchData = await this.branchRepository.findOne();
+        if (!branchData) {
+          return { success: false, message: "No default branch found" };
+        }
+        branchId = branchData._id;
       }
-
-      const data = await this.categoryRepository.getAllCategories(branchId)
-      if(data.length>=0){
-        return {success:true,message:"Category retrieved successfully",data}
+  
+      const data = await this.categoryRepository.getAllCategories(branchId);
+  
+      if (data && data.length > 0) {
+        return {
+          success: true,
+          message: "Categories retrieved successfully",
+          data,
+        };
       }
-      return {success:false,message:"No category found"}
-    }catch(err){
-      console.error(err);
+  
+      return { success: false, message: "No categories found", data: [] };
+  
+    } catch (err) {
+      console.error("Error in getAllCategories:", err);
       return {
         success: false,
-        message: "An error occurred while get category",
+        message: "An error occurred while fetching categories",
         error: err.message,
       };
     }
   }
+  
 }
 
 export default CategoryUseCase;

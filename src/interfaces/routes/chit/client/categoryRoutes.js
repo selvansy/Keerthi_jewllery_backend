@@ -20,11 +20,11 @@ const controller = new CategoryController(useCase, validator);
 
 const router = express.Router();
 
-router.use(authMiddleware.protect);
 router.get('/all',(req,res)=>controller.getAllCategories(req,res))
+router.get("/:id", (req, res) => controller.getById(req, res));
+router.use(authMiddleware.protect);
 router.get('/',(req,res)=>controller.getAllActiveCategory(req,res))
 router.post('/table',(req,res)=>controller.getCategory(req,res))
-router.get("/:id", (req, res) => controller.getById(req, res));
 router.get("/branch/:id", (req, res) => controller.getByBranchId(req, res));
 router.get("/metal/:id", (req, res) => controller.getByMetalId(req, res));
 router.post("/", (req, res) => controller.addCategory(req, res));
