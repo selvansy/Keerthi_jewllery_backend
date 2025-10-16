@@ -506,9 +506,14 @@ class PaymentUseCase {
           itr_utr: data.itr_utr || null,
           total_amt: totalAmount,
           paymentModeName: paymentMode.mode_name,
-          metal_weight: metalWeight,
           installment:Number(schemeAccData.paid_installments) + Number(data.installments)
         };
+        const rejectWeightField =[0,8,13,11,1,7]
+        // metal_weight: metalWeight
+
+        if(rejectWeightField.includes(schemeData?.scheme_type)){
+          dataToSave.metalWeight = 0
+        }
 
         const savedPayment = await this.paymentRepository.addPayment(
           dataToSave

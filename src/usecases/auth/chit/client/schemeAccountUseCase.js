@@ -1130,8 +1130,8 @@ class SchemeAccountUseCase {
 
       const employee = await this.employeeRepository.findOne({_id:tokenData?.id_employee,active:true,is_deleted:false})
 
-      if(!employee){
-        return {success:false,message:"Operation not permitted"}
+      if (!employee || !tokenData?.id_role || tokenData.id_role.id_role !== 2) {
+        return { success: false, message: "Operation not permitted" };
       }
 
       const schemeAccount= await this.schemeAccountRepository.findById(id)
