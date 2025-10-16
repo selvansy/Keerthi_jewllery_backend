@@ -45,7 +45,7 @@ import contentRoutes from "./contentRoutes.js"
 import faqRoutes from "./faqRoutes.js";
 import wishlistRoutes from './wishlistRoutes.js'
 import SaveNotificationRoutes from './saveNotificationRoutes.js'
-import printRoutes from './printroutes.js'
+import printRoutes from './printRoutes.js'
 
 const router = express.Router();
 
