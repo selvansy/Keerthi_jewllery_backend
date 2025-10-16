@@ -45,7 +45,7 @@ import contentRoutes from "./contentRoutes.js"
 import faqRoutes from "./faqRoutes.js";
 import wishlistRoutes from './wishlistRoutes.js'
 import SaveNotificationRoutes from './saveNotificationRoutes.js'
-import printRoutes from './printroutes.js'
+// import printRoutes from './printroutes.js'
 
 const router = express.Router();
 
@@ -100,6 +100,6 @@ router.use('/notification',SaveNotificationRoutes);
 
 // //for print
 
-router.use('/print',printRoutes);
+// router.use('/print',printRoutes);
 
 export default router; 
