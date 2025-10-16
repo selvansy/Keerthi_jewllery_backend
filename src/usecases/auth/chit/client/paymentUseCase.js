@@ -491,6 +491,24 @@ class PaymentUseCase {
         }
         const totalAmount =
           (Number(lastPaidData?.total_amt) || 0) + Number(data.payment_amount);
+        // const dataToSave = {
+        //   ...data,
+        //   id_employee: data.created_by,
+        //   id_transaction: transactionId,
+        //   payment_receipt: paymentReceipt,
+        //   date_add: new Date(),
+        //   payment_status: data.payment_status || 1,
+        //   payment_type: data.payment_type || 1,
+        //   paid_installments: data.installments || 1,
+        //   cash_amount: data.cash_amount || 0,
+        //   card_amount: data.card_amount || 0,
+        //   gpay_amount: data.gpay_amount || 0,
+        //   itr_utr: data.itr_utr || null,
+        //   total_amt: totalAmount,
+        //   paymentModeName: paymentMode.mode_name,
+        //   installment:Number(schemeAccData.paid_installments) + Number(data.installments)
+        // };
+        const rejectWeightField =[0,8,13,11,1,7]
         const dataToSave = {
           ...data,
           id_employee: data.created_by,
@@ -506,14 +524,18 @@ class PaymentUseCase {
           itr_utr: data.itr_utr || null,
           total_amt: totalAmount,
           paymentModeName: paymentMode.mode_name,
-          installment:Number(schemeAccData.paid_installments) + Number(data.installments)
+          installment: Number(schemeAccData.paid_installments) + Number(data.installments),
+          metal_weight: rejectWeightField.includes(schemeData?.scheme_type)
+            ? 0
+            : (metalWeight || 0),
         };
-        const rejectWeightField =[0,8,13,11,1,7]
         // metal_weight: metalWeight
 
-        if(rejectWeightField.includes(schemeData?.scheme_type)){
-          dataToSave.metalWeight = 0
-        }
+        // if(rejectWeightField.includes(schemeData?.scheme_type)){
+        //   dataToSave.metalWeight = 0
+        // }else{
+        //   dataToSave.metalWeight = metalWeight || 0
+        // }
 
         const savedPayment = await this.paymentRepository.addPayment(
           dataToSave
