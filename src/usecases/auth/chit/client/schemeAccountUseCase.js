@@ -7,6 +7,7 @@ import isNotificationEnabled from "../../../../utils/notificationEnableChecket.j
 import SaveNotificationUsecase from "./saveNotificationUsecase.js";
 import SaveNotificationRepo from "../../../../infrastructure/repositories/chit/saveNotificationRepo.js";
 import EmployeeRepository from "../../../../infrastructure/repositories/chit/EmployeeRepository.js";
+import config from "../../../../config/chit/env.js";
 
 
 const customerRepo = new CustomerRepository();
@@ -55,10 +56,12 @@ class SchemeAccountUseCase {
       const input = {
         recipients: [data.id_customer],
         title: "Scheme Account Created",
-        message: `Congratulations! Your ${schemeInfo.id_scheme.scheme_name} Scheme Account has been successfully created at KEERTHI JWELLERS.`,
+        message: `Congratulations! Your ${schemeInfo.id_scheme.scheme_name} Scheme Account has been successfully created at ${config.NOTIFICATION_NAME}.`,
         channel: "push",
       }
       await smsService.sendNotification(input);
+
+      console.log(input.message);
       
       await this.saveNotificationUsecase.saveNotification({
         title: input.title,
@@ -109,7 +112,7 @@ class SchemeAccountUseCase {
         const input= {
           recipients: [data.referral_id],
           title: "Scheme Account Created",
-          message: `Thank you for referring ${data?.customer_name} to KEERTHI JEWELERS! Your referral has successfully created a ${schemeInfo.id_scheme.scheme_name} Scheme Account.`,
+          message: `Thank you for referring ${data?.customer_name} to ${config.NOTIFICATION_NAME}! Your referral has successfully created a ${schemeInfo.id_scheme.scheme_name} Scheme Account.`,
           channel: "push",
         }
         await smsService.sendNotification(input);
@@ -559,7 +562,6 @@ class SchemeAccountUseCase {
         data.typeofcustomer = 2;
       }
 
-
       if (customerData) {
         if (customerData.referral_id == null && data.referral_id !== "") {
           
@@ -579,6 +581,52 @@ class SchemeAccountUseCase {
           };
         }
       }
+
+      // if (data.platform === "android" || data.platform === "ios") {
+      //   let referralType = "Customer";
+      //   let referralId = data?.referral_id;
+      
+      //   if (referralId) {
+      //     const employeeData = await this.employeeRepository.findById(referralId);
+      //     const customerRefData = await this.customerRepo.findById(referralId);
+      
+      //     if (employeeData) {
+      //       referralType = "Employee";
+      //     } else if (customerRefData) {
+      //       referralType = "Customer";
+      //     } else {
+      //       return {
+      //         status: false,
+      //         message: "Invalid referral ID — no matching employee or customer found.",
+      //       };
+      //     }
+      
+      //     data.referral_type = referralType;
+      //     data.typeof_referral = referralType === "Employee" ? 1 : 2; // example: 1=Employee, 2=Customer
+      //   }
+      // }
+      
+      // if (data?.referral_type === "Employee" || data?.typeof_referral === 1) {
+      //   data.typeofcustomer = 2;
+      // }
+      
+      // if (customerData) {
+      //   const hasExistingReferral = !!customerData.referral_id;
+      
+      //   if (!hasExistingReferral && data.referral_id) {
+      //     const refData = {
+      //       referral_type: data?.referral_type,
+      //       referral_id: data?.referral_id,
+      //     };
+      //     await this.customerRepo.updateUniversal(data.id_customer, refData);
+      //   } else if (hasExistingReferral) {
+      //     return {
+      //       status: false,
+      //       message: "This user has already been referred.",
+      //     };
+      //   }
+      // }
+      
 
       if (data.referral_id === "") {
         delete data.referral_id;
@@ -1207,7 +1255,7 @@ class SchemeAccountUseCase {
         const input = {
           recipients: [data.id_customer],
           title: "Scheme Account Closed",
-          message: `Your ${schemeData.scheme_name} Scheme Account with KEERTHI JWELLERS has been successfully closed. We appreciate your association with us`,
+          message: `Your ${schemeData.scheme_name} Scheme Account with ${config.NOTIFICATION_NAME} has been successfully closed. We appreciate your association with us`,
           channel: "push",
         }
         await smsService.sendNotification(input);

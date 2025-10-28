@@ -24,6 +24,7 @@ const config = {
   ONE_SIGNAL_API_KEY: process.env.API_KEY,
   CASH_FREE_URL:process.env.CASH_FREE_URL,
   AWS_DISPLAY_URL:process.env.AWS_DISPLAY_URL,
+  NOTIFICATION_NAME:process.env.NOTIFICATION_NAME,
   DISPLAY_IMG_URL:`${process.env.AWS_DISPLAY_URL}${process.env.AWS_LOCAL_PATH}`,
 };
 

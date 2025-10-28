@@ -238,10 +238,18 @@ class DashboardRepository {
               },
             },
             { $unwind: "$Metal" },
-  
             {
               $match: {
-                "Metal.metal_name": { $regex: /^gold$/i },
+                // "Metal.metal_name": { $regex: /^gold$/i },
+                  "Metal.metal_name": {
+                    $in: [
+                      /^gold$/i,
+                      /^silver$/i,
+                      /^platinum$/i,
+                      /^diamond$/i,
+                      /^rose gold$/i
+                    ]
+                },                
                 "Scheme.scheme_type": { $nin: [0, 8, 13, 11, 1, 7] },
               },
             },

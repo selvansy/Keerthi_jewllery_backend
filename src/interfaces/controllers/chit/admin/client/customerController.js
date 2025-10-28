@@ -227,16 +227,10 @@ class CustomerController {
   async searchCustomerByMobile(req, res) {
     const { search, customer } = req.query;
     try {
-      if (!search) {
+      if (!customer && !search) {
         return res
           .status(200)
           .json({ message: "Referral code or mobile number is required" });
-      }
-
-      if (!customer) {
-        return res
-          .status(200)
-          .json({ message: "Customer mobile number is required" });
       }
 
       const result = await this.customerUseCase.searchCustomerByMobile(

@@ -52,160 +52,417 @@ class ProductRepository {
     }
   }
 
-  async findById(id, customerId) {
-    try {
-      const isValidCustomerId = customerId && mongoose.Types.ObjectId.isValid(customerId);
+  // async findById(id, customerId) {
+  //   try {
+  //     const isValidCustomerId = customerId && mongoose.Types.ObjectId.isValid(customerId);
   
-      const userData = await ProductModel.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(id),
-            is_deleted: false
-          },
-        },
-        {
-          $lookup: {
-            from: "s3bucketsettings",
-            localField: "id_branch",
-            foreignField: "id_branch",
-            as: "s3Details"
-          }
-        },
-        { $unwind: "$s3Details" },
-        {
-          $lookup: {
-            from: "categories",
-            localField: "id_category",
-            foreignField: "_id",
-            as: "category"
-          }
-        },
-        { $unwind: "$category" },
-        {
-          $lookup: {
-            from: "branches",
-            localField: "id_branch",
-            foreignField: "_id",
-            as: "branches"
-          }
-        },
-        { $unwind: "$branches" },
+  //     const userData = await ProductModel.aggregate([
+  //       {
+  //         $match: {
+  //           _id: new mongoose.Types.ObjectId(id),
+  //           is_deleted: false
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "s3bucketsettings",
+  //           localField: "id_branch",
+  //           foreignField: "id_branch",
+  //           as: "s3Details"
+  //         }
+  //       },
+  //       { $unwind: "$s3Details" },
+  //       {
+  //         $lookup: {
+  //           from: "categories",
+  //           localField: "id_category",
+  //           foreignField: "_id",
+  //           as: "category"
+  //         }
+  //       },
+  //       { $unwind: "$category" },
+  //       {
+  //         $lookup: {
+  //           from: "branches",
+  //           localField: "id_branch",
+  //           foreignField: "_id",
+  //           as: "branches"
+  //         }
+  //       },
+  //       { $unwind: "$branches" },
 
-        {
-          $lookup: {
-            from: "metalrates",
-            let: {
-              purityId: "$id_purity",
-              branchId: "$id_branch"
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$purity_id", "$$purityId"] },
-                      { $eq: ["$id_branch", "$$branchId"] }
-                    ]
-                  }
-                }
-              },
-              { $sort: { createdAt: -1 } },
-              { $limit: 1 }
-            ],
-            as: "purity"
-          }
-        },
-        {
-          $unwind: {
-            path: "$purity",
-            preserveNullAndEmptyArrays: true
-          }
-        },
+  //       {
+  //         $lookup: {
+  //           from: "metalrates",
+  //           let: {
+  //             purityId: "$id_purity",
+  //             branchId: "$id_branch"
+  //           },
+  //           pipeline: [
+  //             {
+  //               $match: {
+  //                 $expr: {
+  //                   $and: [
+  //                     { $eq: ["$purity_id", "$$purityId"] },
+  //                     { $eq: ["$id_branch", "$$branchId"] }
+  //                   ]
+  //                 }
+  //               }
+  //             },
+  //             { $sort: { createdAt: -1 } },
+  //             { $limit: 1 }
+  //           ],
+  //           as: "purity"
+  //         }
+  //       },
+  //       {
+  //         $unwind: {
+  //           path: "$purity",
+  //           preserveNullAndEmptyArrays: true
+  //         }
+  //       },
   
-        {
-          $addFields: {
-            purityRate: "$purity.rate",
-            price: {
-              $cond: {
-                if: { $and: ["$purity.rate", "$weight"] },
-                then: { $multiply: ["$weight", "$purity.rate"] },
-                else: null
+  //       {
+  //         $addFields: {
+  //           purityRate: "$purity.rate",
+  //           price: {
+  //             $cond: {
+  //               if: { $and: ["$purity.rate", "$weight"] },
+  //               then: { $multiply: ["$weight", "$purity.rate"] },
+  //               else: null
+  //             }
+  //           }
+  //         }
+  //       },
+  
+  //       ...(isValidCustomerId
+  //         ? [
+  //             {
+  //               $lookup: {
+  //                 from: "wishlists",
+  //                 let: { productId: "$_id" },
+  //                 pipeline: [
+  //                   {
+  //                     $match: {
+  //                       $expr: {
+  //                         $and: [
+  //                           { $eq: ["$itemId", "$$productId"] },
+  //                           { $eq: ["$id_customer", new mongoose.Types.ObjectId(customerId)] }
+  //                         ]
+  //                       }
+  //                     }
+  //                   }
+  //                 ],
+  //                 as: "wishlistMatch"
+  //               }
+  //             },
+  //             {
+  //               $addFields: {
+  //                 isWishlisted: { $gt: [{ $size: "$wishlistMatch" }, 0] }
+  //               }
+  //             }
+  //           ]
+  //         : [
+  //             {
+  //               $addFields: { isWishlisted: false }
+  //             }
+  //           ]
+  //       ),
+        
+  //       {
+  //         $project: {
+  //           product_name: 1,
+  //           description: 1,
+  //           product_image: 1,
+  //           code: 1,
+  //           weight: 1,
+  //           metalcost: 1,
+  //           id_metal: 1,
+  //           id_purity: 1,
+  //           id_category: 1,
+  //           gst: 1,
+  //           sell: 1,
+  //           showprice: 1,
+  //           makingCharges: 1,
+  //           wastageCharges: 1,
+  //           active: 1,
+  //           id_branch: 1,
+  //           categoryName: "$category.category_name",
+  //           pathurl: {
+  //             $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}products/`]
+  //           },
+  //           isWishlisted: 1,
+  //           purityRate: 1,
+  //           price: 1
+  //         }
+  //       },
+  //       { $limit: 1 }
+  //     ]);
+  
+  //     return userData.length ? userData[0] : null;
+  
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw new Error("Database error occurred while finding Product by id");
+  //   }
+  // }
+
+
+  async findById(id, customerId) {
+  try {
+    const isValidCustomerId = customerId && mongoose.Types.ObjectId.isValid(customerId);
+
+    const userData = await ProductModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+          is_deleted: false
+        },
+      },
+      {
+        $lookup: {
+          from: "s3bucketsettings",
+          localField: "id_branch",
+          foreignField: "id_branch",
+          as: "s3Details"
+        }
+      },
+      { $unwind: "$s3Details" },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "id_category",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
+      { $unwind: "$category" },
+      {
+        $lookup: {
+          from: "branches",
+          localField: "id_branch",
+          foreignField: "_id",
+          as: "branches"
+        }
+      },
+      { $unwind: "$branches" },
+
+      {
+        $lookup: {
+          from: "metalrates",
+          let: {
+            purityId: "$id_purity",
+            branchId: "$id_branch"
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$purity_id", "$$purityId"] },
+                    { $eq: ["$id_branch", "$$branchId"] }
+                  ]
+                }
               }
+            },
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 }
+          ],
+          as: "purity"
+        }
+      },
+      {
+        $unwind: {
+          path: "$purity",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      {
+        $addFields: {
+          purityRate: "$purity.rate",
+          baseMetalCost: {
+            $cond: {
+              if: { $and: ["$purity.rate", "$weight"] },
+              then: { $multiply: ["$weight", "$purity.rate"] },
+              else: 0
             }
           }
-        },
-  
-        ...(isValidCustomerId
-          ? [
-              {
-                $lookup: {
-                  from: "wishlists",
-                  let: { productId: "$_id" },
-                  pipeline: [
-                    {
-                      $match: {
-                        $expr: {
-                          $and: [
-                            { $eq: ["$itemId", "$$productId"] },
-                            { $eq: ["$id_customer", new mongoose.Types.ObjectId(customerId)] }
-                          ]
-                        }
-                      }
-                    }
-                  ],
-                  as: "wishlistMatch"
+        }
+      },
+
+      {
+        $addFields: {
+          finalMakingCharges: {
+            $cond: {
+              if: {
+                $and: [
+                  "$makingCharges",
+                  "$makingCharges.mcView"
+                ]
+              },
+              then: {
+                $cond: {
+                  if: "$makingCharges.discountView",
+                  then: "$makingCharges.discountedValue",
+                  else: "$makingCharges.actualValue"
                 }
               },
-              {
-                $addFields: {
-                  isWishlisted: { $gt: [{ $size: "$wishlistMatch" }, 0] }
-                }
-              }
-            ]
-          : [
-              {
-                $addFields: { isWishlisted: false }
-              }
-            ]
-        ),
-        
-        {
-          $project: {
-            product_name: 1,
-            description: 1,
-            product_image: 1,
-            code: 1,
-            weight: 1,
-            metalcost: 1,
-            id_metal: 1,
-            id_purity: 1,
-            id_category: 1,
-            gst: 1,
-            sell: 1,
-            showprice: 1,
-            makingCharges: 1,
-            wastageCharges: 1,
-            active: 1,
-            id_branch: 1,
-            categoryName: "$category.category_name",
-            pathurl: {
-              $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}products/`]
-            },
-            isWishlisted: 1,
-            purityRate: 1,
-            price: 1
+              else: 0
+            }
           }
-        },
-        { $limit: 1 }
-      ]);
-  
-      return userData.length ? userData[0] : null;
-  
-    } catch (err) {
-      console.error(err);
-      throw new Error("Database error occurred while finding Product by id");
-    }
+        }
+      },
+
+      {
+        $addFields: {
+          finalWastageCharges: {
+            $cond: {
+              if: {
+                $and: [
+                  "$wastageCharges",
+                  "$wastageCharges.wastageView"
+                ]
+              },
+              then: {
+                $cond: {
+                  if: "$wastageCharges.discountView",
+                  then: "$wastageCharges.discountedValue",
+                  else: "$wastageCharges.actualValue"
+                }
+              },
+              else: 0
+            }
+          }
+        }
+      },
+
+      {
+        $addFields: {
+          subtotal: {
+            $add: [
+              "$baseMetalCost",
+              "$finalMakingCharges",
+              "$finalWastageCharges"
+            ]
+          },
+          
+          gstAmount: {
+            $cond: {
+              if: "$gst",
+              then: {
+                $multiply: [
+                  {
+                    $add: [
+                      "$baseMetalCost",
+                      "$finalMakingCharges",
+                      "$finalWastageCharges"
+                    ]
+                  },
+                  { $divide: ["$gst", 100] }
+                ]
+              },
+              else: 0
+            }
+          }
+        }
+      },
+
+     
+      {
+        $addFields: {
+          price: {
+            $add: ["$subtotal", "$gstAmount"]
+          },
+          priceBreakdown: {
+            baseMetalCost: "$baseMetalCost",
+            makingCharges: "$finalMakingCharges",
+            wastageCharges: "$finalWastageCharges",
+            subtotal: "$subtotal",
+            gstPercentage: "$gst",
+            gstAmount: "$gstAmount",
+            total: {
+              $add: ["$subtotal", "$gstAmount"]
+            }
+          }
+        }
+      },
+
+      ...(isValidCustomerId
+        ? [
+            {
+              $lookup: {
+                from: "wishlists",
+                let: { productId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$itemId", "$$productId"] },
+                          { $eq: ["$id_customer", new mongoose.Types.ObjectId(customerId)] }
+                        ]
+                      }
+                    }
+                  }
+                ],
+                as: "wishlistMatch"
+              }
+            },
+            {
+              $addFields: {
+                isWishlisted: { $gt: [{ $size: "$wishlistMatch" }, 0] }
+              }
+            }
+          ]
+        : [
+            {
+              $addFields: { isWishlisted: false }
+            }
+          ]
+      ),
+      
+      {
+        $project: {
+          product_name: 1,
+          description: 1,
+          product_image: 1,
+          code: 1,
+          weight: 1,
+          metalcost: 1,
+          id_metal: 1,
+          id_purity: 1,
+          id_category: 1,
+          gst: 1,
+          sell: 1,
+          showprice: 1,
+          makingCharges: 1,
+          wastageCharges: 1,
+          active: 1,
+          id_branch: 1,
+          categoryName: "$category.category_name",
+          pathurl: {
+            $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}products/`]
+          },
+          isWishlisted: 1,
+          purityRate: 1,
+          price: 1,
+          priceBreakdown: 1, 
+          baseMetalCost: 1, 
+          finalMakingCharges: 1, 
+          finalWastageCharges: 1 
+        }
+      },
+      { $limit: 1 }
+    ]);
+
+    return userData.length ? userData[0] : null;
+
+  } catch (err) {
+    console.error(err);
+    throw new Error("Database error occurred while finding Product by id");
   }
+}
 
   async editProduct(productData, id) {
     try {

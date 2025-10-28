@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 class EmployeeRepository {
   async findOne(query) {
     try {
+      console.log(query)
       const findData = await employeeModel
         .findOne(query)
         .populate({

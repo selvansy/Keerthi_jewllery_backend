@@ -49,12 +49,19 @@ class BranchController {
 
   async updateBranch(req, res) {
     try {
-      const validationResult =
-        this.validator.branchValidationSchemas.addBranch.validate(req.body);
+      // const validationResult =
+      //   this.validator.branchValidationSchemas.addBranch.validate(req.body);
 
       const { id } = req.params;
 
+      const baseSchema = this.validator.branchValidationSchemas.addBranch;
+      const updateSchema = baseSchema.fork(['branch_landline'], (schema) =>
+        schema.optional().allow(null, "")
+      );
+
       if (!id) return res.status(400).json({ message: "Branch id required" });
+
+      const validationResult = updateSchema.validate(req.body);
 
       if (validationResult.error) {
         return res

@@ -418,13 +418,13 @@ class PaymentUseCase {
           }
         );
 
-        // if (
-        //   schemeData?.limit_installment &&
-        //   Number(monthlyPaiments) + Number(data.installments) >
-        //     Number(schemeData?.limit_installment)
-        // ) {
-        //   return { status: false, message: "Monthly payment limit reached" };
-        // }
+        if (
+          schemeData?.limit_installment &&
+          Number(monthlyPaiments) + Number(data.installments) >
+            Number(schemeData?.limit_installment)
+        ) {
+          return { status: false, message: "Monthly payment limit reached" };
+        }
 
         const schemeAccData = await this.schemeAccountRepository.findById(
           data.id_scheme_account
@@ -1346,12 +1346,12 @@ class PaymentUseCase {
           { id: data.id_scheme_account, date: todayDate }
         );
 
-        // if (
-        //   Number(monthlyPayments) + Number(data.installments) >
-        //   Number(schemeData.limit_installment) &&  extraData?.digigold !== true
-        // ) {
-        //   return { success: false, message: "Monthly payment limit reached" };
-        // }
+        if (
+          Number(monthlyPayments) + Number(data.installments) >
+          Number(schemeData.limit_installment) &&  extraData?.digigold !== true
+        ) {
+          return { success: false, message: "Monthly payment limit reached" };
+        }
 
         let diffMonth = 0;
         if (lastPaidData) {

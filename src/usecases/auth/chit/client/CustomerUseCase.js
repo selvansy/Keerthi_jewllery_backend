@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { generateReferralCode } from "../../../../utils/cryptoGenerator.js";
 import smsService from "../../../../config/chit/smsService.js";
 import SchemeAccountRepository from '../../../../infrastructure/repositories/chit/schemeAccountRepository.js'
+import EmployeeRepository from "../../../../infrastructure/repositories/chit/EmployeeRepository.js";
 
 class CustomerUseCase {
   constructor(
@@ -26,6 +27,7 @@ class CustomerUseCase {
     this.hashingService = hashingService;
     this.tokenService = tokenService;
     this.schemeAccountRepo = new SchemeAccountRepository()
+    this.employeeRepo = new EmployeeRepository()
   }
 
   
@@ -436,42 +438,99 @@ class CustomerUseCase {
     }
   }
 
-  async searchCustomerByMobile(search,customer) {
+//   async searchCustomerByMobile(search,customer) {
+//     try {
+//       const searchTerm = search;
+
+//       let Data = "";
+
+//       if (search.length == 10) {
+//         Data = await this.customerRepository.searchCustomerByMobile(searchTerm);
+//       } else {
+//         const code = `Cus-${search}`;
+//         Data = await this.customerRepository.finByReferralCode(code);
+//       }
+
+      
+//       if (!Data || Data.length === 0) {
+//         Data = await this.employeeRepo.findOne({mobile:searchTerm})
+//         // return { success: true, message: "No customers found" };
+//       }
+
+//       const customerData = await this.customerRepository.findOne({mobile:searchTerm})
+//       const employeeData = await this.employeeRepo.findOne({mobile:searchTerm})
+
+//       if(customerData){
+//         const code = `Cus-${search}`;
+//         if(customerData.mobile ==  search){
+//           return {stauts:false,message:"Self referring not allowed"}
+//         }else if(customerData.referral_code == code){
+//           return {stauts:false,message:"Self referring not allowed"}
+//         }
+//       }
+// console.log(Data)
+//       return {
+//         success: true,
+//         message: "Data fetched successfully",
+//         data: Data,
+//       };
+//     } catch (error) {
+//       console.error(error);
+//       return { success: false, message: "Failed to fetch data" };
+//     }
+//   }
+    
+   async searchCustomerByMobile(search, customer) {
     try {
-      const searchTerm = search;
-
-      let Data = "";
-
-      if (search.length == 10) {
-        Data = await this.customerRepository.searchCustomerByMobile(searchTerm);
+      const searchTerm = search?.trim();
+      let data = null;
+  
+      if (/^\d{10}$/.test(searchTerm)) {
+        data = await this.customerRepository.searchCustomerByMobile(searchTerm);
       } else {
-        const code = `Cus-${search}`;
-        Data = await this.customerRepository.finByReferralCode(code);
+        const code = `Cus-${searchTerm}`;
+        data = await this.customerRepository.finByReferralCode(code);
       }
-
-      if (!Data || Data.length === 0) {
-        return { success: true, message: "No customers found" };
+ 
+      if (!data) {
+        data = await this.employeeRepo.findOne({ mobile: searchTerm});
       }
-
-      const customerData = await this.customerRepository.findOne({mobile:customer})
-
-      if(customerData){
-        const code = `Cus-${search}`;
-        if(customerData.mobile ==  search){
-          return {stauts:false,message:"Self referring not allowed"}
-        }else if(customerData.referral_code == code){
-          return {stauts:false,message:"Self referring not allowed"}
+  
+      if (!data) {
+        return {
+          success: false,
+          message: "No customer or employee found with given details.",
+        };
+      }
+  
+      const referrer = await this.customerRepository.findOne({ mobile: searchTerm });
+      if (referrer) {
+        const referralCode = `Cus-${referrer.referral_code?.split('-')[1] || ''}`;
+  
+        if (
+          toString(referrer.mobile) === searchTerm ||
+          referralCode === `Cus-${searchTerm}`
+        ) {
+          return {
+            success: false,
+            message: "Self referring is not allowed.",
+          };
         }
       }
-
+  
       return {
         success: true,
-        message: "Data fetched successfully",
-        data: Data,
+        message: "Data fetched successfully.",
+        data,
       };
+  
     } catch (error) {
-      console.error(error);
-      return { success: false, message: "Failed to fetch data" };
+      console.error("Error in searchCustomerByMobile:", error);
+      return {
+        success: false,
+        message: "Failed to fetch data.",
+        error: error.message,
+      };
     }
   }
 

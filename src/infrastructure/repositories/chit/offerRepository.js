@@ -181,6 +181,7 @@ class OfferRepository {
           createdAt:1,
           active:1,
           title:1,
+          description:1,
           pathurl: {
             $concat: [
                 "$s3Details.s3display_url",
