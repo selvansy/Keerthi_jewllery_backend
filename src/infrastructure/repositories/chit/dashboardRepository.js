@@ -250,7 +250,7 @@ class DashboardRepository {
                       /^rose gold$/i
                     ]
                 },                
-                "Scheme.scheme_type": { $nin: [0, 8, 13, 11, 1, 7] },
+                // "Scheme.scheme_type": { $nin: [0, 8, 13, 11, 1, 7] },
               },
             },
   
@@ -258,7 +258,7 @@ class DashboardRepository {
               $group: {
                 _id: null,
                 totalMetalWeight: { $sum: "$metal_weight" },
-                totalAmount: { $sum: "$total_amt" },
+                totalAmount: { $sum: "$payment_amount" },
               },
             },
             {
@@ -559,6 +559,7 @@ class DashboardRepository {
         ]),
       ]);
 
+      console.log(schemeData)
       return {
         newCustomer: newCustomer,
         receivedWeights: paymentData[0]?.totalMetalWeight || 0,

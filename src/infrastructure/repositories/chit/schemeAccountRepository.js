@@ -489,6 +489,8 @@ class SchemeAccountRepository {
   async getSchemeAccountTable(query, skip, limit) {
     try {
       const { scheme_type, ...mainQuery } = query;
+
+      console.log("mainQuery --> ", mainQuery);
     
       const schemeAcc = await schemeAccountModel
         .find(mainQuery)
