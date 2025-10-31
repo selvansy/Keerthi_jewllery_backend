@@ -89,7 +89,7 @@ class DashboardUseCase {
 
   async account({id_branch, startDate, endDate}) {
     try {
-      const filter = { is_deleted: false };
+      const filter = { is_deleted: false,active:true };
   
       if (id_branch) {
         if (isValidObjectId(id_branch)) {
