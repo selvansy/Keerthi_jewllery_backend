@@ -84,6 +84,7 @@ app.use('/api/import',exportRoutes)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use("/exports", express.static(path.join(process.cwd(), "public", "exports")));
 
 
 app.all('*', (req, res, next) => {

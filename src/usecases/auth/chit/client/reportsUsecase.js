@@ -927,7 +927,7 @@ class ReportUseCase {
         const pageSize = Math.min(100, Math.max(1, parseInt(limit) || 10));
         const skip = (pageNum - 1) * pageSize;
 
-        const filter = { is_deleted: false };
+        const filter = { is_deleted: false,payment_status:1 };
         
         let startDate, endDate;
         

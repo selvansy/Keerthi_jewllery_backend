@@ -218,6 +218,7 @@ class SchemeAccountContorller{
 
           const result = await this.schemeAccountUseCase.revertSchemeAccount(id,req.user);
     
+          console.log(result)
           if (!result.success) {
             return res.status(400).json({ message: result.message});
           }

@@ -63,6 +63,24 @@ class ClosAccRepository{
         }
     }
 
+    async getCloseaccountrevert(id){
+        console.log(id)
+        try {
+            const newData = await closeAccModel.findOne({ id_scheme_account:id})
+            .sort({ closebill_id: -1 })
+            .limit(1)
+            .exec();
+
+            if(!newData){
+                return false;
+            }
+
+            return newData;
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     async getRevertedDetails(id) {
         try {
             const newData = await closeAccModel

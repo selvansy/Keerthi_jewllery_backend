@@ -6,6 +6,10 @@ import { generateReferralCode } from "../../../../utils/cryptoGenerator.js";
 import smsService from "../../../../config/chit/smsService.js";
 import SchemeAccountRepository from '../../../../infrastructure/repositories/chit/schemeAccountRepository.js'
 import EmployeeRepository from "../../../../infrastructure/repositories/chit/EmployeeRepository.js";
+import ExcelJS from "exceljs";
+import fs from "fs";
+import path from "path";
+
 
 class CustomerUseCase {
   constructor(
@@ -1015,7 +1019,7 @@ class CustomerUseCase {
       let code=''
       if(checkCusmoter.referral_code == "0" || checkCusmoter.referral_code == null){
         const referralCode = generateReferralCode(checkCusmoter.mobile);
-         code = `Cus-${referralCode}`;
+       code = `Cus-${referralCode}`;
         await this.customerRepository.updateUniversal(customerId,{referral_code:code})
       }
 
@@ -1023,16 +1027,20 @@ class CustomerUseCase {
 
       if (referralData) {
         const outputData ={
-          referralCode: checkCusmoter.referral_code || code,
-          referralMessage:referralData?.message,
-          applink: referralData?.appLink,
-          faq: referralData?.faq
+          referralCode: checkCusmoter?.referral_code || code,
+          referralMessage:referralData?.message || "",
+          applink: referralData?.appLink || "",
+          faq: referralData?.faq || ""
          }
 
         return { success: true, message: "Referral details fetched successfully" ,data:outputData};
       }
 
-      return { success: false, message: "Failed to get referral details" };
+      const outputdata={
+        referralData:checkCusmoter?.referral_code || code,
+      }
+
+      return { success: false, message: "Failed to get referral details" ,data:outputdata};
     } catch (error) {
       console.error(error);
       return { success: false, message: "Error while getting referral data" };
@@ -1147,6 +1155,105 @@ class CustomerUseCase {
     }catch(error){
       console.error(error);
       return { success: false, message: "Error while changing password" };
+    }
+  }
+
+  async exportCustomers(startDate, endDate, search) {
+    try {
+      const exportDir = path.join(process.cwd(), "public", "exports");
+      if (!fs.existsSync(exportDir)) fs.mkdirSync(exportDir, { recursive: true });
+
+      const files = fs.readdirSync(exportDir);
+    for (const file of files) {
+      if (file.endsWith(".xlsx")) {
+        fs.unlinkSync(path.join(exportDir, file));
+      }
+    }
+  
+      const filename = `customers_${Date.now()}.xlsx`;
+      const filePath = path.join(exportDir, filename);
+  
+      const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ filename: filePath });
+      const sheet = workbook.addWorksheet("Customers");
+  
+      sheet.addRow(["Firstname", "LastName", "Mobile", "Joined Date", "Scheme Accounts"]).commit();
+  
+      let skip = 0;
+      const limit = 10000;
+      let hasMore = true;
+  
+      const filterQuery = {};
+      
+      if (startDate || endDate) {
+        filterQuery.createdAt = {};
+        if (startDate) {
+          filterQuery.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          const endDateObj = new Date(endDate);
+          endDateObj.setHours(23, 59, 59, 999);
+          filterQuery.createdAt.$lte = endDateObj;
+        }
+      }
+  
+      if (search && search.trim() !== '') {
+        filterQuery.$or = [
+          { firstname: { $regex: search, $options: 'i' } },
+          { lastname: { $regex: search, $options: 'i' } },
+        ];
+
+        if (!isNaN(search)) {
+          filterQuery.$or.push({ mobile: Number(search) });
+        }
+      }
+  
+      let totalExported = 0;
+  
+      while (hasMore) {
+        const customers = await this.customerRepository.getCustomersBatch(skip, limit, filterQuery);
+        if (!customers.length) break;
+  
+        for (const c of customers) {
+          const schemeAccounts = await this.schemeAccountRepo.countDocuments({
+            id_customer: c._id,
+            active: true,
+            status: 0
+          });
+  
+          const formattedDate = c.createdAt
+            ? new Date(c.createdAt).toLocaleDateString("en-GB").replace(/\//g, "-")
+            : "";
+  
+          sheet.addRow([
+            c.firstname,
+            c.lastname,
+            c.mobile,
+            formattedDate,
+            schemeAccounts || 0
+          ]).commit();
+        }
+  
+        totalExported += customers.length;
+        skip += limit;
+        hasMore = customers.length === limit;
+      }
+  
+      await workbook.commit();
+  
+      console.log(`Exported ${totalExported} customers with filters:`, { startDate, endDate, search });
+  
+      return {
+        success: true,
+        message: "Customers exported successfully",
+        data: {
+          filename,
+          fileUrl: `/exports/${filename}`,
+          count: totalExported
+        },
+      };
+    } catch (err) {
+      console.error("Export Error:", err);
+      return { success: false, message: "Failed to export customers" };
     }
   }
 }

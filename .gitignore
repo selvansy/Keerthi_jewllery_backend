@@ -4,4 +4,4 @@ node_modules
 info.txt
 # src/public
 .vscode
-backup.js
+public/exports

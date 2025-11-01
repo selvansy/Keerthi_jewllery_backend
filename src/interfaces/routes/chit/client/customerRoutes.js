@@ -75,6 +75,7 @@ router.post('/overview',(req,res)=>customerController.customerOverview(req,res))
 router.post('/scheme',(req,res)=>customerController.findUsersBySchema(req,res))
 router.post('/changepass',(req,res)=>customerController.changePassword(req,res))
 router.post('/verifypass',(req,res)=>customerController.verfiyPassword(req,res))
+router.get('/export/customers',(req,res)=>customerController.exportCustomers(req,res))
 
 
 export default router;

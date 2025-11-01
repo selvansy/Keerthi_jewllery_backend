@@ -18,7 +18,6 @@ class ReportRepository {
         { 
           $match: {
             ...filter,
-
             // ...dateFilter 
           } 
         },
@@ -3095,174 +3094,174 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
   
   
   
-  async getCustomerRefferal(filter, skip, limit, type, search) {
-    try {
-      const matchStage = {
-        $match: {
-          ...filter,
-          referred_by: "Customer",
-          id_customer: { $exists: true, $ne: null },
-        },
-      };
+  // async getCustomerRefferal(filter, skip, limit, type, search) {
+  //   try {
+  //     const matchStage = {
+  //       $match: {
+  //         ...filter,
+  //         referred_by: "Customer",
+  //         id_customer: { $exists: true, $ne: null },
+  //       },
+  //     };
 
-      // Add search conditions if search parameter exists
-      let searchConditions = [];
-      if (search) {
-        searchConditions = [
-          {
-            $match: {
-              $or: [
-                { 
-                  "Customer.mobile": { 
-                    $regex: search, 
-                    $options: 'i' 
-                  } 
-                },
-                { 
-                  "Customer.firstname": { 
-                    $regex: search, 
-                    $options: 'i' 
-                  } 
-                },
-                { 
-                  "Customer.lastname": { 
-                    $regex: search, 
-                    $options: 'i' 
-                  } 
-                },
-                {
-                  $expr: {
-                    $regexMatch: {
-                      input: { 
-                        $concat: [
-                          "$Customer.firstname", 
-                          " ", 
-                          { $ifNull: ["$Customer.lastname", ""] }
-                        ] 
-                      },
-                      regex: search,
-                      options: "i"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        ];
-      }
+  //     // Add search conditions if search parameter exists
+  //     let searchConditions = [];
+  //     if (search) {
+  //       searchConditions = [
+  //         {
+  //           $match: {
+  //             $or: [
+  //               { 
+  //                 "Customer.mobile": { 
+  //                   $regex: search, 
+  //                   $options: 'i' 
+  //                 } 
+  //               },
+  //               { 
+  //                 "Customer.firstname": { 
+  //                   $regex: search, 
+  //                   $options: 'i' 
+  //                 } 
+  //               },
+  //               { 
+  //                 "Customer.lastname": { 
+  //                   $regex: search, 
+  //                   $options: 'i' 
+  //                 } 
+  //               },
+  //               {
+  //                 $expr: {
+  //                   $regexMatch: {
+  //                     input: { 
+  //                       $concat: [
+  //                         "$Customer.firstname", 
+  //                         " ", 
+  //                         { $ifNull: ["$Customer.lastname", ""] }
+  //                       ] 
+  //                     },
+  //                     regex: search,
+  //                     options: "i"
+  //                   }
+  //                 }
+  //               }
+  //             ]
+  //           }
+  //         }
+  //       ];
+  //     }
 
-      const pipeline = [
-        matchStage,
-        {
-          $lookup: {
-            from: "payments",
-            localField: "paymentId",
-            foreignField: "_id",
-            as: "Payment",
-            pipeline: [
-              { $match: { payment_status: 1 } },
-              { $limit: 1 } 
-            ]
-          }
-        },
-        { $unwind: { path: "$Payment", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "customers",
-            localField: "id_customer",
-            foreignField: "_id",
-            as: "Customer",
-          },
-        },
-        { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "schemeaccounts",
-            localField: "id_scheme_account",
-            foreignField: "_id",
-            as: "SchemeAccount",
-          },
-        },
-        { $unwind: { path: "$SchemeAccount", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "schemes",
-            localField: "SchemeAccount.id_scheme",
-            foreignField: "_id",
-            as: "Scheme",
-          },
-        },
-        { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "customers",
-            localField: "SchemeAccount.id_customer",
-            foreignField: "_id",
-            as: "referredCustomer",
-          },
-        },
-        { $unwind: { path: "$referredCustomer", preserveNullAndEmptyArrays: true } },
-        ...searchConditions, // Add search conditions here after all lookups are done
-        {
-          $project: {
-            customer_name: {
-              $concat: [
-                "$Customer.firstname",
-                " ",
-                { $ifNull: ["$Customer.lastname", ""] },
-              ],
-            },
-            customerMobile: "$Customer.mobile",
-            referredCusName: {
-              $concat: [
-                "$referredCustomer.firstname",
-                " ",
-                { $ifNull: ["$referredCustomer.lastname", ""] },
-              ],
-            },
-            referredCusMobile: "$referredCustomer.mobile",
-            referredDate: "$SchemeAccount.createdAt",
-            schemeName: "$Scheme.scheme_name",
-            minAmount: "$Scheme.min_amount",
-            maxAmount: "$Scheme.max_amount",
-            minWeight: "$Scheme.min_weight",
-            maxWeight: "$Scheme.max_weight",
-            schemeType: "$Scheme.scheme_type",
-            ReferralBonuses: {
-              payment_date: "$Payment.createdAt",
-              payment_amount: "$Payment.payment_amount",
-              referral_amount: "$credited_amount",
-              payment_id: "$Payment._id",
-              payment_status: "$Payment.payment_status"
-            },
-          }
-        },
-        {
-          $facet: {
-            data: [{ $skip: skip || 0 }, { $limit: limit || 50 }],
-            totalCount: [{ $count: "count" }],
-          },
-        },
-      ];
+  //     const pipeline = [
+  //       matchStage,
+  //       {
+  //         $lookup: {
+  //           from: "payments",
+  //           localField: "paymentId",
+  //           foreignField: "_id",
+  //           as: "Payment",
+  //           pipeline: [
+  //             { $match: { payment_status: 1 } },
+  //             { $limit: 1 } 
+  //           ]
+  //         }
+  //       },
+  //       { $unwind: { path: "$Payment", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "customers",
+  //           localField: "id_customer",
+  //           foreignField: "_id",
+  //           as: "Customer",
+  //         },
+  //       },
+  //       { $unwind: { path: "$Customer", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "schemeaccounts",
+  //           localField: "id_scheme_account",
+  //           foreignField: "_id",
+  //           as: "SchemeAccount",
+  //         },
+  //       },
+  //       { $unwind: { path: "$SchemeAccount", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "schemes",
+  //           localField: "SchemeAccount.id_scheme",
+  //           foreignField: "_id",
+  //           as: "Scheme",
+  //         },
+  //       },
+  //       { $unwind: { path: "$Scheme", preserveNullAndEmptyArrays: true } },
+  //       {
+  //         $lookup: {
+  //           from: "customers",
+  //           localField: "SchemeAccount.id_customer",
+  //           foreignField: "_id",
+  //           as: "referredCustomer",
+  //         },
+  //       },
+  //       { $unwind: { path: "$referredCustomer", preserveNullAndEmptyArrays: true } },
+  //       ...searchConditions, // Add search conditions here after all lookups are done
+  //       {
+  //         $project: {
+  //           customer_name: {
+  //             $concat: [
+  //               "$Customer.firstname",
+  //               " ",
+  //               { $ifNull: ["$Customer.lastname", ""] },
+  //             ],
+  //           },
+  //           customerMobile: "$Customer.mobile",
+  //           referredCusName: {
+  //             $concat: [
+  //               "$referredCustomer.firstname",
+  //               " ",
+  //               { $ifNull: ["$referredCustomer.lastname", ""] },
+  //             ],
+  //           },
+  //           referredCusMobile: "$referredCustomer.mobile",
+  //           referredDate: "$SchemeAccount.createdAt",
+  //           schemeName: "$Scheme.scheme_name",
+  //           minAmount: "$Scheme.min_amount",
+  //           maxAmount: "$Scheme.max_amount",
+  //           minWeight: "$Scheme.min_weight",
+  //           maxWeight: "$Scheme.max_weight",
+  //           schemeType: "$Scheme.scheme_type",
+  //           ReferralBonuses: {
+  //             payment_date: "$Payment.createdAt",
+  //             payment_amount: "$Payment.payment_amount",
+  //             referral_amount: "$credited_amount",
+  //             payment_id: "$Payment._id",
+  //             payment_status: "$Payment.payment_status"
+  //           },
+  //         }
+  //       },
+  //       {
+  //         $facet: {
+  //           data: [{ $skip: skip || 0 }, { $limit: limit || 50 }],
+  //           totalCount: [{ $count: "count" }],
+  //         },
+  //       },
+  //     ];
 
-      const result = await referralListModel.aggregate(pipeline);
+  //     const result = await referralListModel.aggregate(pipeline);
 
-      console.log(result)
+  //     console.log(result)
 
-      return {
-        success: true,
-        data: result[0]?.data || [],
-        totalCount: result[0]?.totalCount[0] || { count: 0 },
-        totalPages: limit
-          ? Math.ceil((result[0]?.totalCount[0]?.count || 0) / limit)
-          : null,
-        currentPage: skip && limit ? Math.floor(skip / limit) + 1 : 1,
-      };
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
-  }
+  //     return {
+  //       success: true,
+  //       data: result[0]?.data || [],
+  //       totalCount: result[0]?.totalCount[0] || { count: 0 },
+  //       totalPages: limit
+  //         ? Math.ceil((result[0]?.totalCount[0]?.count || 0) / limit)
+  //         : null,
+  //       currentPage: skip && limit ? Math.floor(skip / limit) + 1 : 1,
+  //     };
+  //   } catch (err) {
+  //     console.log(err);
+  //     throw err;
+  //   }
+  // }
 
 
 

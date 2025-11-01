@@ -1866,7 +1866,7 @@ class SchemeAccountUseCase {
 
       const schemeAccId = shcemeAccountData[0]._id;
 
-      const closeAccDetails = await this.closeAccRepo.getCloseaccount(
+      const closeAccDetails = await this.closeAccRepo.getCloseaccountrevert(
         schemeAccId
       );
       const returnData = {

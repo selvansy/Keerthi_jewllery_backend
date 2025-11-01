@@ -309,23 +309,6 @@ class CustomerRepository {
     }
   }
 
-  // async getAllCustomers({ query, documentskip, documentlimit }) {
-  //   try {
-  //     const totalCount = await customerModel.countDocuments(query);
-  //     const data = await customerModel
-  //       .find(query)
-  //       .skip(documentskip)
-  //       .limit(documentlimit)
-  //       .select("_id active firstname lastname mobile date_add referral_code")
-  //       .sort({ _id: -1 })
-
-  //     if (!data || data.length === 0) return null;
-
-  //     return { data, totalCount };
-  //   } catch (error) {
-  //     console.error("Error :", error);
-  //   }
-  // }
   async getAllCustomers({ query, documentskip, documentlimit }) {
     try {
       const aggregationPipeline = [
@@ -336,12 +319,23 @@ class CustomerRepository {
         {
           $lookup: {
             from: "schemeaccounts",
-            localField: "_id",
-            foreignField: "id_customer",
+            let: { customerId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$id_customer", "$$customerId"] },
+                      { $eq: ["$active", true] },
+                      { $eq: ["$status", 0] },
+                    ],
+                  },
+                },
+              },
+            ],
             as: "schemes",
           },
         },
-
         {
           $addFields: {
             schemesCount: { $size: "$schemes" },
@@ -1196,6 +1190,14 @@ class CustomerRepository {
       console.error("Error in getCustomersByIds:", error);
       throw error;
     }
+  }
+
+  async getCustomersBatch(skip, limit, filterQuery = {}) {
+    return customerModel.find(filterQuery)
+      .sort({ _id: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
   }
 }
 
