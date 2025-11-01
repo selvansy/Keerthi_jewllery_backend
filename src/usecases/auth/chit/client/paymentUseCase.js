@@ -391,12 +391,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
-          }
+          // if (todatPaidorNot) {
+          //   return {
+          //     status: false,
+          //     message: "Already completed today's payment",
+          //   };
+          // }
         }
 
         const totalInstallments =
