@@ -391,12 +391,12 @@ class PaymentUseCase {
             this.toDateOnlyString(todayDate) ===
             this.toDateOnlyString(lastPaid);
 
-          // if (todatPaidorNot) {
-          //   return {
-          //     status: false,
-          //     message: "Already completed today's payment",
-          //   };
-          // }
+          if (todatPaidorNot) {
+            return {
+              status: false,
+              message: "Already completed today's payment",
+            };
+          }
         }
 
         const totalInstallments =
@@ -1407,6 +1407,9 @@ class PaymentUseCase {
         const runningTotalAmount =
           (Number(lastPaidData?.total_amt) || 0) + Number(data.amount);
 
+
+        let metalWeight=paymentArray[0]?.weight;
+
         const rejectWeightField =[0,8,13,11,1,7]
         const paymentData = {
           ...data,
@@ -1431,7 +1434,6 @@ class PaymentUseCase {
             : (metalWeight || 0),
           installment: Number(schemeAccData.paid_installments) + 1
         };
-
 
         const savedPayment = await this.paymentRepository.addPayment(
           paymentData

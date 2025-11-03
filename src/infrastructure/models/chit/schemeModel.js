@@ -139,7 +139,7 @@ const schemeSchema = new mongoose.Schema(
     // **Status Flags**
     active: { type: Boolean, default: true }, // Active Status
     is_deleted: { type: Boolean, default: false }, // Soft Delete Flag
-    display_referral: { type: Boolean, default: false }, // Soft Delete Flag
+    // display_referral: { type: Boolean, default: false }, // Soft Delete Flag
     display_Weight_in_ledger: { type: Boolean, default: false }, // Soft Delete Flag
     wallet_redemption_onpayment: { type: Boolean, default: false }, //redeem points on payment time
 
@@ -189,10 +189,10 @@ const schemeSchema = new mongoose.Schema(
     count: {
       type: Number,
     },
-    referralPercentage:{
-      type:Number,
-      default:0
-    },
+    // referralPercentage:{
+    //   type:Number,
+    //   default:0
+    // },
     noOfDays:{
       type:Number,
       default:null
@@ -200,7 +200,12 @@ const schemeSchema = new mongoose.Schema(
     maxLimit:{ //maximum gross payment limit for digi gold
       type:Number,
       default:0
-    }
+    },
+    display_referral: { type: Boolean, default: false },
+    referralPercentage: { type: Number, default: 0 },
+    referralAmount: { type: Number, default: 0 },
+    referralTriggerType:{type:Number,default:1}, //1- each payment, 2- first payment
+    commissionType:{type:Number,default:1} // 1- percentage ,2- amount
   },
   {
     timestamps: true,

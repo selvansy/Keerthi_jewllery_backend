@@ -701,14 +701,6 @@ class SchemeAccountUseCase {
           .json({ status: "Failed", message: "Scheme Account not found" });
       }
 
-      //   data.created_by = tokenData.id_employee;
-      //   data.referal_id = 0;
-      //   data.typeofcustomer = 1;
-      //   data.date_add = new Date();
-      //   data.date_upd = new Date();
-      //   data.added_by = 0;
-      //   data.status = 0;
-
       const employeeData = this.employeeRepository.findOne({
         mobile: data.referal_code,
         id_branch: data.id_branch,
