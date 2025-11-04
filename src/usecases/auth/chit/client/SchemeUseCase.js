@@ -495,6 +495,27 @@ class SchemeUseCase {
       };
     }
   }
+
+  async changeOrder(schemData) {
+    try {
+      const result = await this.schemeRepository.updateSchemeOrder(schemData);
+
+      if (!result) {
+        return { success: false, message: "Failed to update Scheme order" };
+      }
+      
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        message: "Error while Update scheme Order",
+      };
+    }
+  }
 }
 
 export default SchemeUseCase;

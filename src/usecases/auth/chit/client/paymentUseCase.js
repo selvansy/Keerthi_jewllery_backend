@@ -392,10 +392,10 @@ class PaymentUseCase {
             this.toDateOnlyString(lastPaid);
 
           if (todatPaidorNot) {
-            return {
-              status: false,
-              message: "Already completed today's payment",
-            };
+            // return {
+            //   status: false,
+            //   message: "Already completed today's payment",
+            // };
           }
         }
 
@@ -569,6 +569,7 @@ class PaymentUseCase {
               reward_mode: 1,
               created_by: token.id_employee,
               modified_by: token.id_employee,
+              id_payment:savedPayment._id
             };
 
             let walletOwner = null;
@@ -629,6 +630,7 @@ class PaymentUseCase {
               } else {
                 await this.walletRepo.creditAmount(wallet.id, creditedAmount);
               }
+              console.log("referralreferralreferralreferralreferralreferral",referral)
               await this.paymentRepository.addReferralPoint(referral);
             }else if(referralTriggerType == 2 && lastPaidData == null){
               if (!wallet) {
@@ -715,6 +717,7 @@ class PaymentUseCase {
             return {
               success: true,
               message: messageOut ? messageOut : message,
+              data:savedPayment
             };
           } else {
             return {
@@ -732,7 +735,7 @@ class PaymentUseCase {
         );
 
         if (digiCalc.success) {
-          return { success: true, message: digiCalc.message };
+         return { success: true, message: digiCalc.message,data:digiCalc.savedPayment };
         } else {
           return { success: false, message: digiCalc.message };
         }
@@ -913,6 +916,7 @@ class PaymentUseCase {
           reward_mode: 1,
           created_by: token.id_employee,
           modified_by: token.id_employee,
+          id_payment:savedPayment._id
         };
 
         let walletOwner = null;
@@ -1058,7 +1062,7 @@ class PaymentUseCase {
       return { success: true, message: "Payment added successfully" };
     } catch (error) {
       console.error(error);
-      return { success: false, message: "Failed to add payment" };
+      return { success: false, message: "Failed to add payment",savedPayment };
     }
   }
 
@@ -1669,6 +1673,7 @@ class PaymentUseCase {
 
         if (referral_id) {
           accountData.referral_id = referral_id;
+          accountData.referral_type = "Customer";
         }
 
         newSchemeAcc = await this.schemeAccountRepository.addSchemeAccount(
@@ -2015,6 +2020,7 @@ class PaymentUseCase {
           reward_mode: 1,
           created_by: data?.token?.id_employee || null,
           modified_by: data?.token?.id_employee || null,
+          id_payment:paymentData._id
         };
   
         let referrer = null;

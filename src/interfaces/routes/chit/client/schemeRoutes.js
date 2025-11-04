@@ -45,4 +45,8 @@ router.post('/delist',(req,res)=>schemeController.getDelistSchemes(req,res));
 
 router.get('/branch/:branchId', (req, res) => schemeController.getAllBranchScheme(req, res));
 
+// for order change 
+
+router.post('/change-order',(req,res)=>schemeController.changeOrder(req,res));
+
 export default router;

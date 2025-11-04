@@ -41,6 +41,26 @@ class PrintController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+
+   async getPassbookData(req, res) {
+    try {
+        const {accountNumber,page=1,limit=20}=req.body
+        if(!accountNumber){
+          return res.status(400).json({ message: "Account number" });
+        }
+        const result = await this.printUseCase.getPassbookData({accountNumber,page,limit})
+        if(result.success){
+          return res.status(200).json({ message:result.message,data:result.data });
+        }
+          return res.status(400).json({ message: result.message });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  
 }
 
 export default PrintController;

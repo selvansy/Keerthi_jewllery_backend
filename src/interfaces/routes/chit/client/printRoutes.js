@@ -19,6 +19,7 @@ const printController = new PrintController(printUseCase)
 router.use(authMiddleware.protect)
 router.post('/receipt',(req,res)=>printController.getReceipt(req,res))
 router.post('/receipt/print',(req,res)=>printController.getReceiptByPaymentId(req,res));
+router.post('/passbook',(req,res)=>printController.getPassbookData(req,res))
 
 
 export default router;

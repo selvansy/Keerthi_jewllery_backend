@@ -54,6 +54,33 @@ class PrintUseCase {
       }
     }
   }
+
+    async getPassbookData(filter){
+    try{
+    
+      const result = await this.printRepository.getPassbookData(filter)
+      if(result){
+        return{
+          success:true,
+          message:"Payment Receipt",
+          data:result
+        }
+      }
+      
+      return{
+        success:false,
+        message:"Failed to get payments"
+      }
+
+    }catch(error){
+      return{
+        success:false,
+        message:error
+      }
+    }
+  }
+
+  
 }
 
 export default PrintUseCase;

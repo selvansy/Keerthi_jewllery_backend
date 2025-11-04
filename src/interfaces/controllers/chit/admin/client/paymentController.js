@@ -1,9 +1,10 @@
 
 class PaymentController { 
-    constructor(paymentUseCase, schemeAccountUseCase, validator) {
+    constructor(paymentUseCase, schemeAccountUseCase, printUseCase,validator) {
         this.paymentUseCase = paymentUseCase;
         this.schemeAccountUseCase = schemeAccountUseCase;
         this.validator = validator;
+        this.printUseCase=printUseCase;
     }
 
     async addPayment(req, res) {
@@ -21,8 +22,8 @@ class PaymentController {
             if (!result.success) {
                 return res.status(400).json({ message: result.message })
             }
-
-            return res.status(201).json({ message: result.message })
+             const printData = await this.printUseCase.getReceiptByPaymentId([result.data._id],req.user)
+            return res.status(201).json({ message: result.message,printData:printData.data })
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: "Internal server error" })

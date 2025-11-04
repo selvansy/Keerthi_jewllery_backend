@@ -19,6 +19,11 @@ const referralListSchema = new mongoose.Schema({
         required: true,
         ref:"SchemeAccount"
     },
+    id_payment: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: 'Payment',
+    },
     mobile:{
         type:String
     },

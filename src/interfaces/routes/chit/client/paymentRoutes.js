@@ -22,6 +22,11 @@ import WalletRepository from '../../../../infrastructure/repositories/chit/walle
 import EmployeeRepository from '../../../../infrastructure/repositories/chit/EmployeeRepository.js';
 import NotificationConfigRepository from '../../../../infrastructure/repositories/chit/notificationConfigRepository.js';
 
+// for save and print
+import PrintRepository from '../../../../infrastructure/repositories/chit/printRepository.js';
+import PrintUseCase from '../../../../usecases/auth/chit/client/printUsecase.js';
+import PrintController from '../../../controllers/chit/admin/client/printController.js';
+
 const router = express.Router();
 
 const tokenService = new TokenService();
@@ -51,7 +56,11 @@ const paymentUseCase = new PaymentUseCase(paymentRepository,metalrateRepository,
 
 const schemAccoutUseCase= new SchemeAccountUseCase(schemeAccountRepository,null,null,null,customerRepo)
 
-const paymentController = new PaymentController(paymentUseCase,schemAccoutUseCase);
+// for save and print
+const printRepository = new PrintRepository()
+const printUseCase = new PrintUseCase(printRepository)
+
+const paymentController = new PaymentController(paymentUseCase,schemAccoutUseCase,printUseCase);
 
 router.post('/mobile/webhook',(req,res)=>paymentController.webhook(req,res))
 router.use(authMiddleware.protect);

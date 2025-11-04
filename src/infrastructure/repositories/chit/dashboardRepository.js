@@ -4,484 +4,6 @@ import schemeAccountModel from "../../models/chit/schemeAccountModel.js";
 import topupModel from "../../models/chit/topupModel.js";
 
 class DashboardRepository {
-  // async getAllOver(filter) {
-  //   try {
-  //     const openAccountFilter = { ...filter, status: 0 };
-  
-  //     const [totalCustomers, payment, totalAccounts] =
-  //       await Promise.all([
-  //         customerModel.find(filter).countDocuments(),
-  
-  //         paymentModel.aggregate([
-  //           { $match: { ...filter, payment_status: 1 } },
-  //           {
-  //             $lookup: {
-  //               from: "schemes",
-  //               localField: "id_scheme",
-  //               foreignField: "_id",
-  //               as: "Scheme",
-  //             },
-  //           },
-  //           { $unwind: "$Scheme" },
-  
-  //           {
-  //             $lookup: {
-  //               from: "metals",
-  //               localField: "Scheme.id_metal",
-  //               foreignField: "_id",
-  //               as: "Metal",
-  //             },
-  //           },
-  //           { $unwind: "$Metal" },
-  //           {
-  //             $match: {
-  //               // "Metal.metal_name": { $regex: /^gold$/i },
-  //                 "Metal.metal_name": {
-  //                   $in: [
-  //                     /^gold$/i,
-  //                     // /^silver$/i,
-  //                     /^platinum$/i,
-  //                     /^diamond$/i,
-  //                     /^rose gold$/i
-  //                   ]
-  //               },                
-  //               // "Scheme.scheme_type": { $nin: [0, 8, 13, 11, 1, 7] },
-  //             },
-  //           },
-  
-  //           {
-  //             $group: {
-  //               _id: null,
-  //               totalMetalWeight: { $sum: "$metal_weight" },
-  //               totalAmount: { $sum: "$payment_amount" },
-  //             },
-  //           },
-  //           {
-  //             $project: {
-  //               _id: 0,
-  //               totalMetalWeight: 1,
-  //               totalAmount: 1,
-  //             },
-  //           },
-  //         ]),
-  
-  //         schemeAccountModel.find(openAccountFilter).countDocuments(),
-  
-  //         schemeAccountModel.aggregate([
-  //           { $match: openAccountFilter },
-  //           {
-  //             $lookup: {
-  //               from: "schemes",
-  //               localField: "id_scheme",
-  //               foreignField: "_id",
-  //               as: "Scheme",
-  //             },
-  //           },
-  //           {
-  //             $lookup: {
-  //               from: "schemeclassifications",
-  //               localField: "id_classification",
-  //               foreignField: "_id",
-  //               as: "Classification",
-  //             },
-  //           },
-  //           {
-  //             $lookup: {
-  //               from: "customers",
-  //               localField: "id_customer",
-  //               foreignField: "_id",
-  //               as: "Customer",
-  //             },
-  //           },
-  //           { $unwind: "$Scheme" },
-  //           { $unwind: "$Classification" },
-  //           { $unwind: "$Customer" },
-  
-  //           {
-  //             $addFields: {
-  //               daysPassed: {
-  //                 $add: [
-  //                   {
-  //                     $dateDiff: {
-  //                       startDate: "$start_date",
-  //                       endDate: new Date(),
-  //                       unit: "day",
-  //                     },
-  //                   },
-  //                   1,
-  //                 ],
-  //               },
-  //               monthsPassed: {
-  //                 $add: [
-  //                   {
-  //                     $dateDiff: {
-  //                       startDate: "$start_date",
-  //                       endDate: new Date(),
-  //                       unit: "month",
-  //                     },
-  //                   },
-  //                   1,
-  //                 ],
-  //               },
-  //               yearsPassed: {
-  //                 $add: [
-  //                   {
-  //                     $dateDiff: {
-  //                       startDate: "$start_date",
-  //                       endDate: new Date(),
-  //                       unit: "year",
-  //                     },
-  //                   },
-  //                   1,
-  //                 ],
-  //               },
-  //             },
-  //           },
-  
-  //           {
-  //             $addFields: {
-  //               expectedInstallments: {
-  //                 $switch: {
-  //                   branches: [
-  //                     {
-  //                       case: { $eq: ["$Scheme.installment_type", 1] },
-  //                       then: "$monthsPassed",
-  //                     },
-  //                     {
-  //                       case: { $eq: ["$Scheme.installment_type", 2] },
-  //                       then: { $trunc: { $divide: ["$daysPassed", 7] } },
-  //                     },
-  //                     {
-  //                       case: { $eq: ["$Scheme.installment_type", 3] },
-  //                       then: "$daysPassed",
-  //                     },
-  //                     {
-  //                       case: { $eq: ["$Scheme.installment_type", 4] },
-  //                       then: "$yearsPassed",
-  //                     },
-  //                   ],
-  //                   default: 0,
-  //                 },
-  //               },
-  //             },
-  //           },
-  
-  //           {
-  //             $addFields: {
-  //               totalPaidInstallments: { $sum: "$paid_installments" },
-  //             },
-  //           },
-  //           {
-  //             $addFields: {
-  //               installmentDue: {
-  //                 $max: [
-  //                   {
-  //                     $subtract: [
-  //                       "$expectedInstallments",
-  //                       "$totalPaidInstallments",
-  //                     ],
-  //                   },
-  //                   0,
-  //                 ],
-  //               },
-  //             },
-  //           },
-  //           { $match: { installmentDue: { $gt: 0 } } },
-  //           { $count: "overdueCount" },
-  //         ]),
-  //       ]);
-  
-  //     const data = {
-  //       totalAccounts,
-  //       totalCustomers,
-  //       totalGoldSave: payment[0]?.totalMetalWeight || 0,
-  //       totalAmount: payment[0]?.totalAmount || 0,
-  //     };
-  
-  //     return data;
-  //   } catch (err) {
-  //     console.error(err);
-  //     throw new Error("Error fetching dashboard data");
-  //   }
-  // }  
-
-
-//  async getAllOver(filter) {
-//   try {
-//     const openAccountFilter = { ...filter, status: 0 };
-
-//     const goldMetals = [
-//       /^gold$/i,
-//       /^platinum$/i,
-//       /^diamond$/i,
-//       /^rose gold$/i,
-//     ];
-
-//     const silverMetals = [
-//       /^silver$/i,
-//     ];
-
-//     const [
-//       totalCustomers,
-//       Payment,
-//       silverPayment,
-//       totalPayment, 
-//       totalAccounts,
-//       overdueAccounts,
-//     ] = await Promise.all([
-//       customerModel.find(filter).countDocuments(),
-
-//       paymentModel.aggregate([
-//         { $match: { ...filter, payment_status: 1 } },
-//         {
-//           $lookup: {
-//             from: "schemes",
-//             localField: "id_scheme",
-//             foreignField: "_id",
-//             as: "Scheme",
-//           },
-//         },
-//         { $unwind: "$Scheme" },
-//         {
-//           $lookup: {
-//             from: "metals",
-//             localField: "Scheme.id_metal",
-//             foreignField: "_id",
-//             as: "Metal",
-//           },
-//         },
-//         { $unwind: "$Metal" },
-//         { $match: { "Metal.metal_name": { $in: goldMetals } } },
-//         {
-//           $group: {
-//             _id: null,
-//             totalMetalWeight: { $sum: "$metal_weight" },
-//             totalAmount: { $sum: "$payment_amount" },
-//           },
-//         },
-//         {
-//           $project: {
-//             _id: 0,
-//             totalMetalWeight: 1,
-//             totalAmount: 1,
-//           },
-//         },
-//       ]),
-
-//       paymentModel.aggregate([
-//         { $match: { ...filter, payment_status: 1 } },
-//         {
-//           $lookup: {
-//             from: "schemes",
-//             localField: "id_scheme",
-//             foreignField: "_id",
-//             as: "Scheme",
-//           },
-//         },
-//         { $unwind: "$Scheme" },
-//         {
-//           $lookup: {
-//             from: "metals",
-//             localField: "Scheme.id_metal",
-//             foreignField: "_id",
-//             as: "Metal",
-//           },
-//         },
-//         { $unwind: "$Metal" },
-//         { $match: { "Metal.metal_name": { $in: silverMetals } } },
-//         {
-//           $group: {
-//             _id: null,
-//             totalSilverWeight: { $sum: "$metal_weight" },
-//             totalSilverAmount: { $sum: "$payment_amount" },
-//           },
-//         },
-//         {
-//           $project: {
-//             _id: 0,
-//             totalSilverWeight: 1,
-//             totalSilverAmount: 1,
-//           },
-//         },
-//       ]),
-
-//       paymentModel.aggregate([
-//         { $match: { ...filter, payment_status: 1 } },
-//         {
-//           $lookup: {
-//             from: "schemes",
-//             localField: "id_scheme",
-//             foreignField: "_id",
-//             as: "Scheme",
-//           },
-//         },
-//         { $unwind: "$Scheme" },
-//         {
-//           $lookup: {
-//             from: "metals",
-//             localField: "Scheme.id_metal",
-//             foreignField: "_id",
-//             as: "Metal",
-//           },
-//         },
-//         { $unwind: "$Metal" },
-//         {
-//           $group: {
-//             _id: null,
-//             totalCombinedAmount: { $sum: "$payment_amount" },
-//             totalCombinedWeight: { $sum: "$metal_weight" },
-//           },
-//         },
-//         {
-//           $project: {
-//             _id: 0,
-//             totalCombinedAmount: 1,
-//             totalCombinedWeight: 1,
-//           },
-//         },
-//       ]),
-
-//       schemeAccountModel.find(openAccountFilter).countDocuments(),
-
-//       schemeAccountModel.aggregate([
-//         { $match: openAccountFilter },
-//         {
-//           $lookup: {
-//             from: "schemes",
-//             localField: "id_scheme",
-//             foreignField: "_id",
-//             as: "Scheme",
-//           },
-//         },
-//         {
-//           $lookup: {
-//             from: "schemeclassifications",
-//             localField: "id_classification",
-//             foreignField: "_id",
-//             as: "Classification",
-//           },
-//         },
-//         {
-//           $lookup: {
-//             from: "customers",
-//             localField: "id_customer",
-//             foreignField: "_id",
-//             as: "Customer",
-//           },
-//         },
-//         { $unwind: "$Scheme" },
-//         { $unwind: "$Classification" },
-//         { $unwind: "$Customer" },
-//         {
-//           $addFields: {
-//             daysPassed: {
-//               $add: [
-//                 {
-//                   $dateDiff: {
-//                     startDate: "$start_date",
-//                     endDate: new Date(),
-//                     unit: "day",
-//                   },
-//                 },
-//                 1,
-//               ],
-//             },
-//             monthsPassed: {
-//               $add: [
-//                 {
-//                   $dateDiff: {
-//                     startDate: "$start_date",
-//                     endDate: new Date(),
-//                     unit: "month",
-//                   },
-//                 },
-//                 1,
-//               ],
-//             },
-//             yearsPassed: {
-//               $add: [
-//                 {
-//                   $dateDiff: {
-//                     startDate: "$start_date",
-//                     endDate: new Date(),
-//                     unit: "year",
-//                   },
-//                 },
-//                 1,
-//               ],
-//             },
-//           },
-//         },
-//         {
-//           $addFields: {
-//             expectedInstallments: {
-//               $switch: {
-//                 branches: [
-//                   {
-//                     case: { $eq: ["$Scheme.installment_type", 1] },
-//                     then: "$monthsPassed",
-//                   },
-//                   {
-//                     case: { $eq: ["$Scheme.installment_type", 2] },
-//                     then: { $trunc: { $divide: ["$daysPassed", 7] } },
-//                   },
-//                   {
-//                     case: { $eq: ["$Scheme.installment_type", 3] },
-//                     then: "$daysPassed",
-//                   },
-//                   {
-//                     case: { $eq: ["$Scheme.installment_type", 4] },
-//                     then: "$yearsPassed",
-//                   },
-//                 ],
-//                 default: 0,
-//               },
-//             },
-//           },
-//         },
-//         {
-//           $addFields: {
-//             totalPaidInstallments: { $sum: "$paid_installments" },
-//           },
-//         },
-//         {
-//           $addFields: {
-//             installmentDue: {
-//               $max: [
-//                 {
-//                   $subtract: [
-//                     "$expectedInstallments",
-//                     "$totalPaidInstallments",
-//                   ],
-//                 },
-//                 0,
-//               ],
-//             },
-//           },
-//         },
-//         { $match: { installmentDue: { $gt: 0 } } },
-//         { $count: "overdueCount" },
-//       ]),
-//     ]);
-
-//     return {
-//       totalAccounts,
-//       totalCustomers,
-//       totalGoldSave: Payment[0]?.totalMetalWeight || 0,
-//       totalGoldAmount: Payment[0]?.totalAmount || 0,
-//       totalSilverSave: silverPayment[0]?.totalSilverWeight || 0,
-//       totalSilverAmount: silverPayment[0]?.totalSilverAmount || 0,
-//       totalAmount: totalPayment[0]?.totalCombinedAmount || 0, 
-//       totalCombinedWeight: totalPayment[0]?.totalCombinedWeight || 0, 
-//       overdueAccounts: overdueAccounts[0]?.overdueCount || 0,
-//     };
-
-//   } catch (err) {
-//     console.error(err);
-//     throw new Error("Error fetching dashboard data");
-//   }
-// }
-
 async getAllOver(filter) {
   try {
     const openAccountFilter = { ...filter };
@@ -492,6 +14,22 @@ async getAllOver(filter) {
 
         paymentModel.aggregate([
           { $match: { ...filter, payment_status: 1 } },
+          {
+            $lookup: {
+              from: "schemeaccounts",
+              localField: "id_scheme_account",
+              foreignField: "_id",
+              as: "schemeAccount"
+            }
+          },
+          {
+            $unwind: "$schemeAccount"
+          },
+          {
+            $match: {
+              "schemeAccount.status": { $ne: 4 }
+            }
+          },
           {
             $lookup: {
               from: "schemes",
@@ -522,7 +60,7 @@ async getAllOver(filter) {
                   /^rose gold$/i
                 ]
               }, 
-               // "Scheme.scheme_type": { $nin: [0, 8, 13, 11, 1, 7] },               
+               // "Scheme.scheme_type": { $nin: [0, 8, 13, 11, 1, 7] },      
             },
           },
 
@@ -810,21 +348,61 @@ async getAllOver(filter) {
 
   async getAccountStat(customFilter) {
     try {
+      console.log(customFilter)
       const [newCustomer, paymentData, schemeData] = await Promise.all([
         await customerModel.countDocuments(customFilter),
+        // await paymentModel.aggregate([
+        //   { $match: {...customFilter,payment_status:1} },
+        //   {
+        //     $group: {
+        //       _id: null,
+        //       totalMetalWeight: { $sum: "$metal_weight" },
+        //       totalAmount: { $sum: "$payment_amount" },
+        //     },
+        //   },
+        //   { $project: { _id: 0, totalMetalWeight: 1, totalAmount: 1 } },
+        // ]),
         await paymentModel.aggregate([
-          { $match: {...customFilter,payment_status:1} },
+          {
+            $match: {
+              // ...customFilter,
+              payment_status: 1
+            }
+          },
+          {
+            $lookup: {
+              from: "schemeaccounts",
+              localField: "id_scheme_account",
+              foreignField: "_id",
+              as: "schemeAccount"
+            }
+          },
+          {
+            $unwind: "$schemeAccount"
+          },
+          {
+            $match: {
+              "schemeAccount.status": { $ne: 4 }
+            }
+          },
           {
             $group: {
               _id: null,
               totalMetalWeight: { $sum: "$metal_weight" },
-              totalAmount: { $sum: "$payment_amount" },
-            },
+              totalAmount: { $sum: "$payment_amount" }
+            }
           },
-          { $project: { _id: 0, totalMetalWeight: 1, totalAmount: 1 } },
+          {
+            $project: {
+              _id: 0,
+              totalMetalWeight: 1,
+              totalAmount: 1
+            }
+          }
         ]),
+        
         await schemeAccountModel.aggregate([
-          { $match: customFilter },
+          { $match: {...customFilter,status:{$nin:[4]}}},
           {
             $facet: {
               totalAccounts: [{ $count: "count" }],
@@ -850,7 +428,7 @@ async getAllOver(filter) {
           },
         ]),
       ]);
-
+console.log(paymentData)
       return {
         newCustomer: newCustomer,
         receivedWeights: paymentData[0]?.totalMetalWeight || 0,

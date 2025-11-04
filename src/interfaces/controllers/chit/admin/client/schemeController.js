@@ -470,6 +470,27 @@ class SchemeController{
         return res.status(500).json({ message: "Internal server error", error: error.message });
       }
     }
+
+    // for change order 
+
+    async changeOrder(req,res){
+      try{
+         
+        const {data}=req.body
+        const result = await this.schemeUseCase.changeOrder(data);
+  
+        if (!result.success) {
+          return res.status(400).json({ message: result.message });
+        }
+  
+        return res.status(200).json({ message: result.message, data: result.data });
+
+      }catch(error){
+
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error", error: error.message }); 
+      }
+    }
 }
 
 export default SchemeController;

@@ -1569,13 +1569,7 @@ class SchemeAccountUseCase {
       // Add computed fields
       pipeline.push({
         $addFields: {
-          customer_name: {
-            $concat: [
-              { $ifNull: ["$customer.firstname", ""] },
-              " ",
-              { $ifNull: ["$customer.lastname", ""] },
-            ],
-          },
+          account_name:"$account_name",
           mobile: "$customer.mobile",
           address: "$customer.address",
           scheme_name: "$scheme.scheme_name",

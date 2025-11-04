@@ -3638,10 +3638,10 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
   //   }
   // }
   
-  async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId, type,from_date,to_date) {
+async getAmountDetailedView(filter, skip = 0, limit = 10, schemeId, type, from_date, to_date) {
     try {
         const paymentMatch = {};
-        if (from_date) paymentMatch.createdAt = { $gte: from_date};
+        if (from_date) paymentMatch.createdAt = { $gte: from_date };
         if (to_date) paymentMatch.createdAt = { ...paymentMatch.createdAt, $lte: to_date };
 
         const fieldToSum = type === 'weight' ? "metal_weight" : "payment_amount";
@@ -3670,7 +3670,7 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
                         {
                             $match: {
                                 $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
-                                payment_status:1,
+                                payment_status: 1,
                                 ...paymentMatch
                             }
                         },
@@ -3687,6 +3687,11 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
             {
                 $addFields: {
                     totalValue: { $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0] }
+                }
+            },
+            {
+                $match: {
+                    totalValue: { $gt: 0 }
                 }
             },
             {
@@ -3711,41 +3716,51 @@ async getPaymentLedger(query = {}, skip = 0, limit = 10) {
         // Get paginated results
         const schemeDetails = await schemeAccountModel.aggregate(aggregationPipeline);
 
-       
-        // const totalCount = await schemeAccountModel.countDocuments({
-        //     id_scheme: new mongoose.Types.ObjectId(schemeId),
-        //     filter
-        // });
-      const totalCountAgg = await schemeAccountModel.aggregate([
-        {
-          $match: {
-            id_scheme: new mongoose.Types.ObjectId(schemeId),
-            ...filter
-          }
-        },
-        {
-          $lookup: {
-            from: "payments",
-            let: { schemeAccountId: "$_id" },
-            pipeline: [
-              {
+        const totalCountAgg = await schemeAccountModel.aggregate([
+            {
                 $match: {
-                  $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
-                  ...paymentMatch
+                    id_scheme: new mongoose.Types.ObjectId(schemeId),
+                    ...filter
                 }
-              }
-            ],
-            as: "PaymentSummary"
-          }
-        },
-        {
-          $count: "totalCount"
-        }
-      ]);
-
+            },
+            {
+                $lookup: {
+                    from: "payments",
+                    let: { schemeAccountId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$id_scheme_account", "$$schemeAccountId"] },
+                                payment_status: 1,
+                                ...paymentMatch
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                totalValue: { $sum: `$${fieldToSum}` }
+                            }
+                        }
+                    ],
+                    as: "PaymentSummary"
+                }
+            },
+            {
+                $addFields: {
+                    totalValue: { $ifNull: [{ $arrayElemAt: ["$PaymentSummary.totalValue", 0] }, 0] }
+                }
+            },
+            {
+                $match: {
+                    totalValue: { $gt: 0 }
+                }
+            },
+            {
+                $count: "totalCount"
+            }
+        ]);
 
         const totalCount = totalCountAgg[0]?.totalCount || 0;
-        console.log(totalCount)
 
         const totalPages = Math.ceil(totalCount / limit);
         const currentPage = Math.floor(skip / limit) + 1;
