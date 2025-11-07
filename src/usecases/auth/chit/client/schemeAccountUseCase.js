@@ -1206,6 +1206,12 @@ class SchemeAccountUseCase {
         previousStatus:schemeAccount?.status
       };
 
+      const billNoExists = await this.closeAccRepo.findByBillNmber(bill_no)
+
+      if(billNoExists){
+        return { success: false, message: "Bill number already exists" };
+      }
+
       let newClosedAccount = "";
       if (refund_paymenttype !== "") {
         newClosedAccount = await this.closeAccRepo.addCloseAccount(
@@ -1243,13 +1249,19 @@ class SchemeAccountUseCase {
 
       const notificationData = await isNotificationEnabled("schemeClose");
 
-      if (notificationData.push) {
-        const schemeData = await this.schemeAccountRepository.find({ _id: id });
+      if (notificationData?.push) {
+        let type = "Closed"
+
+        if(status == 3){
+          type = "Pre-closed"
+        }else if(status == 4){
+          type = "Refunded"
+        }
 
         const input = {
-          recipients: [data.id_customer],
-          title: "Scheme Account Closed",
-          message: `Your ${schemeData.scheme_name} Scheme Account with ${config.NOTIFICATION_NAME} has been successfully closed. We appreciate your association with us`,
+          recipients: [schemeAccount?.id_customer],
+          title: `Scheme Account ${type}`,
+          message: `Your ${schemeAccount?.scheme_acc_number} Scheme Account with ${config.NOTIFICATION_NAME} has been successfully ${type}. We appreciate your association with us`,
           channel: "push",
         }
         await smsService.sendNotification(input);
@@ -1259,7 +1271,7 @@ class SchemeAccountUseCase {
           message: input.message,
           type:"alert",
           category:'Scheme account'
-        },data.id_customer)
+        },schemeAccount?.id_customer)
       }
 
       return {

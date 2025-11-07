@@ -3,7 +3,7 @@ import campaignTypeModel from "../../models/chit/campaignTypeModel.js";
 class CampaignTypeRepository{
     async findByName(name) {
         const campaignTypeData = await campaignTypeModel.findOne({
-            name: { $regex: new RegExp(name, 'i') }});
+            name: { $regex: new RegExp(name, 'i') },active:true});
         if (!campaignTypeData) return null;
         return {
             name: campaignTypeData.name,

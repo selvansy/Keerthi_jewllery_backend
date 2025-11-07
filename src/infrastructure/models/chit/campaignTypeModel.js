@@ -5,7 +5,6 @@ const CampaignTypeSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
       // enum: ["Festival", "Diwali", "Pongal", "New Year", "Wishes", "Other", "New arrivals", "Product", "Branch" ], // Add more as needed
     },
@@ -20,7 +19,6 @@ const CampaignTypeSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
-      required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,10 +26,8 @@ const CampaignTypeSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, 
   }
 );
-
-// CampaignTypeSchema.index({ name: 1 });
 
 export default  mongoose.model("CampaignType", CampaignTypeSchema);

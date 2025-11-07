@@ -5,17 +5,11 @@ import CampaignTypeRepository from '../../../../infrastructure/repositories/chit
 import TokenService from '../../../../utils/jwtToken.js';
 import Validator from '../../../../utils/validations/validation.js';
 import AuthMiddleware  from '../../../../utils/middleware/authMiddleware.js';
-// import S3Service from '../../../../utils/s3Bucket.js';
-// import {upload} from '../../../../utils/multer.js';
-// import HashingService from '../../../../utils/bcrypt.js';
 const router = express.Router();
 
 const tokenService= new TokenService();
 const validator = new Validator()
 const authMiddleware= new AuthMiddleware(tokenService)
-// const hashingService= new HashingService();
-// const s3service= new S3Service();
-
 
 
 const campaignTypeRepository= new CampaignTypeRepository();

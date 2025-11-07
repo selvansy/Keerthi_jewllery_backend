@@ -1327,6 +1327,7 @@ class ReportUseCase {
     const data = await this.reportRepo.getAmountPayble(filter, skip, limit);
     return data;
   }
+  
   async getWeightPayble(query) {
     const { page, limit, from_date, to_date, id_branch, id_purity, id_scheme } =
       query;
