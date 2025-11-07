@@ -173,6 +173,10 @@ const schemeAccountSchema = new mongoose.Schema(
     flexFixed:{
       type:Number,
       default:0
+    },
+    closingBonus:{
+      type:Number,
+      default:0
     }
   },
   {

@@ -484,14 +484,14 @@ class CommonUseCase {
   }
 
 
-  //! app version check, add, update api section (do not modify with proper understanding)
+  //! app version check, add, update api section (do not modify without proper understanding)
   async addAppVersionData(data,token) {
     try {
       const employeeData = await this.employeeRepo.findOne({_id:token.id_employee,is_deleted:false})
 
-      if(!employeeData){
-        return {success:false,message:"Employee not found,operation aborted"}
-      }
+      // if(!employeeData){
+      //   return {success:false,message:"Employee not found,operation aborted"}
+      // }
 
       const existsData = await this.appversionRepo.findOne(data);
   
@@ -500,7 +500,7 @@ class CommonUseCase {
       let success = false;
   
       if (existsData) {
-        data.updatedBy = `${employeeData?.firstname} ${employeeData?.lastname}`
+        data.updatedBy = `${employeeData?.firstname} ${employeeData?.lastname}` || "Admin"
         result = await this.appversionRepo.updateAppVersionData(existsData._id,data);
         if (result) {
           success = true;
@@ -509,7 +509,7 @@ class CommonUseCase {
           message = "Failed to update app version details";
         }
       } else {
-        data.updatedBy = `${employeeData?.firstname} ${employeeData?.lastname}`
+        data.updatedBy = `${employeeData?.firstname} ${employeeData?.lastname}` || "Admin"
         result = await this.appversionRepo.addAppVersionData(data);
         if (result) {
           success = true;

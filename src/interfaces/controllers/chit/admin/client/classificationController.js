@@ -33,14 +33,6 @@ class ClassificationController{
           .status(400)
           .json({ status: "Failed", message: "Type of Scheme is required" });
       }
-      // else if (!classification_order || classification_order === "") {
-      //   return res
-      //     .status(400)
-      //     .json({
-      //       status: "Failed",
-      //       message: "Classification Order is required",
-      //     });
-      // }
 
       req.body.created_by = req.user.id_employee;
 
@@ -93,14 +85,16 @@ class ClassificationController{
             status: "Failed",
             message: "Classification Name is required",
           });
-      } else if (!classification_order || classification_order === "") {
-        return res
-          .status(400)
-          .json({
-            status: "Failed",
-            message: "Classification Order is required",
-          });
-      } else if (!id_branch || id_branch === "") {
+      } 
+      // else if (!classification_order || classification_order === "") {
+      //   return res
+      //     .status(400)
+      //     .json({
+      //       status: "Failed",
+      //       message: "Classification Order is required",
+      //     });
+      // }
+       else if (!id_branch || id_branch === "") {
         return res
           .status(400)
           .json({ status: "Failed", message: "Branch ID is required" });

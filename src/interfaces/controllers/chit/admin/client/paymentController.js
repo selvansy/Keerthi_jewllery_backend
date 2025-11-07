@@ -22,7 +22,7 @@ class PaymentController {
             if (!result.success) {
                 return res.status(400).json({ message: result.message })
             }
-             const printData = await this.printUseCase.getReceiptByPaymentId([result.data._id],req.user)
+             const printData = await this.printUseCase.getReceiptByPaymentId([result?.data?._id],req.user)
             return res.status(201).json({ message: result.message,printData:printData.data })
         } catch (error) {
             console.error(error);

@@ -56,6 +56,7 @@ class SchemeAccountRepository {
 
   async getSchemeAccountById(id) {
     try {
+      console.log("kd")
       const data = await schemeAccountModel
         .findById(id)
         .populate({

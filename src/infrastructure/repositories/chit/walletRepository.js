@@ -1367,8 +1367,6 @@ class WalletRepository {
       
           const referralPipeline = [
             { $match: query },
-      
-            // Lookup customer who referred
             {
               $lookup: {
                 from: "customers",
@@ -1378,8 +1376,6 @@ class WalletRepository {
               },
             },
             { $unwind: { path: "$id_customer", preserveNullAndEmptyArrays: true } },
-      
-            // Lookup employee
             {
               $lookup: {
                 from: "employees",
@@ -1389,8 +1385,6 @@ class WalletRepository {
               },
             },
             { $unwind: { path: "$id_employee", preserveNullAndEmptyArrays: true } },
-      
-            // Lookup scheme account
             {
               $lookup: {
                 from: "schemeaccounts",
@@ -1405,8 +1399,6 @@ class WalletRepository {
                 preserveNullAndEmptyArrays: true,
               },
             },
-      
-            // Lookup the customer under the scheme account
             {
               $lookup: {
                 from: "customers",
@@ -1422,8 +1414,6 @@ class WalletRepository {
                 },
               },
             },
-      
-            // Lookup the scheme
             {
               $lookup: {
                 from: "schemes",
@@ -1437,74 +1427,113 @@ class WalletRepository {
                 id_scheme: { $arrayElemAt: ["$id_scheme", 0] },
               },
             },
-      
-            // Add referral_amount field
             {
-              $addFields: {
-                referral_amount: {
-                  $round: [
-                    {
-                      $multiply: [
-                        {
-                          $divide: [
-                            { $ifNull: ["$id_scheme.referralPercentage", 0] },
-                            100,
-                          ],
-                        },
-                        { $ifNull: ["$payment_amount", 0] },
-                      ],
-                    },
-                    2,
-                  ],
-                },
+                $addFields: {
+                  referral_amount: {
+                    $cond: {
+                      if: { $eq: ["$id_scheme.commissionType", 1] }, 
+                      then: {
+                        $round: [
+                          {
+                            $multiply: [
+                              { $divide: [ { $ifNull: ["$id_scheme.referralPercentage", 0] }, 100 ] },
+                              { $ifNull: ["$payment_amount", 0] }
+                            ]
+                          },
+                          2
+                        ]
+                      },
+                      else: { $ifNull: ["$id_scheme.referralAmount", 0] }
+                    }
+                  }
+                }
               },
-            },
-      
-            // Final projection
-            {
-              $project: {
-                id_customer: {
-                  firstname: 1,
-                  lastname: 1,
-                  mobile: 1,
-                  id_branch: 1,
-                },
-                id_employee: {
-                  firstname: 1,
-                  lastname: 1,
-                  mobile: 1,
-                  id_branch: 1,
-                },
-                id_scheme_account: {
-                  _id: 1,
-                  scheme_acc_number: 1,
-                  total_installments: 1,
-                  paymentcount: 1,
-                  start_date: 1,
-                  maturity_date: 1,
-                  paid_installments: 1, // ✅ pull from schemeaccount
-                },
-                id_scheme: {
-                  scheme_name: 1,
-                  description: 1,
-                  scheme_type: 1,
-                  code: 1,
-                  maturity_period: 1,
-                  referralPercentage: 1,
-                },
-                payment_receipt: 1,
-                payment_amount: 1,
-                total_amt: 1,
-                metal_rate: 1,
-                metal_weight: 1,
-                payment_mode: 1,
-                createdAt: 1,
-                referral_amount: 1,
-                payment_status: 1,
-                remarks: 1,
-              },
-            },
-      
+              {
+                $match: { referral_amount: { $gt: 0 } } // ✅ Only include positive referral payments
+              },              
+            // {
+            //   $project: {
+            //     id_customer: {
+            //       firstname: 1,
+            //       lastname: 1,
+            //       mobile: 1,
+            //       id_branch: 1,
+            //     },
+            //     id_employee: {
+            //       firstname: 1,
+            //       lastname: 1,
+            //       mobile: 1,
+            //       id_branch: 1,
+            //     },
+            //     id_scheme_account: {
+            //       _id: 1,
+            //       scheme_acc_number: 1,
+            //       total_installments: 1,
+            //       paymentcount: 1,
+            //       start_date: 1,
+            //       maturity_date: 1,
+            //       paid_installments: 1, // ✅ pull from schemeaccount
+            //     },
+            //     id_scheme: {
+            //       scheme_name: 1,
+            //       description: 1,
+            //       scheme_type: 1,
+            //       code: 1,
+            //       maturity_period: 1,
+            //       referralPercentage: 1,
+            //     },
+            //     payment_receipt: 1,
+            //     payment_amount: 1,
+            //     total_amt: 1,
+            //     metal_rate: 1,
+            //     metal_weight: 1,
+            //     payment_mode: 1,
+            //     createdAt: 1,
+            //     referral_amount: 1,
+            //     payment_status: 1,
+            //     remarks: 1,
+            //     referrlTriggerType:"$id_scheme.referralTriggerType", // 1) each 2) start
+            //     commissionType:"$id_scheme.referralTriggerType"  //1) % 2) amount
+            //   },
+            // },
+              {
+  $setWindowFields: {
+    partitionBy: "$id_scheme_account._id", // group payments by scheme account
+    sortBy: { createdAt: 1 },             // earliest first
+    output: {
+      paymentOrder: { $rank: {} }         // assign 1,2,3...
+    }
+  }
+},
+{
+  $match: {
+    $or: [
+      { "id_scheme.referralTriggerType": { $ne: 2 } },  // If not "Start Payment" referral → show all
+      { paymentOrder: 1 }                                // If type == 2 → keep only first payment
+    ]
+  }
+},
+{
+  $project: {
+    id_customer: 1,
+    id_employee: 1,
+    id_scheme_account: 1,
+    id_scheme: 1,
+    payment_receipt: 1,
+    payment_amount: 1,
+    total_amt: 1,
+    metal_rate: 1,
+    metal_weight: 1,
+    payment_mode: 1,
+    createdAt: 1,
+    payment_status: 1,
+    remarks: 1,
+    referrlTriggerType: "$id_scheme.referralTriggerType",
+    commissionType: "$id_scheme.referralTriggerType",
+    referral_amount:1
+  }
+},
+
             {
               $facet: {
                 data: [
